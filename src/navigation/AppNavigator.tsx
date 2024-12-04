@@ -3,8 +3,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 
 // Import screens
-import { LoadingScreen } from '../screens/LoadingScreen'; // Your launch screen
-import { HomeScreen } from '../screens/HomeScreen'; // Your main screen after the launch
+import { LoadingScreen } from '../screens/LoadingScreen/LoadingScreen'; 
+import { HomeScreen } from '../screens/HomeScreen/HomeScreen'; 
 
 const Stack = createStackNavigator();
 
