@@ -5,7 +5,7 @@ import { Header, BodyText } from '../../components/core/Typography';
 const TypographyExampleScreen: React.FC = () => {
     return (
         <View style={styles.container}>
-            <Header variant="h1">Salut </Header>
+            <Header variant="h1">Header 1 </Header>
             <Header variant="h2">Header 2</Header>
             <Header variant="h3">Header 3</Header>
             <Header variant="h4">Header 4</Header>
