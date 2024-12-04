@@ -1,0 +1,12 @@
+# Logs
+*.log
+
+# Dependency directories
+node_modules/
+
+# Expo specific
+.expo/
+.expo-shared/
+
+# IDE
+.vscode/
