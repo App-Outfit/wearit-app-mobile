@@ -13,7 +13,7 @@ RESET='\033[0m'
 
 # Utility Functions
 function print_usage {
-  echo -e "${CYAN}Usage:${RESET} $0 <${YELLOW}major|minor|patch${RESET}>"
+  echo -e "${CYAN}Usage:${RESET} npm run release:start <${YELLOW}major|minor|patch${RESET}>"
   echo ""
   echo -e "${CYAN}Choose the version increment type based on the nature of your changes:${RESET}"
   echo -e "  ${YELLOW}major${RESET}: For ${RED}breaking changes${RESET} that are incompatible with the current API."
@@ -26,7 +26,7 @@ function print_usage {
 }
 
 function get_current_version {
-  git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || echo "0.0.0"
+  git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 | sed 's/^v//' || echo "0.0.0"
 }
 
 function increment_version {
@@ -74,12 +74,17 @@ if [[ -n $(git status --porcelain) ]]; then
   exit 1
 fi
 
+
+
 # Fetch the current version
 CURRENT_VERSION=$(get_current_version)
-NEW_VERSION=$(increment_version "$CURRENT_VERSION" "$TYPE")
-
 echo -e "${CYAN}Current version:${RESET} ${YELLOW}$CURRENT_VERSION${RESET}"
+
+NEW_VERSION=$(increment_version "$CURRENT_VERSION" "$TYPE")
 echo -e "${CYAN}New version:${RESET} ${GREEN}$NEW_VERSION${RESET}"
+
+NEW_TAG="v$NEW_VERSION"
+echo -e "${CYAN}New tag:${RESET} ${GREEN}$NEW_TAG${RESET}"
 
 # Create the release branch
 BRANCH_NAME="release/v${NEW_VERSION}"
