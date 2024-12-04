@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
 # dependencies
@@ -35,7 +34,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-=======
 # Logs
 *.log
 
@@ -48,4 +46,3 @@ node_modules/
 
 # IDE
 .vscode/
->>>>>>> develop
