@@ -1,0 +1,6 @@
+# Assign both of us to all files in the repository
+* @theobonzi @Ekliipce
+
+# Assign the two of us specifically for the scripts
+release_start.sh @theobonzi @Ekliipce
+release_finalize.sh @theobonzi @Ekliipce
