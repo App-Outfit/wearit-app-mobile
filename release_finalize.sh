@@ -1,7 +1,11 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 # Script: release_finalize.sh
 
+=======
+# Script: release_finalize_with_pr.sh
+>>>>>>> 3e24ce2 (Release v0.1.0 (#4))
 set -e  # Stop the script on errors
 
 # Ensure on a release branch
@@ -25,6 +29,7 @@ git push origin "$CURRENT_BRANCH"
 echo "Creating a pull request to merge $CURRENT_BRANCH into main..."
 gh pr create --base main --head "$CURRENT_BRANCH" --title "Release v$VERSION" --body "This is the release PR for version $VERSION."
 
+<<<<<<< HEAD
 echo "Pull request created. Please review and merge manually from the GitHub UI."
 
 # Wait for the user to merge the pull request before proceeding
@@ -48,3 +53,6 @@ git tag "v${VERSION}"
 git push origin "v${VERSION}"
 
 echo "Release finalized, main and develop are in sync, and tag v${VERSION} created."
+=======
+echo "Pull request created. Please review and merge manually from the GitHub UI."
+>>>>>>> 3e24ce2 (Release v0.1.0 (#4))
