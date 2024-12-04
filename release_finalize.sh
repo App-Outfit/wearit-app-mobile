@@ -39,7 +39,7 @@ git pull origin main
 echo "Switching to develop and merging main..."
 git checkout develop
 git pull origin develop
-git merge --no-ff main -m "Merge release v${VERSION} into develop"
+git rebase main
 git push origin develop
 
 # Create and push the tag
