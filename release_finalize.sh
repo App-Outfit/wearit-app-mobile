@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Script: release_finalize.sh
+
 set -e  # Stop the script on errors
 
 # Ensure on a release branch
