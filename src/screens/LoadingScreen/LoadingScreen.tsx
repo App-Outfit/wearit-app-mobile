@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Image, Text } from 'react-native';
-import { Images, Animations } from '../../assets';
+import { Images, Animations } from '../../assets/index';
 import LottieView from 'lottie-react-native';
 
 import styles from './LoadingScreen.styles';
