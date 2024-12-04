@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script: release_start.sh
+# Script: start_release.sh
 set -e  # Stop the script on errors
 
 # Colors for better visibility

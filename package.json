@@ -8,8 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "release:start": "./scripts/release_start.sh",
-    "release:finilize": "./scripts/release_finilize.sh"
+    "release:start": "./scripts/start_release.sh",
+    "release:stop": "./scripts/stop_release.sh"
   },
   "dependencies": {
     "@react-navigation/stack": "^7.0.18",

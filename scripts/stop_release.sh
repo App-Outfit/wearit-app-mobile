@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script: release_finalize.sh
+# Script: stop_release.sh
 
 set -e  # Stop the script on errors
 
