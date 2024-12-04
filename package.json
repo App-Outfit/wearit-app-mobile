@@ -7,7 +7,13 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
+<<<<<<< HEAD
     "web": "expo start --web"
+=======
+    "web": "expo start --web",
+    "release:start": "./scripts/start_release.sh",
+    "release:stop": "./scripts/stop_release.sh"
+>>>>>>> develop
   },
   "dependencies": {
     "@react-navigation/stack": "^7.0.18",
@@ -31,4 +37,8 @@
     "typescript": "^5.3.3"
   },
   "private": true
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> develop

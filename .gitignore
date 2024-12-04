@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
 # dependencies
@@ -34,3 +35,17 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+=======
+# Logs
+*.log
+
+# Dependency directories
+node_modules/
+
+# Expo specific
+.expo/
+.expo-shared/
+
+# IDE
+.vscode/
+>>>>>>> develop

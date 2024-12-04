@@ -4,11 +4,19 @@
     "slug": "wearit-app-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
+<<<<<<< HEAD
     "icon": "./src/assets/icons/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./src/assets/icons/splash-icon.png",
+=======
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+>>>>>>> develop
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,12 +25,20 @@
     },
     "android": {
       "adaptiveIcon": {
+<<<<<<< HEAD
         "foregroundImage": "./src/assets/icons/adaptive-icon.png",
+=======
+        "foregroundImage": "./assets/adaptive-icon.png",
+>>>>>>> develop
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
+<<<<<<< HEAD
       "favicon": "./src/assets/icons/favicon.png"
+=======
+      "favicon": "./assets/favicon.png"
+>>>>>>> develop
     },
     "extra": {
       "eas": {
