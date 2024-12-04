@@ -14,33 +14,42 @@ export function LoadingScreen({navigation} : any){
 
 
   return (
-    <View style={styles.container}>
-      <Image source={require('../assets/icons/logo-wearit.png')} style={styles.logo} />
+    <View style={styles.loading_screen}>
+      <View style={styles.container}>
+        <Image source={require('../assets/icons/logo-wearit.png')} style={styles.logo} />
+      </View>
       <LottieView
-        source={require('../assets/lottie/lottie-loading-spinner.json')}
-        autoPlay
-        loop
-        style={styles.animation}
+          source={require('../assets/lottie/lottie-loading-spinner.json')}
+          autoPlay
+          loop
+          style={styles.animation}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  loading_screen: {
+    flex: 1,
+    backgroundColor: '#000000',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff', // Adjust as needed
   },
   logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
-  },
-  animation: {
     width: 200,
     height: 200,
+    marginTop: 100,
+  },
+  animation: {
+    width: 50,
+    height: 50,
+    marginBottom: 150,
+    marginTop: 0,
   },
   text: {
     marginTop: 20,
