@@ -46,6 +46,7 @@ read -p "Once the pull request is merged into main, press Enter to continue."
 while true; do
   echo -e "${CYAN}Fetching the latest changes from origin...${RESET}"
   git fetch origin
+
   LATEST_MAIN_COMMIT=$(git rev-parse origin/main)
   LATEST_RELEASE_COMMIT=$(git rev-parse origin/$CURRENT_BRANCH)
 
