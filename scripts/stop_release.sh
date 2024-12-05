@@ -56,7 +56,7 @@ git push origin "v${VERSION}"
 echo -e "${CYAN}Switching to develop and syncing it with main...${RESET}"
 git checkout develop
 git pull origin develop
-git merge release/v1.0.0 -m "Merge release v1.0.0 into develop"
+git merge main -m "Sync main into develop after release v${VERSION}"
 git push origin develop
 
 echo -e "${GREEN}Release finalized.${RESET}"
