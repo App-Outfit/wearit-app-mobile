@@ -42,24 +42,6 @@ echo -e "${YELLOW}Please review and merge the pull request manually in the GitHu
 # Wait for the user to merge the pull request
 read -p "Once the pull request is merged into main, press Enter to continue."
 
-# Check if the pull request has been merged
-while true; do
-  LATEST_MAIN_COMMIT=$(git rev-parse origin/main)
-  LATEST_RELEASE_COMMIT=$(git rev-parse origin/$CURRENT_BRANCH)
-
-  if [[ "$LATEST_MAIN_COMMIT" == "$LATEST_RELEASE_COMMIT" ]]; then
-    echo -e "${GREEN}Pull request has been merged successfully into main.${RESET}"
-    break
-  else
-    echo -e "${YELLOW}Pull request not merged yet. Please merge it in GitHub.${RESET}"
-    read -p "Press Enter to retry or type 'abort' to exit: " choice
-    if [[ "$choice" == "abort" ]]; then
-      echo -e "${RED}Aborting process as requested by user.${RESET}"
-      exit 1
-    fi
-  fi
-done
-
 # Switch to main and pull the latest changes
 echo -e "${CYAN}Switching to main and pulling the latest changes...${RESET}"
 git checkout main
