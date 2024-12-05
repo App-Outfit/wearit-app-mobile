@@ -47,17 +47,17 @@ echo -e "${CYAN}Switching to main and pulling the latest changes...${RESET}"
 git checkout main
 git pull origin main
 
+# Create and push the tag
+echo -e "${CYAN}Creating and pushing tag ${YELLOW}v${VERSION}${CYAN}...${RESET}"
+git tag -a "v${VERSION}" -m "Release v${VERSION}"
+git push origin "v${VERSION}"
+
 # Merge main into develop
 echo -e "${CYAN}Switching to develop and syncing it with main...${RESET}"
 git checkout develop
 git pull origin develop
-git merge main -m "Sync main into develop after release v${VERSION}"
+git merge release/v1.0.0 -m "Merge release v1.0.0 into develop"
 git push origin develop
-
-# Create and push the tag
-echo -e "${CYAN}Creating and pushing tag ${YELLOW}v${VERSION}${CYAN}...${RESET}"
-git tag "v${VERSION}"
-git push origin "v${VERSION}"
 
 echo -e "${GREEN}Release finalized.${RESET}"
 echo -e "${CYAN}Branches ${YELLOW}main${CYAN} and ${YELLOW}develop${CYAN} are in sync, and tag ${YELLOW}v${VERSION}${CYAN} has been created.${RESET}"
