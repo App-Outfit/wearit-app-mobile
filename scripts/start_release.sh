@@ -15,13 +15,12 @@ RESET='\033[0m'
 function print_usage {
   echo -e "${CYAN}Usage:${RESET} npm run release:start <${YELLOW}major|minor|patch${RESET}>"
   echo ""
-  echo -e "${CYAN}Choose the version increment type based on the nature of your changes:${RESET}"
-  echo -e "  ${YELLOW}major${RESET}: For ${RED}breaking changes${RESET} that are incompatible with the current API."
-  echo -e "         Example: Removing or modifying an existing feature."
-  echo -e "  ${YELLOW}minor${RESET}: For adding ${GREEN}new features${RESET} that are backward compatible."
-  echo -e "         Example: Adding a new feature or endpoint without affecting existing ones."
-  echo -e "  ${YELLOW}patch${RESET}: For ${CYAN}bug fixes${RESET} or minor changes that don't impact the API."
-  echo -e "         Example: Fixing a bug or making visual adjustments."
+  echo -e "${CYAN}Choose the version increment type:${RESET}"
+  echo -e "  ${YELLOW}major${RESET}: For ${RED}breaking changes${RESET}."
+  echo -e "  ${YELLOW}minor${RESET}: For ${GREEN}new features${RESET}."
+  echo -e "  ${YELLOW}patch${RESET}: For ${CYAN}bug fixes${RESET}."
+  echo ""
+  echo -e "${CYAN}For more information, visit:${RESET} ${BLUE}https://semver.org/${RESET}"
   exit 1
 }
 
@@ -46,15 +45,11 @@ function increment_version {
 }
 
 # Check parameters
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 1 ] || [[ ! "$1" =~ ^(major|minor|patch)$ ]]; then
   print_usage
 fi
 
 TYPE=$1
-
-if [[ ! "$TYPE" =~ ^(major|minor|patch)$ ]]; then
-  print_usage
-fi
 
 # Ensure on the develop branch
 echo -e "${CYAN}Ensuring you are on the ${YELLOW}develop${CYAN} branch...${RESET}"
@@ -74,8 +69,6 @@ if [[ -n $(git status --porcelain) ]]; then
   exit 1
 fi
 
-
-
 # Fetch the current version
 CURRENT_VERSION=$(get_current_version)
 echo -e "${CYAN}Current version:${RESET} ${YELLOW}$CURRENT_VERSION${RESET}"
@@ -92,4 +85,3 @@ echo -e "${CYAN}Creating release branch: ${YELLOW}$BRANCH_NAME${RESET}"
 git checkout -b "$BRANCH_NAME" develop
 
 echo -e "${GREEN}Release branch '$BRANCH_NAME' created successfully.${RESET}"
-echo -e "${CYAN}Make your changes and finalize the release later.${RESET}"
