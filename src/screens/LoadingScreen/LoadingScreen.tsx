@@ -30,14 +30,14 @@ export function LoadingScreen({ navigation }: any) {
     useEffect(() => {
         let timer: NodeJS.Timeout;
 
-        if (!fontsLoaded) {
+        if (fontsLoaded) {
             timer = setTimeout(() => {
-                navigation.replace('Typo');
-            }, 1300);
+                navigation.replace('Core');
+            }, 130);
         }
 
         return () => clearTimeout(timer);
-    }, [navigation]);
+    }, [navigation, fontsLoaded]);
 
     return (
         <View style={styles.loading_screen}>

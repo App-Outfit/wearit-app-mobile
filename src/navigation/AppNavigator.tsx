@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 // Import screens
 import { LoadingScreen } from '../screens/LoadingScreen/LoadingScreen';
 import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
-import TypographyExampleScreen from '../screens/CoreExampleScreen/TypographyExampleScreen';
+import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,9 +25,9 @@ const AppNavigator = () => {
                 />
 
                 <Stack.Screen
-                    name="Typo"
-                    component={TypographyExampleScreen}
-                    options={{ headerShown: true, title: 'Typo' }}
+                    name="Core"
+                    component={CoreExampleScreen}
+                    options={{ headerShown: true, title: 'Core' }}
                 />
             </Stack.Navigator>
         </NavigationContainer>
