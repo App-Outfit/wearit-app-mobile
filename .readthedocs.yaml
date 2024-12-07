@@ -5,17 +5,13 @@ build:
   tools:
     python: "3.9"
     nodejs: "16"
-
 python:
   install:
     - requirements: docs/requirements.txt
-
 sphinx:
   configuration: docs/source/conf.py
-
 formats:
-  - html
-
+  - htmlzip
 build.commands:
   - npm install
   - npx typedoc
