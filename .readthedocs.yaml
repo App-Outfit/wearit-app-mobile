@@ -6,7 +6,7 @@ build:
     nodejs: "16"
   commands:
     - npm install
-    - npx typedoc
+    - npx typedoc --out $READTHEDOCS_OUTPUT/html ./src
 python:
   install:
     - requirements: docs/requirements.txt
