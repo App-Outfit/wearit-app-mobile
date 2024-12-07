@@ -1,0 +1,7 @@
+{
+    "entryPoints": ["src/index.tsx"],
+    "entryPointStrategy": "expand",
+    "out": "docs/typedoc",
+    "plugin": ["typedoc-plugin-markdown"],
+}
+  
