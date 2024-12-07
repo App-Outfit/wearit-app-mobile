@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "release:start": "./scripts/start_release.sh",
     "release:stop": "./scripts/stop_release.sh",
+    "docs:build": "make -C docs html",
     "prepare": "husky"
   },
   "lint-staged": {

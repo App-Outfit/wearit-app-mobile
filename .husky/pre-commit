@@ -1,1 +1,6 @@
+#!/bin/sh
+echo "Generating documentation..."
+npm run docs:build
+
+echo "Running lint and other checks..."
 npx lint-staged
