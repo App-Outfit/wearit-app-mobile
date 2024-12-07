@@ -1,19 +1,9 @@
-.. WearIT documentation master file, created by
-   sphinx-quickstart on Sat Dec  7 12:43:25 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-WearIT documentation
-====================
-
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
+Welcome to the Wearit-App-Mobile Documentation!
+===============================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents
+   :glob:
 
-   typedoc/README
-   typedoc/globals
+   typedoc/**
