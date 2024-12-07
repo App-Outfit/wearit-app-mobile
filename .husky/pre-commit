@@ -1,6 +1,10 @@
 #!/bin/sh
-echo "Generating documentation..."
+
+CYAN='\033[0;36m'
+RESET='\033[0m'
+
+echo -e "${CYAN}Generating documentation...${RESET}"
 npm run docs:build
 
-echo "Running lint and other checks..."
+echo -e "${CYAN}Running lint and other checks...${RESET}"
 npx lint-staged
