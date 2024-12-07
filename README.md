@@ -1,4 +1,4 @@
-## Project Structure
+# Project Structure
 
 The project is organized as follows:
 In the Main Folder **src** you will find : 
