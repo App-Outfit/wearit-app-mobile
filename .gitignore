@@ -31,6 +31,14 @@ yarn-error.*
 
 # local env files
 .env*.local
+env/
+
+# Ignorer les fichiers de build de Sphinx
+docs/build/
+docs/docs/
+
+# Ignorer les fichiers de TypeDoc
+docs/typedoc/
 
 # typescript
 *.tsbuildinfo
