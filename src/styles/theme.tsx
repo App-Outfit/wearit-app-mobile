@@ -10,6 +10,7 @@ const normalize = (size: number): number => Math.round(size * scale);
 type Colors = {
     primary: string;
     secondary: string;
+    secondary_2: string;
     error: string;
     warning: string;
     success: string;
@@ -17,7 +18,13 @@ type Colors = {
     white: string;
     black: string;
     gray: string;
+    gray_2: string;
+    gray_3: string;
+    gray_4: string;
+    gray_5: string;
     lightGray: string;
+    lightGray_2: string;
+    lightGray_3: string;
     lauchScreen: string;
     background: string;
     text: string;
@@ -107,6 +114,7 @@ type DimensionsType = {
 const baseColors = {
     primary: '#6A0DAD',
     secondary: '#BFA2DB',
+    secondary_2: '#f4e9ff',
     error: '#ed1068',
     warning: '#ed1068',
     success: '#2ecc71',

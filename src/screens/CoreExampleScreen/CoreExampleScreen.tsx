@@ -2,13 +2,23 @@ import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Header, BodyText } from '../../components/core/Typography';
 import { CButton } from '../../components/core/Buttons';
+import { ToggleButton } from '../../components/core/Toggle';
 
 export const CoreExampleScreen: React.FC = () => {
     return (
         <ScrollView>
             <TypographyExample />
             <ButtonExample />
+            <ToggleBtnExample />
         </ScrollView>
+    );
+};
+
+const ToggleBtnExample: React.FC = () => {
+    return (
+        <View style={styles.container}>
+            <ToggleButton firstText="Ongoing" secondText="Completed" />
+        </View>
     );
 };
 
