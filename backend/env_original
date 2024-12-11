@@ -1,0 +1,33 @@
+# MongoDB configuration for local development
+MONGODB_URI_LOCAL=
+MONGODB_DATABASE_LOCAL=
+
+# MongoDB configuration for production
+MONGODB_URI_PROD=
+MONGODB_DATABASE_PROD=
+
+# Variable to select environment
+ENVIRONMENT= # "local" or “prod”
+
+# AWS S3 configuration
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_BUCKET_NAME=
+AWS_REGION_NAME=
+
+# JWT secret
+JWT_SECRET_KEY=
+
+# Replicate API token
+REPLICATE_API_TOKEN=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Kafka configuration
+PORT=
+PYTHON_API_BASE_URL=
+KAFKA_BOOTSTRAP_SERVERS=
+KAFKA_GROUP_ID=
+KAFKA_OFFSET_RESET=
+KAFKA_AUTO_COMMIT=
+KAFKA_PARTITION=
