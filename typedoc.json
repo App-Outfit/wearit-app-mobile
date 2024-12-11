@@ -1,7 +1,0 @@
-{
-    "entryPoints": ["src"],
-    "entryPointStrategy": "expand",
-    "out": "docs/source/typedoc",
-    "plugin": ["typedoc-plugin-markdown"],
-}
-  
