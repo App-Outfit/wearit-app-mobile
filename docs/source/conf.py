@@ -18,8 +18,6 @@ extensions = [
 ]
 
 autosummary_generate = True
-
-# Chemin des templates
 templates_path = ['_templates']
 
 # Suffixe des fichiers source
