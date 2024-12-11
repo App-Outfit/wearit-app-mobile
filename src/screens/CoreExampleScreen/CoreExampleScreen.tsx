@@ -3,14 +3,31 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Header, BodyText } from '../../components/core/Typography';
 import { CButton } from '../../components/core/Buttons';
 import { ToggleButton } from '../../components/core/Toggle';
+import { InputField } from '../../components/core/PlaceHolders';
 
 export const CoreExampleScreen: React.FC = () => {
     return (
         <ScrollView>
+            <PlaceHolderExample />
             <TypographyExample />
             <ButtonExample />
             <ToggleBtnExample />
         </ScrollView>
+    );
+};
+
+const PlaceHolderExample: React.FC = () => {
+    return (
+        <View style={styles.container}>
+            <InputField placeholder="Input base" />
+            <InputField placeholder="Input selected" />
+            <InputField placeholder="Input success" isValid={true} />
+            <InputField
+                placeholder="Input error"
+                isValid={false}
+                errorMessage="Error message"
+            />
+        </View>
     );
 };
 
