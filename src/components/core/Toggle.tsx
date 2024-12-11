@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { ButtonGroup, normalize } from 'react-native-elements';
+import { View, StyleSheet, GestureResponderEvent } from 'react-native';
+import { ButtonGroup, normalize } from '@rneui/themed';
 import { lightTheme } from '../../styles/theme';
 
 type ToggleButtonProps = {
     firstText?: string;
     secondText?: string;
     onPress?: (...args: any[]) => void;
-    onLongPress?: () => void;
-    onLongPressOut?: () => void;
-    onLongPressIn?: () => void;
     disabled?: boolean;
 };
 
@@ -17,10 +14,7 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
     firstText = 'Ongoing',
     secondText = 'Completed',
     onPress = () => {},
-    onLongPress = () => {},
-    onLongPressOut = () => {},
-    onLongPressIn = () => {},
-    disabled,
+    disabled = false,
 }) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -37,15 +31,13 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
                 buttons={buttons}
                 selectedIndex={selectedIndex}
                 onPress={handlePress}
-                onLongPress={onLongPress}
-                onLongPressOut={onLongPressOut}
-                onLongPressIn={onLongPressIn}
                 containerStyle={styles.buttonGroupContainer}
                 buttonStyle={styles.button}
                 selectedButtonStyle={styles.selectedButton}
                 selectedTextStyle={styles.selectedText}
                 textStyle={styles.text}
                 innerBorderStyle={styles.innerBorderStyle}
+                disabled={disabled}
             />
         </View>
     );
