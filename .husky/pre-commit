@@ -3,8 +3,5 @@
 CYAN='\033[0;36m'
 RESET='\033[0m'
 
-echo "${CYAN}Generating documentation...${RESET}"
-npm run docs:build
-
-echo "${CYAN}Running lint and other checks...${RESET}"
+echo "${CYAN}Running lint...${RESET}"
 npx lint-staged
