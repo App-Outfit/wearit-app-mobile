@@ -1,25 +1,32 @@
-# Configuration file for the Sphinx documentation builder.
+import os
+import sys
 
-# -- Project information -----------------------------------------------------
-project = 'WearIT'
-copyright = '2024, Charles-André Arsenec, Théo Bonzi'
-author = 'Charles-André Arsenec, Théo Bonzi'
+# Ajouter le chemin du backend au PATH pour les imports
+sys.path.insert(0, os.path.abspath('../../backend/src'))
 
-# -- General configuration ---------------------------------------------------
-extensions = ['myst_parser']
+# Informations générales
+project = 'WearIT Backend'
+copyright = '2024, WearIT Team'
+author = 'WearIT Team'
 
-# Support des fichiers Markdown et reStructuredText
-source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',
-}
+# Extensions Sphinx
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode'
+]
 
-# Chemin vers le répertoire source de vos fichiers TypeScript
-js_source_path = '../../src'
+autosummary_generate = True
 
+# Chemin des templates
 templates_path = ['_templates']
-exclude_patterns = []
 
-# -- Options for HTML output -------------------------------------------------
-html_theme = 'sphinx_rtd_theme'
+# Suffixe des fichiers source
+source_suffix = '.rst'
+
+# Thème
+html_theme = 'alabaster'
+
+# Chemin des fichiers statiques
 html_static_path = ['_static']
