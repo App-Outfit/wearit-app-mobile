@@ -1,5 +1,9 @@
 # Project Structure
 
+## Documentation
+
+Link : https://wearit-app-mobile.readthedocs.io/en/latest/index.html
+
 The project is organized as follows:
 In the Main Folder **src** you will find : 
 
