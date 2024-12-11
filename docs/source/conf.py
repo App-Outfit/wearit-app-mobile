@@ -18,15 +18,13 @@ extensions = [
 ]
 
 autosummary_generate = True
-
-# Chemin des templates
 templates_path = ['_templates']
 
 # Suffixe des fichiers source
 source_suffix = '.rst'
 
 # Thème
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Chemin des fichiers statiques
 html_static_path = ['_static']
