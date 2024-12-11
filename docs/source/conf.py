@@ -26,7 +26,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # Thème
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Chemin des fichiers statiques
 html_static_path = ['_static']
