@@ -2,7 +2,7 @@
   "name": "wearit-app-mobile",
   "license": "0BSD",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "./src/index.tsx",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "release:start": "./scripts/start_release.sh",
     "release:stop": "./scripts/stop_release.sh",
+    "docs:build": "make -C docs html",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -52,6 +53,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "prettier": "^3.4.2",
+    "typedoc": "^0.27.3",
+    "typedoc-plugin-markdown": "^4.3.1",
     "typescript": "^5.3.3"
   },
   "private": true
