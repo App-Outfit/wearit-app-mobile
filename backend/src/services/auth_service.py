@@ -1,5 +1,5 @@
 from services.mongodb_service import mongodb_service
-from config.security import create_access_token, get_password_hash
+from config.security import create_access_token, get_password_hash, verify_password
 from fastapi import HTTPException, status
 from datetime import timedelta
 
@@ -27,5 +27,31 @@ async def create_user(name: str, email: str, password: str) -> str:
     hashed_password = get_password_hash(password)
     result = await mongodb_service.create_user(name, email, hashed_password)
 
+    access_token = create_access_token(data={"sub": email}, expires_delta=timedelta(minutes=60))
+    return access_token
+
+async def authenticate_user(email: str, password: str) -> str:
+    """Authenticate an existing user and return an access token.
+
+    This function retrieves the user from the database, verifies the password,
+    and generates a JWT access token valid for 60 minutes.
+
+    Args:
+        email (str): The email address of the user.
+        password (str): The plaintext password of the user.
+
+    Raises:
+        HTTPException: If the user does not exist or the password is incorrect.
+
+    Returns:
+        str: A JWT access token for the authenticated user.
+    """
+    user = await mongodb_service.find_user_by_email(email)
+    if not user or not user["password"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
+    
+    if not user["password"] or not verify_password(password, user["password"]):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password")
+    
     access_token = create_access_token(data={"sub": email}, expires_delta=timedelta(minutes=60))
     return access_token
