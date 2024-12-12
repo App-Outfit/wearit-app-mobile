@@ -48,7 +48,7 @@ export function SignUp() {
                     keyboardType="email-address"
                     returnKeyType="next"
                     onSubmitEditing={() => passwordRef.current!.focus()} // Passe au champ suivant
-                    blurOnSubmit={false}
+                    submitBehavior="submit"
                 />
 
                 {/* Mot de passe */}

@@ -38,6 +38,7 @@ export const InputField = forwardRef<any, InputFieldProps>(
 
         return (
             <Input
+                ref={ref}
                 placeholder={placeholder}
                 value={current_value}
                 onChangeText={handleOnChangeText}
@@ -67,7 +68,6 @@ export const InputField = forwardRef<any, InputFieldProps>(
                     isValid === true && styles.validContainer,
                 ]}
                 errorStyle={isValid === false && styles.errorMessage}
-                ref={ref}
                 {...rest}
             />
         );
