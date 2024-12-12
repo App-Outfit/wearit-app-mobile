@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, isValidElement } from 'react';
 import {
     View,
     Text,
@@ -22,6 +22,9 @@ export function SignUp() {
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [username, setUsername] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
+    const [errorEmail, setErrorEmail] = useState<string>('');
+    const [errorUsername, setErrorUsername] = useState<string>('');
+    const [errorPassword, setErrorPassword] = useState<string>('');
 
     const [emailValid, setEmailValid] = useState<boolean | undefined>(
         undefined,
@@ -41,17 +44,31 @@ export function SignUp() {
 
     const handleEmailChange = useCallback((text: string) => {
         setEmail(text);
-        setEmailValid(validateEmail(text));
+        const is_valid = validateEmail(text);
+        setEmailValid(is_valid);
+
+        const errorMessage = !is_valid ? 'Email invalide' : '';
+        setErrorEmail(errorMessage);
     }, []);
 
     const handleUsernameChange = useCallback((text: string) => {
         setUsername(text);
-        setUsernameValid(validateUsername(text));
+        const is_valid = validateUsername(text);
+        setUsernameValid(is_valid);
+
+        const errorMessage = !is_valid ? 'Username invalide' : '';
+        setErrorUsername(errorMessage);
     }, []);
 
     const handlePasswordChange = useCallback((text: string) => {
         setPassword(text);
-        setPasswordValid(validatePassword(text));
+        const is_valid = validatePassword(text);
+        setPasswordValid(is_valid);
+
+        const errorMessage = !is_valid
+            ? 'Mot de passe invalide (ex: GTH6dk_dk!)'
+            : '';
+        setErrorPassword(errorMessage);
     }, []);
 
     const handleSubmit = useCallback(() => {
@@ -65,7 +82,9 @@ export function SignUp() {
     return (
         <View style={styles.container}>
             {/* Titre */}
-            <Header variant="h2">Créer un compte</Header>
+            <Header variant="h2" style={styles.header}>
+                Créer un compte
+            </Header>
             <Text style={styles.subtitle}>Créons votre compte.</Text>
 
             {/* Formulaire */}
@@ -80,6 +99,7 @@ export function SignUp() {
                     submitBehavior="submit"
                     isValid={usernameValid}
                     onChangeText={handleUsernameChange}
+                    errorMessage={errorUsername}
                 />
 
                 {/* E-mail */}
@@ -93,6 +113,7 @@ export function SignUp() {
                     submitBehavior="submit"
                     isValid={emailValid}
                     onChangeText={handleEmailChange}
+                    errorMessage={errorEmail}
                 />
 
                 {/* Mot de passe */}
@@ -105,6 +126,7 @@ export function SignUp() {
                     onSubmitEditing={() => Keyboard.dismiss()}
                     isValid={passwordValid}
                     onChangeText={handlePasswordChange}
+                    errorMessage={errorPassword}
                 />
             </View>
 
@@ -173,6 +195,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         padding: 20,
         justifyContent: 'center',
+    },
+    header: {
+        marginTop: 60,
     },
     subtitle: {
         fontSize: 16,

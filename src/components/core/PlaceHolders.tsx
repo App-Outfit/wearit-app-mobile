@@ -54,7 +54,10 @@ export const InputField = forwardRef<any, InputFieldProps>(
                           ? circleErrorIcon
                           : undefined
                 }
-                containerStyle={styles.container}
+                containerStyle={[
+                    styles.container,
+                    isValid === false && { marginBottom: normalize(30) },
+                ]}
                 inputStyle={[
                     styles.inputText,
                     current_value.length !== 0
