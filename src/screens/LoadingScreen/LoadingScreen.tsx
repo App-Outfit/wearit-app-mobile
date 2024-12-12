@@ -1,8 +1,10 @@
+import { useFonts } from 'expo-font';
 import React, { useEffect } from 'react';
+import LottieView from 'lottie-react-native';
+
 import { View, StyleSheet, Image, Text } from 'react-native';
 import { Images, Animations } from '../../assets/index';
-import { useFonts } from 'expo-font';
-import LottieView from 'lottie-react-native';
+import { preloadEssentialImages } from '../../assets/loading_image';
 
 import styles from './LoadingScreen.styles';
 
@@ -31,15 +33,21 @@ export function LoadingScreen({ navigation }: any) {
     });
 
     useEffect(() => {
-        let timer: NodeJS.Timeout;
+        const loadAssets = async () => {
+            await preloadEssentialImages();
+            navigation.replace('Auth');
+        };
+        loadAssets();
 
-        if (fontsLoaded) {
-            timer = setTimeout(() => {
-                navigation.replace('Auth');
-            }, 130);
-        }
+        // let timer: NodeJS.Timeout;
 
-        return () => clearTimeout(timer);
+        // if (fontsLoaded) {
+        //     timer = setTimeout(() => {
+
+        //     }, 130);
+        // }
+
+        // return () => clearTimeout(timer);
     }, [navigation, fontsLoaded]);
 
     return (
