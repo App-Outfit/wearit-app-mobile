@@ -1,40 +1,40 @@
 Introduction
 ============
 
-Bienvenue dans la documentation du backend de WearIT ! 🎉
+Welcome to the WearIT backend documentation! 🎉
 
-WearIT est une application innovante de **dressing numérique avec intelligence artificielle (IA)**, permettant aux utilisateurs d’essayer virtuellement des vêtements et de visualiser leurs tenues de manière réaliste. Le backend est au cœur du fonctionnement de WearIT, gérant les utilisateurs, le traitement des images, la communication avec les services externes et la coordination des processus asynchrones.
-
----
-
-📌 **Fonctionnalités Principales du Backend**
-
-1. **Authentification des Utilisateurs** :
-   - Inscription, connexion et gestion des mots de passe.
-   - Support des authentifications tierces (Google, Apple).
-
-2. **Prétraitement des Images** :
-   - **Body** : Détection des points de repère et segmentation du corps.
-   - **Vêtements** : Segmentation et création de masques pour les vêtements.
-
-3. **Gestion des Tâches Asynchrones** :
-   - Utilisation de **Kafka** pour traiter les tâches en arrière-plan de manière efficace et scalable.
-
-4. **Stockage des Données** :
-   - Utilisation de **MongoDB** pour stocker les informations des utilisateurs et des prétraitements.
-   - Stockage des images et des masques dans **Amazon S3**.
-
-5. **Sécurité** :
-   - Sécurisation des mots de passe avec **bcrypt**.
-   - Gestion des tokens d'accès avec **JWT**.
+WearIT is an innovative **AI-powered digital wardrobe** application, allowing users to virtually try on clothes and visualize their outfits realistically. The backend is at the core of WearIT's functionality, managing users, image processing, communication with external services, and coordination of asynchronous processes.
 
 ---
 
-🗂️ **Technologies Utilisées**
+📌 **Core Backend Features**
 
-- **Framework Web** : FastAPI
-- **Base de Données** : MongoDB
-- **Message Broker** : Apache Kafka
-- **Stockage d’Images** : Amazon S3
-- **Sécurité** : JWT, bcrypt
-- **Langage** : Python 3.12
+1. **User Authentication**:
+   - Registration, login, and password management.
+   - Support for third-party authentication (Google, Apple).
+
+2. **Image Preprocessing**:
+   - **Body**: Landmark detection and body segmentation.
+   - **Clothing**: Segmentation and mask creation for clothing items.
+
+3. **Asynchronous Task Management**:
+   - Use of **Kafka** for efficient and scalable background task processing.
+
+4. **Data Storage**:
+   - Use of **MongoDB** to store user information and preprocessing data.
+   - Storage of images and masks in **Amazon S3**.
+
+5. **Security**:
+   - Password encryption with **bcrypt**.
+   - Access token management with **JWT**.
+
+---
+
+🗂️ **Technologies Used**
+
+- **Web Framework**: FastAPI
+- **Database**: MongoDB
+- **Message Broker**: Apache Kafka
+- **Image Storage**: Amazon S3
+- **Security**: JWT, bcrypt
+- **Language**: Python 3.12

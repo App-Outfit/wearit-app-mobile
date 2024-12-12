@@ -17,6 +17,12 @@ extensions = [
     'sphinx.ext.viewcode'
 ]
 
+napoleon_google_docstring = True
+napoleon_include_init_with_doc = True
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = False
+napoleon_use_param = True
+napoleon_use_rtype = True
 autosummary_generate = True
 templates_path = ['_templates']
 
