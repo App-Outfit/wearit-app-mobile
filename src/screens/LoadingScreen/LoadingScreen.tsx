@@ -18,6 +18,9 @@ export function LoadingScreen({ navigation }: any) {
         'Poppins-Regular': require(
             `${font_base_bath}Poppins/Poppins-Regular.ttf`,
         ),
+        'Poppins-Medium': require(
+            `${font_base_bath}Poppins/Poppins-Medium.ttf`,
+        ),
         'Poppins-SemiBold': require(
             `${font_base_bath}Poppins/Poppins-SemiBold.ttf`,
         ),
