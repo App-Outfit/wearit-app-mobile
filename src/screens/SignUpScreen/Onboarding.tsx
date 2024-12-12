@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     View,
     Image,
@@ -13,10 +13,15 @@ import { CButton } from '../../components/core/Buttons';
 import { Text } from '@rneui/themed';
 
 // TODO: Add Image import and replace the require
-const female_onboarding = require('../../assets/images/auth/female-onboarding.png');
-const male_onboarding = require('../../assets/images/auth/male-onboarding.png');
 
-export const Onboarding: React.FC = () => {
+export function Onboarding({ navigation }: any) {
+    const female_onboarding = require('../../assets/images/auth/female-onboarding.png');
+    const male_onboarding = require('../../assets/images/auth/male-onboarding.png');
+
+    const handlePress = () => {
+        navigation.navigate('SignUp');
+    };
+
     return (
         <View style={styles.container}>
             {/* Section texte */}
@@ -55,7 +60,7 @@ export const Onboarding: React.FC = () => {
                         <CButton
                             variant="primary"
                             size="xlarge"
-                            onPress={() => {}}
+                            onPress={handlePress}
                             style={styles.button}
                         >
                             Commencer
@@ -65,7 +70,7 @@ export const Onboarding: React.FC = () => {
             </View>
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {

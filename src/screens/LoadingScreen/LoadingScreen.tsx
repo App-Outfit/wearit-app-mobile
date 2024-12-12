@@ -33,21 +33,19 @@ export function LoadingScreen({ navigation }: any) {
     });
 
     useEffect(() => {
+        let timer: NodeJS.Timeout;
         const loadAssets = async () => {
             await preloadEssentialImages();
-            navigation.replace('Auth');
+
+            if (fontsLoaded) {
+                timer = setTimeout(() => {
+                    navigation.replace('Auth');
+                }, 130);
+            }
         };
         loadAssets();
 
-        // let timer: NodeJS.Timeout;
-
-        // if (fontsLoaded) {
-        //     timer = setTimeout(() => {
-
-        //     }, 130);
-        // }
-
-        // return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
     }, [navigation, fontsLoaded]);
 
     return (
