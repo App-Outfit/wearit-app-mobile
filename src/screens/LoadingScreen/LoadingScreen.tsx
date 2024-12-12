@@ -32,7 +32,7 @@ export function LoadingScreen({ navigation }: any) {
 
         if (fontsLoaded) {
             timer = setTimeout(() => {
-                navigation.replace('Core');
+                navigation.replace('Auth');
             }, 130);
         }
 
