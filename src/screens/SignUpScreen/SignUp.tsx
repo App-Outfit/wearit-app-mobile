@@ -1,20 +1,26 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     View,
     Text,
     TextInput,
-    TouchableOpacity,
     StyleSheet,
     Image,
+    Keyboard,
 } from 'react-native';
 import { Header } from '../../components/core/Typography';
 import { lightTheme } from '../../styles/theme';
 import { InputField } from '../../components/core/PlaceHolders';
-import { Input } from 'react-native-elements';
 import { CButton } from '../../components/core/Buttons';
+import { Input } from '@rneui/base';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export function SignUp() {
     const [showPassword, setShowPassword] = useState(false);
+
+    // Références pour chaque champ
+    const nameRef = useRef<TextInput>(null);
+    const emailRef = useRef<TextInput>(null);
+    const passwordRef = useRef<TextInput>(null);
 
     return (
         <View style={styles.container}>
@@ -26,20 +32,34 @@ export function SignUp() {
             <View style={styles.form}>
                 {/* Nom et prénom */}
                 <Text style={styles.label}>Nom et prénom</Text>
-                <InputField placeholder="Entrez votre nom complet" />
+                <InputField
+                    ref={nameRef}
+                    placeholder="Entrez votre nom complet"
+                    returnKeyType="next"
+                    onSubmitEditing={() => emailRef.current!.focus()} // Passe au champ suivant
+                    blurOnSubmit={false}
+                />
 
                 {/* E-mail */}
                 <Text style={styles.label}>E-mail</Text>
-                <InputField placeholder="Entrez votre adresse email" />
+                <InputField
+                    ref={emailRef}
+                    placeholder="Entrez votre adresse email"
+                    keyboardType="email-address"
+                    returnKeyType="next"
+                    onSubmitEditing={() => passwordRef.current!.focus()} // Passe au champ suivant
+                    blurOnSubmit={false}
+                />
 
                 {/* Mot de passe */}
                 <Text style={styles.label}>Mot de passe</Text>
-                <View style={styles.passwordContainer}>
-                    <InputField
-                        placeholder="Entrez votre mot de passe"
-                        secureTextEntry={!showPassword}
-                    />
-                </View>
+                <InputField
+                    ref={passwordRef}
+                    placeholder="Entrez votre mot de passe"
+                    secureTextEntry={!showPassword}
+                    returnKeyType="done" // Dernier champ
+                    onSubmitEditing={() => Keyboard.dismiss()} // Ferme le clavier
+                />
             </View>
 
             {/* Conditions */}
@@ -61,7 +81,11 @@ export function SignUp() {
             </CButton>
 
             {/* Ou */}
-            <Text style={styles.orText}>Ou</Text>
+            <View style={styles.orContainer}>
+                <View style={styles.orDivider} />
+                <Text style={styles.orText}>Ou</Text>
+                <View style={styles.orDivider} />
+            </View>
 
             {/* Boutons Google et Facebook */}
             <TouchableOpacity style={styles.googleButton}>
@@ -113,24 +137,12 @@ const styles = StyleSheet.create({
         marginBottom: 0,
         justifyContent: 'center',
         alignItems: 'flex-start',
-        gap: 0,
     },
     label: {
         fontSize: 14,
         fontFamily: 'Poppins-Medium',
         marginBottom: 0,
         color: lightTheme.colors.black,
-    },
-    passwordContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    passwordInput: {
-        flex: 1,
-    },
-    showPassword: {
-        color: '#888',
-        marginLeft: 10,
     },
     conditions: {
         fontFamily: 'Poppins-Regular',
@@ -142,11 +154,23 @@ const styles = StyleSheet.create({
         color: lightTheme.colors.primary,
         textDecorationLine: 'underline',
     },
-    orText: {
-        fontSize: 14,
-        color: '#888',
-        textAlign: 'center',
+    orContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 10,
         marginBottom: 20,
+    },
+    orDivider: {
+        flex: 1,
+        height: 1,
+        backgroundColor: lightTheme.colors.lightGray_3,
+    },
+    orText: {
+        fontFamily: 'Poppins-Regular',
+        fontSize: 14,
+        color: lightTheme.colors.gray_4,
+        textAlign: 'center',
+        paddingHorizontal: 8,
     },
     googleButton: {
         flexDirection: 'row',

@@ -1,71 +1,78 @@
-import { Icon, lightColors } from '@rneui/base';
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState, forwardRef } from 'react';
+import { StyleSheet } from 'react-native';
 import { Input, normalize } from 'react-native-elements';
 import { lightTheme } from '../../styles/theme';
 import { circleCheckIcon, circleErrorIcon } from '../../assets';
 
 type InputFieldProps = {
-    placeholder: string;
+    placeholder: string; // Votre prop obligatoire
     value?: string;
     onChangeText?: (text: string) => void;
     secureTextEntry?: boolean;
     disabled?: boolean;
     errorMessage?: string;
     isValid?: boolean | undefined;
-};
+} & React.ComponentProps<typeof Input>;
 
-export const InputField: React.FC<InputFieldProps> = ({
-    placeholder,
-    value = '',
-    onChangeText = () => {},
-    secureTextEntry = false,
-    disabled = false,
-    errorMessage = '',
-    isValid = undefined,
-}) => {
-    const [current_value, setCurrentValue] = useState(value);
-    const [isFocused, setIsFocused] = useState(false);
+export const InputField = forwardRef<any, InputFieldProps>(
+    (
+        {
+            placeholder,
+            value = '',
+            onChangeText = () => {},
+            secureTextEntry = false,
+            disabled = false,
+            errorMessage = '',
+            isValid = undefined,
+            ...rest
+        },
+        ref,
+    ) => {
+        const [current_value, setCurrentValue] = useState(value);
+        const [isFocused, setIsFocused] = useState(false);
 
-    const handleOnChangeText = (text: string) => {
-        setCurrentValue(text);
-        onChangeText(text);
-    };
+        const handleOnChangeText = (text: string) => {
+            setCurrentValue(text);
+            onChangeText(text);
+        };
 
-    return (
-        <Input
-            placeholder={placeholder}
-            value={current_value}
-            onChangeText={handleOnChangeText}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            secureTextEntry={secureTextEntry}
-            disabled={disabled}
-            errorMessage={errorMessage}
-            rightIcon={
-                isValid === true
-                    ? circleCheckIcon
-                    : isValid === false
-                      ? circleErrorIcon
-                      : undefined
-            }
-            containerStyle={styles.container}
-            inputStyle={[
-                styles.inputText,
-                current_value.length !== 0
-                    ? styles.inputValue
-                    : StyleSheet.create({}),
-            ]}
-            inputContainerStyle={[
-                styles.inputContainer,
-                isFocused && styles.inputContainerFocused,
-                isValid === false && styles.errorContainer,
-                isValid === true && styles.validContainer,
-            ]}
-            errorStyle={isValid === false && styles.errorMessage}
-        />
-    );
-};
+        return (
+            <Input
+                placeholder={placeholder}
+                value={current_value}
+                onChangeText={handleOnChangeText}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                secureTextEntry={secureTextEntry}
+                disabled={disabled}
+                errorMessage={errorMessage}
+                rightIcon={
+                    isValid === true
+                        ? circleCheckIcon
+                        : isValid === false
+                          ? circleErrorIcon
+                          : undefined
+                }
+                containerStyle={styles.container}
+                inputStyle={[
+                    styles.inputText,
+                    current_value.length !== 0
+                        ? styles.inputValue
+                        : StyleSheet.create({}),
+                ]}
+                inputContainerStyle={[
+                    styles.inputContainer,
+                    isFocused && styles.inputContainerFocused,
+                    isValid === false && styles.errorContainer,
+                    isValid === true && styles.validContainer,
+                ]}
+                errorStyle={isValid === false && styles.errorMessage}
+                ref={ref}
+                {...rest}
+            />
+        );
+    },
+);
 
 const styles = StyleSheet.create({
     container: {
