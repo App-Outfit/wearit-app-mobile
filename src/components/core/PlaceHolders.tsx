@@ -69,9 +69,14 @@ export const InputField: React.FC<InputFieldProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 1,
         width: '100%',
+        height: normalize(52),
         marginVertical: normalize(0),
+        marginHorizontal: normalize(0),
+        paddingHorizontal: normalize(0),
+        paddingVertical: normalize(0),
+        marginBottom: normalize(16),
     },
     inputContainer: {
         height: normalize(52),
@@ -79,7 +84,8 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         borderColor: '#e6e6e6',
         borderWidth: 1,
-        paddingRight: 20,
+        // paddingRight: 20,
+        marginBottom: 0,
     },
     inputContainerFocused: {
         borderColor: lightTheme.colors.primary,
