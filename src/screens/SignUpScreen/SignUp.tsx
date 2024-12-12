@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -11,16 +11,56 @@ import { Header } from '../../components/core/Typography';
 import { lightTheme } from '../../styles/theme';
 import { InputField } from '../../components/core/PlaceHolders';
 import { CButton } from '../../components/core/Buttons';
-import { Input } from '@rneui/base';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import {
+    validateEmail,
+    validatePassword,
+    validateUsername,
+} from '../../utils/validation';
 
 export function SignUp() {
+    const [email, setEmail] = useState<string | undefined>(undefined);
+    const [username, setUsername] = useState<string | undefined>(undefined);
+    const [password, setPassword] = useState<string | undefined>(undefined);
+
+    const [emailValid, setEmailValid] = useState<boolean | undefined>(
+        undefined,
+    );
+    const [usernameValid, setUsernameValid] = useState<boolean | undefined>(
+        undefined,
+    );
+    const [passwordValid, setPasswordValid] = useState<boolean | undefined>(
+        undefined,
+    );
+
     const [showPassword, setShowPassword] = useState(false);
 
-    // Références pour chaque champ
     const nameRef = useRef<TextInput>(null);
     const emailRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
+
+    const handleEmailChange = useCallback((text: string) => {
+        setEmail(text);
+        setEmailValid(validateEmail(text));
+    }, []);
+
+    const handleUsernameChange = useCallback((text: string) => {
+        setUsername(text);
+        setUsernameValid(validateUsername(text));
+    }, []);
+
+    const handlePasswordChange = useCallback((text: string) => {
+        setPassword(text);
+        setPasswordValid(validatePassword(text));
+    }, []);
+
+    const handleSubmit = useCallback(() => {
+        if (emailValid && usernameValid && passwordValid) {
+            console.log('Form is valid, submitting...');
+        } else {
+            console.log('Form is invalid, please correct the errors.');
+        }
+    }, [emailValid, usernameValid, passwordValid]);
 
     return (
         <View style={styles.container}>
@@ -36,8 +76,10 @@ export function SignUp() {
                     ref={nameRef}
                     placeholder="Entrez votre nom complet"
                     returnKeyType="next"
-                    onSubmitEditing={() => emailRef.current!.focus()} // Passe au champ suivant
-                    blurOnSubmit={false}
+                    onSubmitEditing={() => emailRef.current!.focus()}
+                    submitBehavior="submit"
+                    isValid={usernameValid}
+                    onChangeText={handleUsernameChange}
                 />
 
                 {/* E-mail */}
@@ -47,8 +89,10 @@ export function SignUp() {
                     placeholder="Entrez votre adresse email"
                     keyboardType="email-address"
                     returnKeyType="next"
-                    onSubmitEditing={() => passwordRef.current!.focus()} // Passe au champ suivant
+                    onSubmitEditing={() => passwordRef.current!.focus()}
                     submitBehavior="submit"
+                    isValid={emailValid}
+                    onChangeText={handleEmailChange}
                 />
 
                 {/* Mot de passe */}
@@ -57,8 +101,10 @@ export function SignUp() {
                     ref={passwordRef}
                     placeholder="Entrez votre mot de passe"
                     secureTextEntry={!showPassword}
-                    returnKeyType="done" // Dernier champ
-                    onSubmitEditing={() => Keyboard.dismiss()} // Ferme le clavier
+                    returnKeyType="done"
+                    onSubmitEditing={() => Keyboard.dismiss()}
+                    isValid={passwordValid}
+                    onChangeText={handlePasswordChange}
                 />
             </View>
 
@@ -74,8 +120,8 @@ export function SignUp() {
             <CButton
                 variant="primary"
                 size="xlarge"
-                disabled={true}
-                onPress={() => console.log('connexion ...')}
+                disabled={!emailValid || !usernameValid || !passwordValid} // Désactiver le bouton si un champ est invalide
+                onPress={handleSubmit}
             >
                 Créer un compte
             </CButton>
