@@ -3,11 +3,13 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Header, BodyText } from '../../components/core/Typography';
 import { CButton } from '../../components/core/Buttons';
 import { ToggleButton } from '../../components/core/Toggle';
+import Pricebar from '../../components/core/Pricebar';
 
 export const CoreExampleScreen: React.FC = () => {
     return (
         <ScrollView>
             <TypographyExample />
+            <Pricebar />
             <ButtonExample />
             <ToggleBtnExample />
         </ScrollView>
