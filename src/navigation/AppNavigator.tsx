@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { LoadingScreen } from '../screens/LoadingScreen/LoadingScreen';
 import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
 import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScreen';
+import BottomTabNavigator from '../components/core/BottomTabNavigator'; // Import Bottom Tab Navigator
 
 const Stack = createStackNavigator();
 
@@ -21,13 +22,13 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name="HomeScreen"
                     component={HomeScreen}
-                    options={{ headerShown: true, title: 'Home' }}
+                    options={{ headerShown: false }}
                 />
 
                 <Stack.Screen
                     name="Core"
-                    component={CoreExampleScreen}
-                    options={{ headerShown: true, title: 'Core' }}
+                    component={BottomTabNavigator}
+                    options={{ headerShown: false, title: 'Core' }}
                 />
             </Stack.Navigator>
         </NavigationContainer>

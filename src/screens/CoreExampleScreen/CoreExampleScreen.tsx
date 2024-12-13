@@ -55,7 +55,9 @@ const ButtonExample: React.FC = () => {
 
             <CButton
                 variant="danger"
-                onPress={() => console.log('Danger button pressed')}
+                onPress={() => {
+                    console.log('Danger button pressed');
+                }}
             >
                 Danger Button
             </CButton>
