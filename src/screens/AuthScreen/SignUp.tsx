@@ -17,8 +17,9 @@ import {
     validatePassword,
     validateUsername,
 } from '../../utils/validation';
+import { DividerText } from '../../components/core/Divider';
 
-export function SignUp() {
+export function SignUp({ navigation }: any) {
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [username, setUsername] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
@@ -78,6 +79,10 @@ export function SignUp() {
             console.log('Form is invalid, please correct the errors.');
         }
     }, [emailValid, usernameValid, passwordValid]);
+
+    const moveToLoginPage = () => {
+        navigation.navigate('LogIn');
+    };
 
     return (
         <View style={styles.container}>
@@ -149,11 +154,7 @@ export function SignUp() {
             </CButton>
 
             {/* Ou */}
-            <View style={styles.orContainer}>
-                <View style={styles.orDivider} />
-                <Text style={styles.orText}>Ou</Text>
-                <View style={styles.orDivider} />
-            </View>
+            <DividerText text="Ou" />
 
             {/* Boutons Google et Facebook */}
             <TouchableOpacity style={styles.googleButton}>
@@ -183,7 +184,9 @@ export function SignUp() {
             {/* Connexion */}
             <Text style={styles.loginText}>
                 Vous avez déjà un compte ?{' '}
-                <Text style={styles.link}>Connecter</Text>
+                <Text style={styles.link} onPress={moveToLoginPage}>
+                    Connecter
+                </Text>
             </Text>
         </View>
     );
@@ -224,24 +227,6 @@ const styles = StyleSheet.create({
     link: {
         color: lightTheme.colors.primary,
         textDecorationLine: 'underline',
-    },
-    orContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 10,
-        marginBottom: 20,
-    },
-    orDivider: {
-        flex: 1,
-        height: 1,
-        backgroundColor: lightTheme.colors.lightGray_3,
-    },
-    orText: {
-        fontFamily: 'Poppins-Regular',
-        fontSize: 14,
-        color: lightTheme.colors.gray_4,
-        textAlign: 'center',
-        paddingHorizontal: 8,
     },
     googleButton: {
         flexDirection: 'row',
