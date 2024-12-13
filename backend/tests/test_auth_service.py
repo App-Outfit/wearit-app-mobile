@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from fastapi import HTTPException
-from services.auth_service import create_user
+from src.services.auth_service import create_user
 
 @pytest.mark.asyncio
 async def test_create_user_success():

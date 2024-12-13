@@ -1,5 +1,6 @@
-from services.mongodb_service import mongodb_service
-from config.security import create_access_token, get_password_hash, verify_password
+from src.services.mongodb_service import mongodb_service
+from src.services.email_service import send_reset_email
+from src.config.security import create_access_token, get_password_hash, verify_password, create_reset_token, verify_reset_token
 from fastapi import HTTPException, status
 from datetime import timedelta
 
@@ -55,3 +56,39 @@ async def authenticate_user(email: str, password: str) -> str:
     
     access_token = create_access_token(data={"sub": email}, expires_delta=timedelta(minutes=60))
     return access_token
+
+async def request_password_reset(email: str):
+    """Génère un token de réinitialisation et envoie un e-mail.
+
+    Args:
+        email (str): L'email de l'utilisateur.
+
+    Raises:
+        HTTPException: Si l'utilisateur n'existe pas.
+    """
+    user = await mongodb_service.find_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    reset_token = create_reset_token(email)
+    send_reset_email(email, reset_token)
+    return {"message": "Password reset email sent"}
+
+async def reset_password(token: str, new_password: str):
+    """Réinitialise le mot de passe avec le token de réinitialisation.
+
+    Args:
+        token (str): Le token de réinitialisation.
+        new_password (str): Le nouveau mot de passe.
+
+    Raises:
+        HTTPException: Si le token est invalide ou l'utilisateur n'existe pas.
+    """
+    email = verify_reset_token(token)
+    user = await mongodb_service.find_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    hashed_password = get_password_hash(new_password)
+    await mongodb_service.update_user_password(email, hashed_password)
+    return {"message": "Password successfully reset"}

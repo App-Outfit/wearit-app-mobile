@@ -1,5 +1,5 @@
 import pytest
-from services.mongodb_service import MongoDBService
+from src.services.mongodb_service import MongoDBService
 from unittest.mock import AsyncMock, patch
 
 @pytest.mark.asyncio
