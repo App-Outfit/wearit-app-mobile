@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, EmailStr
-from src.services.auth_service import create_user, authenticate_user, request_password_reset, reset_password
+from src.services import auth_service
+from src.services.google_auth_service import get_google_redirect, handle_google_callback
 from src.exceptions.error_handler import handle_errors
 
 router = APIRouter()
@@ -25,7 +26,7 @@ class ResetPassword(BaseModel):
     token: str
     new_password: str
 
-@router.post("/signup", summary="Create a new user")
+@router.post("/auth/signup", summary="Create a new user")
 @handle_errors
 async def signup(user: UserSignup) -> dict:
     """Create a new user and return an access token.
@@ -39,10 +40,10 @@ async def signup(user: UserSignup) -> dict:
     Returns:
         dict: A dictionary containing the access token and its type.
     """
-    access_token = await create_user(user.name, user.email, user.password)
+    access_token = await auth_service.create_user(user.name, user.email, user.password)
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/signin", summary="Sign in as an existing user")
+@router.post("/auth/signin", summary="Sign in as an existing user")
 @handle_errors
 async def signin(user: UserSignin) -> dict:
     """Sign in as an existing user and return an access token.
@@ -56,10 +57,10 @@ async def signin(user: UserSignin) -> dict:
     Returns:
         dict: A dictionary containing the access token and its type.
     """
-    access_token = await authenticate_user(user.email, user.password)
+    access_token = await auth_service.authenticate_user(user.email, user.password)
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/forgot-password", summary="Request a password reset")
+@router.post("/auth/forgot-password", summary="Request a password reset")
 @handle_errors
 async def forgot_password(data: ForgotPassword) -> dict:
     """Request a password reset for the given email address.
@@ -73,10 +74,10 @@ async def forgot_password(data: ForgotPassword) -> dict:
     Returns:
         dict: A success message indicating that the email was sent.
     """
-    await request_password_reset(data.email)
+    await auth_service.request_password_reset(data.email)
     return {"message": "Password reset email sent"}
 
-@router.post("/reset-password", summary="Reset a user's password")
+@router.post("/auth/reset-password", summary="Reset a user's password")
 @handle_errors
 async def reset_password_route(data: ResetPassword) -> dict:
     """Reset a user's password using a password reset token.
@@ -90,5 +91,15 @@ async def reset_password_route(data: ResetPassword) -> dict:
     Returns:
         dict: A success message indicating that the password was reset.
     """
-    await reset_password(data.token, data.new_password)
+    await auth_service.reset_password(data.token, data.new_password)
     return {"message": "Password reset successful"}
+
+@router.get("/auth/google", summary="Sign in with Google")
+@handle_errors
+async def google_signin(request: Request) -> dict:
+    return await get_google_redirect(request)
+
+@router.get("/auth/google/callback", summary="Google OAuth callback")
+@handle_errors
+async def google_callback(request: Request) -> dict:
+    return await handle_google_callback(request)

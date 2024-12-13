@@ -5,6 +5,11 @@ from src.api.auth_routes import router as auth_router
 from src.exceptions.exceptions import http_exception_handler, generic_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
+from starlette.middleware.sessions import SessionMiddleware
+import dotenv
+import os
+
+dotenv.load_dotenv()
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
 
@@ -17,8 +22,10 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
+
 # --- Registering routers and middleware ---
-app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+app.include_router(auth_router, prefix="/api", tags=["auth"])
 
 app.add_middleware(
     CORSMiddleware,

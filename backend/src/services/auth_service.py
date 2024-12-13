@@ -92,3 +92,29 @@ async def reset_password(token: str, new_password: str):
     hashed_password = get_password_hash(new_password)
     await mongodb_service.update_user_password(email, hashed_password)
     return {"message": "Password successfully reset"}
+
+async def authenticate_google_user(user_info: dict) -> str:
+    """Authenticate or create a user via Google OAuth and return an access token.
+
+    Args:
+        user_info (dict): User information received from Google.
+
+    Returns:
+        str: A JWT access token for the authenticated or newly created user.
+    """
+    email = user_info.get("email")
+    name = user_info.get("name")
+
+    if not email or not name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user information from Google")
+
+    # Vérifie si l'utilisateur existe déjà dans la base de données
+    user = await mongodb_service.find_user_by_email(email)
+
+    # Si l'utilisateur n'existe pas, crée un nouvel utilisateur sans mot de passe
+    if not user:
+        await mongodb_service.create_user(name=name, email=email, password=None)
+
+    # Génère un token JWT pour l'utilisateur
+    access_token = create_access_token(data={"sub": email}, expires_delta=timedelta(minutes=60))
+    return access_token
