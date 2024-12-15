@@ -68,6 +68,10 @@ export const LogIn: React.FC = ({ navigation }: any) => {
         navigation.navigate('SignUp');
     };
 
+    const moveToForgotPassword = () => {
+        navigation.push('ForgotPassword');
+    };
+
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -110,7 +114,9 @@ export const LogIn: React.FC = ({ navigation }: any) => {
                 {/* Mot de passe oublié */}
                 <Text style={styles.conditions}>
                     Vous avez oublié le mot de passe ?{' '}
-                    <Text style={styles.link}>Reinitialisez</Text>
+                    <Text style={styles.link} onPress={moveToForgotPassword}>
+                        Reinitialisez
+                    </Text>
                 </Text>
             </View>
 
