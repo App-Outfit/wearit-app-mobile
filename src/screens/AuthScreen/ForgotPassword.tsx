@@ -7,7 +7,7 @@ import { TextInput } from 'react-native-gesture-handler';
 import { validateEmail } from '../../utils/validation';
 import { CButton } from '../../components/core/Buttons';
 
-export const ForgotPassword = () => {
+export const ForgotPassword = ({ navigation }: any) => {
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [errorEmail, setErrorEmail] = useState<string>('');
 
@@ -27,7 +27,13 @@ export const ForgotPassword = () => {
     }, []);
 
     const handleSubmit = () => {
-        // Send email to the server
+        // TODO: Change 'true' by email validation
+        if (true) {
+            // Send email to the server
+
+            // Redirect to the next screen
+            navigation.push('ResetPassword');
+        }
     };
 
     return (

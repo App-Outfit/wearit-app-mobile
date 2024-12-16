@@ -6,6 +6,7 @@ import { Onboarding } from '../screens/AuthScreen/Onboarding';
 import { SignUp } from '../screens/AuthScreen/SignUp';
 import { LogIn } from '../screens/AuthScreen/LogIn';
 import { ForgotPassword } from '../screens/AuthScreen/ForgotPassword';
+import { ResetPassword } from '../screens/AuthScreen/ResetPassword';
 
 const AuthStack = createStackNavigator();
 
@@ -33,6 +34,16 @@ export const AuthNavigator = () => {
             <AuthStack.Screen
                 name="ForgotPassword"
                 component={ForgotPassword}
+                options={{
+                    headerShown: true,
+                    headerTitle: '',
+                    headerStyle: { elevation: 0, height: 70 },
+                }}
+            />
+
+            <AuthStack.Screen
+                name="ResetPassword"
+                component={ResetPassword}
                 options={{
                     headerShown: true,
                     headerTitle: '',
