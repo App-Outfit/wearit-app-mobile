@@ -5,7 +5,7 @@ from src.config.settings import get_kafka_client
 
 logger = logging.getLogger(__name__)
 
-class KafkaService:
+class KafkaServiceProducer:
     """ 
     Kafka service class for managing Kafka operations.
     """
