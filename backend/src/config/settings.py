@@ -49,6 +49,13 @@ def get_mongo_database(async_mode: bool = False):
     
     return db
 
+def get_kafka_clinet():
+    return {
+        'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', "localhost:9092"),
+        'auto.offset.reset': os.getenv('KAFKA_AUTO_OFFSET_RESET', "earliest"),
+        'autot.commit.enable': os.getenv('KAFKA_AUTO_COMMIT_ENABLE', "False")
+    }
+
 # OAuth configuration
 oauth = OAuth()
 oauth.register(
