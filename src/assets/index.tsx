@@ -28,6 +28,24 @@ export const circleErrorIcon = (
         style={{ marginRight: 2 }}
     />
 );
+export const eyeIcon = (
+    <Icon
+        name="eye"
+        type="antdesign"
+        iconProps={{ size: 20, name: 'eye' }}
+        color={lightTheme.colors.black}
+        style={{ marginRight: 2 }}
+    />
+);
+export const eyeOffIcon = (
+    <Icon
+        name="eye-off"
+        type="antdesign"
+        iconProps={{ size: 20, name: 'eye-off' }}
+        color={lightTheme.colors.black}
+        style={{ marginRight: 2 }}
+    />
+);
 
 // Animations
 export const Animations: Record<string, AnimationSource> = {

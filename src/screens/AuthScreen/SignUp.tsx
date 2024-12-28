@@ -18,6 +18,7 @@ import {
     validateUsername,
 } from '../../utils/validation';
 import { DividerText } from '../../components/core/Divider';
+import { eyeIcon } from '../../assets';
 
 export function SignUp({ navigation }: any) {
     const [email, setEmail] = useState<string | undefined>(undefined);
@@ -132,6 +133,7 @@ export function SignUp({ navigation }: any) {
                     isValid={passwordValid}
                     onChangeText={handlePasswordChange}
                     errorMessage={errorPassword}
+                    iconRight={eyeIcon}
                 />
             </View>
 
