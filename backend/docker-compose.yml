@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000" # Redirige le port 8000 vers le conteneur
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/ # URL de connexion à MongoDB
+    depends_on:
+      - mongo # Assure que Mongo est lancé avant FastAPI
+    volumes:
+      - .:/app # Synchronise le code local avec le conteneur (optionnel)
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017" # Redirige le port MongoDB
+    volumes:
+      - mongo-data:/data/db # Persistance des données
+
+volumes:
+  mongo-data: # Volume pour la persistance de MongoDB

@@ -1,10 +1,12 @@
 # MongoDB configuration for local development
-MONGODB_URI_LOCAL=
+MONGODB_URI_LOCAL=mongodb://mongo:27017/
 MONGODB_DATABASE_LOCAL=
 
 # MongoDB configuration for production
 MONGODB_URI_PROD=
 MONGODB_DATABASE_PROD=
+
+
 
 # Variable to select environment
 ENVIRONMENT= # "local" or “prod”
