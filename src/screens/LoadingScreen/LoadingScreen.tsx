@@ -1,8 +1,10 @@
+import { useFonts } from 'expo-font';
 import React, { useEffect } from 'react';
+import LottieView from 'lottie-react-native';
+
 import { View, StyleSheet, Image, Text } from 'react-native';
 import { Images, Animations } from '../../assets/index';
-import { useFonts } from 'expo-font';
-import LottieView from 'lottie-react-native';
+import { preloadEssentialImages } from '../../assets/loading_image';
 
 import styles from './LoadingScreen.styles';
 
@@ -18,6 +20,9 @@ export function LoadingScreen({ navigation }: any) {
         'Poppins-Regular': require(
             `${font_base_bath}Poppins/Poppins-Regular.ttf`,
         ),
+        'Poppins-Medium': require(
+            `${font_base_bath}Poppins/Poppins-Medium.ttf`,
+        ),
         'Poppins-SemiBold': require(
             `${font_base_bath}Poppins/Poppins-SemiBold.ttf`,
         ),
@@ -29,12 +34,16 @@ export function LoadingScreen({ navigation }: any) {
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
+        const loadAssets = async () => {
+            await preloadEssentialImages();
 
-        if (fontsLoaded) {
-            timer = setTimeout(() => {
-                navigation.replace('Core');
-            }, 130);
-        }
+            if (fontsLoaded) {
+                timer = setTimeout(() => {
+                    navigation.replace('Auth');
+                }, 130);
+            }
+        };
+        loadAssets();
 
         return () => clearTimeout(timer);
     }, [navigation, fontsLoaded]);
