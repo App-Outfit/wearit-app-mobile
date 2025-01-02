@@ -17,7 +17,8 @@ import {
     validatePassword,
     validateUsername,
 } from '../../utils/validation';
-
+import { sign } from 'crypto';
+import { signUpUser } from '../../services/signupService';
 export function SignUp() {
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [username, setUsername] = useState<string | undefined>(undefined);
@@ -73,10 +74,20 @@ export function SignUp() {
 
     const handleSubmit = useCallback(() => {
         if (emailValid && usernameValid && passwordValid) {
-            console.log('Form is valid, submitting...');
+            console.log('Form is valid, submitting . ..');
+            const response = signUpUser(email, username, password);
+            if (response === null) {
+                console.error('Error while signing up user');
+            }
+            if (response === undefined) {
+                console.error('No response from server');
+            }
         } else {
             console.log('Form is invalid, please correct the errors.');
         }
+        console.log('Email:', email);
+        console.log('Username:', username);
+        console.log('Password', password);
     }, [emailValid, usernameValid, passwordValid]);
 
     return (
