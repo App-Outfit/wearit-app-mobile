@@ -9,8 +9,8 @@ async def create_user(name: str, email: str, passowrd: str):
     """
     existing_user = await mongodb_service.find_user_by_email(email)
     if existing_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
-    
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"user with email {email} already exists")
+
     hashed_password = get_password_hash(passowrd)
     result = await mongodb_service.create_user(name, email, hashed_password)
 
