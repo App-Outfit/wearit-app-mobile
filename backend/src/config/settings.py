@@ -2,10 +2,28 @@ import os
 from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
+from authlib.integrations.starlette_client import OAuth
 
 load_dotenv()
 
-def get_mongo_database(async_mode=False):
+def get_mongo_database(async_mode: bool = False):
+    """Get the MongoDB database connection.
+
+    This function returns a MongoDB database connection based on the environment
+    configuration (`local` or `prod`). It supports both synchronous and asynchronous
+    clients.
+
+    Args:
+        async_mode (bool, optional): Whether to use an asynchronous client (`motor`). 
+            Defaults to `False` for synchronous mode.
+
+    Raises:
+        ValueError: If the `ENVIRONMENT` variable is not recognized as `local` or `prod`.
+
+    Returns:
+        Database: A `pymongo.database.Database` object if `async_mode` is `False`.
+        AsyncIOMotorDatabase: A `motor.motor_asyncio.AsyncIOMotorDatabase` object if `async_mode` is `True`.
+    """
     environment = os.getenv("ENVIRONMENT", "local")
     
     if environment == "local":
@@ -15,9 +33,9 @@ def get_mongo_database(async_mode=False):
         mongo_uri = os.getenv("MONGODB_URI_PROD")
         db_name = os.getenv("MONGODB_DATABASE_PROD")
     else:
-        raise ValueError("Environnement non reconnu. Utilisez 'local' ou 'prod' dans ENVIRONMENT.")
+        raise ValueError("Environment must be either 'local' or 'prod'")
     
-    # Choix entre client synchrone ou asynchrone
+    # Choose between synchronous and asynchronous client
     if async_mode:
         client = AsyncIOMotorClient(mongo_uri)
     else:
@@ -25,8 +43,27 @@ def get_mongo_database(async_mode=False):
     
     db = client[db_name]
 
-    # Log de confirmation
-    print(f"Connecté à MongoDB : {mongo_uri}")
-    print(f"Base de données utilisée : {db_name} pour l'environnement {environment}")
+    # Log connection details
+    print(f"Connected to MongoDB: {mongo_uri}")
+    print(f"Using database: {db_name} for environment: {environment}")
     
     return db
+
+def get_kafka_clinet():
+    return {
+        'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', "localhost:9092"),
+        'auto.offset.reset': os.getenv('KAFKA_AUTO_OFFSET_RESET', "earliest"),
+        'autot.commit.enable': os.getenv('KAFKA_AUTO_COMMIT_ENABLE', "False")
+    }
+
+# OAuth configuration
+oauth = OAuth()
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    authorize_url="https://accounts.google.com/o/oauth2/auth",
+    access_token_url="https://accounts.google.com/o/oauth2/token",
+    redirect_uri=os.getenv("GOOGLE_REDIRECT_URI"),
+    client_kwargs={"scope": "openid email profile"},
+)
