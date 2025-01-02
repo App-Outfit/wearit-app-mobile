@@ -26,7 +26,8 @@ export function SignUp() {
     const [errorEmail, setErrorEmail] = useState<string>('');
     const [errorUsername, setErrorUsername] = useState<string>('');
     const [errorPassword, setErrorPassword] = useState<string>('');
-
+    const [submissionStatus, setSubmissionStatus] = useState<string>('');
+    const [errorMessage, setErrorMessage] = useState<string>('');
     const [emailValid, setEmailValid] = useState<boolean | undefined>(
         undefined,
     );
@@ -50,6 +51,7 @@ export function SignUp() {
 
         const errorMessage = !is_valid ? 'Email invalide' : '';
         setErrorEmail(errorMessage);
+        setSubmissionStatus('');
     }, []);
 
     const handleUsernameChange = useCallback((text: string) => {
@@ -59,6 +61,7 @@ export function SignUp() {
 
         const errorMessage = !is_valid ? 'Username invalide' : '';
         setErrorUsername(errorMessage);
+        setSubmissionStatus('');
     }, []);
 
     const handlePasswordChange = useCallback((text: string) => {
@@ -70,25 +73,49 @@ export function SignUp() {
             ? 'Mot de passe invalide (ex: GTH6dk_dk!)'
             : '';
         setErrorPassword(errorMessage);
+        setSubmissionStatus('');
     }, []);
 
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback(async () => {
+        setSubmissionStatus('');
         if (emailValid && usernameValid && passwordValid) {
-            console.log('Form is valid, submitting . ..');
-            const response = signUpUser(email, username, password);
+            const response = await signUpUser(email, username, password);
             if (response === null) {
-                console.error('Error while signing up user');
+                setSubmissionStatus('error');
+                return;
             }
             if (response === undefined) {
+                setSubmissionStatus('error');
                 console.error('No response from server');
+                return;
+            }
+            if (response !== null && response !== undefined) {
+                if (
+                    response.status === 400 &&
+                    response.data &&
+                    response.data.detail
+                ) {
+                    console.error(response.data.detail);
+                    setSubmissionStatus('detailed_error');
+                    setErrorMessage(response.data.detail);
+                    return;
+                }
+                console.log('User signed up successfully');
+                setSubmissionStatus('success');
             }
         } else {
             console.log('Form is invalid, please correct the errors.');
+            return;
         }
-        console.log('Email:', email);
-        console.log('Username:', username);
-        console.log('Password', password);
-    }, [emailValid, usernameValid, passwordValid]);
+    }, [
+        emailValid,
+        usernameValid,
+        passwordValid,
+        email,
+        username,
+        password,
+        submissionStatus,
+    ]);
 
     return (
         <View style={styles.container}>
@@ -99,6 +126,25 @@ export function SignUp() {
             <Text style={styles.subtitle}>Créons votre compte.</Text>
 
             {/* Formulaire */}
+            {submissionStatus === 'success' && (
+                <View style={styles.successContainer}>
+                    <Text style={styles.successMessage}>
+                        Inscription réussie ! Bienvenue {username} !
+                    </Text>
+                </View>
+            )}
+            {submissionStatus === 'error' && (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorMessage}>
+                        Une erreur s'est produite. Veuillez réessayer.
+                    </Text>
+                </View>
+            )}
+            {submissionStatus === 'detailed_error' && (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorMessage}>{errorMessage}</Text>
+                </View>
+            )}
             <View style={styles.form}>
                 {/* Nom et prénom */}
                 <Text style={styles.label}>Nom et prénom</Text>
@@ -291,5 +337,29 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         color: lightTheme.colors.lightGray,
+    },
+    successContainer: {
+        backgroundColor: '#d4edda', // Vert clair
+        padding: 15,
+        borderRadius: 8,
+        marginVertical: 10,
+    },
+    successMessage: {
+        color: '#155724', // Vert foncé
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    errorMessage: {
+        color: '#721c24', // Rouge foncé
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    errorContainer: {
+        backgroundColor: '#f8d7da', // Rouge clair
+        padding: 15,
+        borderRadius: 8,
+        marginVertical: 10,
     },
 });
