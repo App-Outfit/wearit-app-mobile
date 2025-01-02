@@ -1,5 +1,6 @@
 // TODO Implement a new function which will add a new registered user to the Mongo database
 // create an axios post request to the backend to add a new user to the databaseimport axios from 'axios';
+
 import axios from 'axios';
 const BASE_URL = 'http://192.168.1.18:8000'; // TODO: Change this to the server's IP address because it hardcoded to the local IP address
 const AUTH_URL = `${BASE_URL}/auth/signup`;

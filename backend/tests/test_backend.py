@@ -34,5 +34,11 @@ def test_signup():
     assert "token_type" in response_data
     assert response_data["token_type"] == "bearer"
 
+def test_same_login():
+    url = AUTH_URL + "/signup"
+    data = {"name": "test", "email": "test@test.fr", "password": "test"}
+    response = requests.post(
+        url, json=data, headers={"Content-Type": "application/json"}, timeout=5
+    )
 
 # test_signup()
