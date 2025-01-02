@@ -12,6 +12,7 @@ type InputFieldProps = {
     disabled?: boolean;
     errorMessage?: string;
     isValid?: boolean | undefined;
+    iconRight?: React.JSX.Element;
 } & React.ComponentProps<typeof Input>;
 
 export const InputField = forwardRef<any, InputFieldProps>(
@@ -24,6 +25,7 @@ export const InputField = forwardRef<any, InputFieldProps>(
             disabled = false,
             errorMessage = '',
             isValid = undefined,
+            iconRight = undefined,
             ...rest
         },
         ref,
@@ -52,7 +54,7 @@ export const InputField = forwardRef<any, InputFieldProps>(
                         ? circleCheckIcon
                         : isValid === false
                           ? circleErrorIcon
-                          : undefined
+                          : iconRight
                 }
                 containerStyle={[
                     styles.container,

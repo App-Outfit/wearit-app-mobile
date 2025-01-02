@@ -1,107 +1,89 @@
-import React, { useRef, useState, useCallback, isValidElement } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
-    View,
     Text,
     TextInput,
+    View,
     StyleSheet,
-    Image,
     Keyboard,
+    Image,
 } from 'react-native';
 import { Header } from '../../components/core/Typography';
 import { lightTheme } from '../../styles/theme';
 import { InputField } from '../../components/core/PlaceHolders';
 import { CButton } from '../../components/core/Buttons';
+import { validateEmail } from '../../utils/validation';
+import { DividerText } from '../../components/core/Divider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import {
-    validateEmail,
-    validatePassword,
-    validateUsername,
-} from '../../utils/validation';
 
-export function SignUp() {
+export const LogIn: React.FC = ({ navigation }: any) => {
+    const [showPassword, setShowPassword] = useState(false);
+
     const [email, setEmail] = useState<string | undefined>(undefined);
-    const [username, setUsername] = useState<string | undefined>(undefined);
     const [password, setPassword] = useState<string | undefined>(undefined);
     const [errorEmail, setErrorEmail] = useState<string>('');
-    const [errorUsername, setErrorUsername] = useState<string>('');
     const [errorPassword, setErrorPassword] = useState<string>('');
 
     const [emailValid, setEmailValid] = useState<boolean | undefined>(
-        undefined,
-    );
-    const [usernameValid, setUsernameValid] = useState<boolean | undefined>(
         undefined,
     );
     const [passwordValid, setPasswordValid] = useState<boolean | undefined>(
         undefined,
     );
 
-    const [showPassword, setShowPassword] = useState(false);
-
-    const nameRef = useRef<TextInput>(null);
-    const emailRef = useRef<TextInput>(null);
-    const passwordRef = useRef<TextInput>(null);
+    const emailRef = React.useRef<TextInput>(null);
+    const passwordRef = React.useRef<TextInput>(null);
 
     const handleEmailChange = useCallback((text: string) => {
         setEmail(text);
         const is_valid = validateEmail(text);
         setEmailValid(is_valid);
 
-        const errorMessage = !is_valid ? 'Email invalide' : '';
+        const errorMessage = !is_valid
+            ? 'Veuillez entrez une adresse e-mail valide'
+            : '';
         setErrorEmail(errorMessage);
     }, []);
 
-    const handleUsernameChange = useCallback((text: string) => {
-        setUsername(text);
-        const is_valid = validateUsername(text);
-        setUsernameValid(is_valid);
+    const handlePasswordChange = useCallback(
+        (text: string) => {
+            setPassword(text);
+            const is_valid = text.length > 0;
+            setPasswordValid(is_valid);
 
-        const errorMessage = !is_valid ? 'Username invalide' : '';
-        setErrorUsername(errorMessage);
-    }, []);
-
-    const handlePasswordChange = useCallback((text: string) => {
-        setPassword(text);
-        const is_valid = validatePassword(text);
-        setPasswordValid(is_valid);
-
-        const errorMessage = !is_valid
-            ? 'Mot de passe invalide (ex: GTH6dk_dk!)'
-            : '';
-        setErrorPassword(errorMessage);
-    }, []);
+            const errorMessage = !is_valid
+                ? 'Veuillez entrez un mot de passe valide'
+                : '';
+            setErrorPassword(errorMessage);
+        },
+        [emailValid, passwordValid],
+    );
 
     const handleSubmit = useCallback(() => {
-        if (emailValid && usernameValid && passwordValid) {
-            console.log('Form is valid, submitting...');
-        } else {
-            console.log('Form is invalid, please correct the errors.');
+        if (emailValid && passwordValid) {
+            // Submit the form
         }
-    }, [emailValid, usernameValid, passwordValid]);
+    }, [emailValid, passwordValid]);
+
+    const moveToSignInPage = () => {
+        navigation.navigate('SignUp');
+    };
+
+    const moveToForgotPassword = () => {
+        navigation.push('ForgotPassword');
+    };
 
     return (
         <View style={styles.container}>
-            {/* Titre */}
+            {/* Header */}
             <Header variant="h2" style={styles.header}>
-                Créer un compte
+                Connectez-vous à votre compte
             </Header>
-            <Text style={styles.subtitle}>Créons votre compte.</Text>
+            <Text style={styles.subtitle}>
+                C'est formidable de vous revoir.
+            </Text>
 
             {/* Formulaire */}
             <View style={styles.form}>
-                {/* Nom et prénom */}
-                <Text style={styles.label}>Nom et prénom</Text>
-                <InputField
-                    ref={nameRef}
-                    placeholder="Entrez votre nom complet"
-                    returnKeyType="next"
-                    onSubmitEditing={() => emailRef.current!.focus()}
-                    submitBehavior="submit"
-                    isValid={usernameValid}
-                    onChangeText={handleUsernameChange}
-                    errorMessage={errorUsername}
-                />
-
                 {/* E-mail */}
                 <Text style={styles.label}>E-mail</Text>
                 <InputField
@@ -128,32 +110,27 @@ export function SignUp() {
                     onChangeText={handlePasswordChange}
                     errorMessage={errorPassword}
                 />
+
+                {/* Mot de passe oublié */}
+                <Text style={styles.conditions}>
+                    Vous avez oublié le mot de passe ?{' '}
+                    <Text style={styles.link} onPress={moveToForgotPassword}>
+                        Reinitialisez
+                    </Text>
+                </Text>
             </View>
 
-            {/* Conditions */}
-            <Text style={styles.conditions}>
-                En vous inscrivant, vous acceptez nos{' '}
-                <Text style={styles.link}>conditions générales</Text>, notre{' '}
-                <Text style={styles.link}>politique de confidentialité</Text> et
-                notre <Text style={styles.link}>utilisation des cookies</Text>.
-            </Text>
-
-            {/* Bouton Créer un compte */}
+            {/* Bouton Connexion */}
             <CButton
                 variant="primary"
                 size="xlarge"
-                disabled={!emailValid || !usernameValid || !passwordValid} // Désactiver le bouton si un champ est invalide
+                disabled={!emailValid || !passwordValid} // Désactiver le bouton si un champ est invalide
                 onPress={handleSubmit}
             >
-                Créer un compte
+                Se Connecter
             </CButton>
 
-            {/* Ou */}
-            <View style={styles.orContainer}>
-                <View style={styles.orDivider} />
-                <Text style={styles.orText}>Ou</Text>
-                <View style={styles.orDivider} />
-            </View>
+            <DividerText text="Ou" />
 
             {/* Boutons Google et Facebook */}
             <TouchableOpacity style={styles.googleButton}>
@@ -180,28 +157,31 @@ export function SignUp() {
                 </Text>
             </TouchableOpacity>
 
-            {/* Connexion */}
+            {/* Inscription */}
             <Text style={styles.loginText}>
-                Vous avez déjà un compte ?{' '}
-                <Text style={styles.link}>Connecter</Text>
+                Vous n'avez pas de compte ?{' '}
+                <Text style={styles.link} onPress={moveToSignInPage}>
+                    Inscription
+                </Text>
             </Text>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
         padding: 20,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
     },
     header: {
         marginTop: 60,
     },
     subtitle: {
         fontSize: 16,
-        color: '#888',
+        fontFamily: 'Poppins-Regular',
+        color: lightTheme.colors.gray_4,
         marginBottom: 20,
     },
     form: {
@@ -225,24 +205,13 @@ const styles = StyleSheet.create({
         color: lightTheme.colors.primary,
         textDecorationLine: 'underline',
     },
-    orContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 10,
-        marginBottom: 20,
-    },
-    orDivider: {
-        flex: 1,
-        height: 1,
-        backgroundColor: lightTheme.colors.lightGray_3,
-    },
-    orText: {
+    loginText: {
         fontFamily: 'Poppins-Regular',
-        fontSize: 14,
-        color: lightTheme.colors.gray_4,
+        fontSize: 16,
         textAlign: 'center',
-        paddingHorizontal: 8,
+        color: lightTheme.colors.lightGray,
     },
+
     googleButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -274,11 +243,5 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
-    },
-    loginText: {
-        fontFamily: 'Poppins-Regular',
-        fontSize: 16,
-        textAlign: 'center',
-        color: lightTheme.colors.lightGray,
     },
 });
