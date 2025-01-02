@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from config.settings import get_mongo_database
+from src.config.settings import get_mongo_database
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -62,5 +62,19 @@ class MongoDBService:
         """
         user = await self.users.find_one({"email": email})
         return user
+
+    
+    async def update_user_password(self, email: str, new_password: str) -> dict:
+        """Update the password of a user in the MongoDB database.
+
+        Args:
+            email (str): The email address of the user.
+            new_password (str): The new hashed password for the user.
+
+        Returns:
+            dict: The result of the update operation, including the number of documents modified.
+        """
+        result = await self.users.update_one({"email": email}, {"$set": {"password": new_password}})
+        return result
 
 mongodb_service = MongoDBService()

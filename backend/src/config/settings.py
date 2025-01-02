@@ -2,6 +2,7 @@ import os
 from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
+from authlib.integrations.starlette_client import OAuth
 
 load_dotenv()
 
@@ -47,3 +48,22 @@ def get_mongo_database(async_mode: bool = False):
     print(f"Using database: {db_name} for environment: {environment}")
     
     return db
+
+def get_kafka_clinet():
+    return {
+        'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', "localhost:9092"),
+        'auto.offset.reset': os.getenv('KAFKA_AUTO_OFFSET_RESET', "earliest"),
+        'autot.commit.enable': os.getenv('KAFKA_AUTO_COMMIT_ENABLE', "False")
+    }
+
+# OAuth configuration
+oauth = OAuth()
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    authorize_url="https://accounts.google.com/o/oauth2/auth",
+    access_token_url="https://accounts.google.com/o/oauth2/token",
+    redirect_uri=os.getenv("GOOGLE_REDIRECT_URI"),
+    client_kwargs={"scope": "openid email profile"},
+)

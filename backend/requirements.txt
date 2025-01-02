@@ -66,3 +66,7 @@ uvicorn==0.32.1
 uvloop==0.21.0
 watchfiles==1.0.3
 websockets==14.1
+pytest
+pytest-asyncio
+motor
+httpx
