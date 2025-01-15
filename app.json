@@ -29,6 +29,9 @@
         "projectId": "14e9bc6d-1cde-4adf-8479-15a05697dcf6"
       }
     },
-    "owner": "wearit"
+    "owner": "wearit",
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
