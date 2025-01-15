@@ -1,15 +1,37 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Header, BodyText } from '../../components/core/Typography';
 import { CButton } from '../../components/core/Buttons';
 import { ToggleButton } from '../../components/core/Toggle';
+import ValidationCard from '../../components/core/ValidationCard';
 
 export const CoreExampleScreen: React.FC = () => {
+    const [visible, setVisible] = useState(false);
+
+    const toggleOverlay = () => {
+        setVisible(true);
+    };
+    const buttonFunction = () => {
+        Alert.alert('Button was pressed!');
+        setVisible(!visible);
+    };
+
     return (
         <ScrollView>
             <TypographyExample />
             <ButtonExample />
             <ToggleBtnExample />
+            <CButton variant="primary" onPress={toggleOverlay}>
+                Validation Card toggle
+            </CButton>
+            <ValidationCard
+                title="fecilitations"
+                message="Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure amet tenetur ea aut reprehenderit saepe, quia molestiae."
+                buttonTitle="L'Essayer Maintenant"
+                buttonFunction={buttonFunction}
+                visible={visible}
+                toggleOverlay={toggleOverlay}
+            />
         </ScrollView>
     );
 };
