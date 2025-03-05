@@ -10,6 +10,13 @@ class WardrobeService:
         self.repository = repository or WardrobeRepository()
 
     async def create_cloth(self, cloth: ClothCreate):
+        """
+        Create a new cloth in the wardrobe
+        - Upload original image to S3
+        - Call pre-processing service for cloth
+        - Save cloth_preprocessed to S3
+        - Save cloth to database
+        """
         logger.info(f"🟡 [Service] Creating new cloth in repository")
 
         # Create a unique ID for the cloth
