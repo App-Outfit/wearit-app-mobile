@@ -1,5 +1,5 @@
 from app.repositories.wardrobe_repo import WardrobeRepository
-from app.api.schemas.wardrobe import ClothResponse, ClothCreate, ClothCreateResponse
+from app.api.schemas.wardrobe import ClothResponse, ClothCreate, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
 from app.core.errors import NotFoundError
 from app.core.logging_config import logger
 from datetime import datetime
@@ -34,9 +34,9 @@ class WardrobeService:
         
         logger.debug(f"🟢 [Service] Cloth created with ID: {cloth_id}")
         return ClothCreateResponse(
-            **data,
             id=str(cloth_id), 
-            message="Cloth created successfully"
+            message=f"Cloth {str(cloth_id)} created successfully",
+            created_at=cloth.created_at
         )
 
     async def get_cloth_by_id(self, cloth_id: str):
@@ -46,12 +46,37 @@ class WardrobeService:
         if not cloth:
             logger.warning(f"🔴 [Service] Cloth {cloth_id} not found")
             raise NotFoundError(f"cloth {cloth_id} not found")
-        print(cloth)
         logger.debug(f"🟢 [Service] Cloth {cloth_id} found")
         return ClothResponse(
+            id=str(cloth["_id"]),
             user_id=cloth["user_id"],
             name=cloth["name"],
             type=cloth["type"],
-            id=str(cloth["_id"]),
-            image_url=cloth["image_url"]
+            image_url=cloth["image_url"],
+            created_at=cloth["created_at"]
+        )
+    
+    async def get_clothes(self, user_id: str, cloth_type: str):
+        logger.info(f"🟡 [Service] Fetching clothes for user {user_id} and type {cloth_type}")
+        clothes = await self.repository.get_clothes(user_id, cloth_type)
+
+        if not clothes:
+            logger.warning(f"🔴 [Service] No clothes found for user {user_id} and type {cloth_type}")
+            raise NotFoundError(f"No clothes found for user {user_id} and type {cloth_type}")
+        
+        logger.debug(f"🟢 [Service] Clothes found for user {user_id} and type {cloth_type}")
+        return ClothListResponse(clothes=[ClothResponse(**cloth, id=str(cloth["_id"])) for cloth in clothes])
+    
+    async def delete_cloth(self, cloth_id: str):
+        logger.info(f"🟡 [Service] Deleting cloth {cloth_id} from repository")
+        cloth = await self.repository.get_cloth_by_id(cloth_id)
+
+        if not cloth:
+            logger.warning(f"🔴 [Service] Cloth {cloth_id} not found")
+            raise NotFoundError(f"cloth {cloth_id} not found")
+        
+        await self.repository.delete_cloth(cloth_id)
+        logger.debug(f"🟢 [Service] Cloth {cloth_id} deleted")
+        return ClothDeleteResponse(
+            message=f"Cloth {cloth_id} deleted successfully"
         )
