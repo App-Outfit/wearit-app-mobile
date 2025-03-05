@@ -25,8 +25,7 @@ class ClothCreate(ClothBase):
 class ClothResponse(ClothBase):
     """Response model when fetching a cloth."""
     id: str
-    created_at: datetime
-
+    
 
 class ClothCreateResponse(BaseModel):
     """Response model after successfully creating a cloth."""

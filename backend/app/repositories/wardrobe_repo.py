@@ -3,9 +3,9 @@ from app.core.logging_config import logger
 from bson import ObjectId
 
 class WardrobeRepository:
-    def __init__(self):
-        self.db = MongoDB.get_database()
-
+    def __init__(self, db=None):
+        self.db = db if db is not None else MongoDB().get_database()
+        
     async def create_cloth(self, cloth: dict):
         logger.info(f"🟡 [Repository] Inserting new cloth into MongoDB")
         try:

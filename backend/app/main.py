@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import wardrobe  # Import des routes
-from fastapi import FastAPI
 from app.infrastructure.database.mongodb import MongoDB
 
 app = FastAPI()
@@ -35,9 +34,8 @@ async def shutdown_event():
     """ Fermeture propre de MongoDB """
     await MongoDB.close()
 
-
 # 📌 Inclure les routes
-app.include_router(wardrobe.router, prefix="/wardrobe", tags=["Wardrobe"])
+app.include_router(wardrobe.router)
 
 # 📌 Point de départ si lancé directement
 if __name__ == "__main__":
