@@ -14,4 +14,4 @@ Generated Documentation
    :maxdepth: 2
    :caption: API and Services:
 
-   generated/modules
+   modules
