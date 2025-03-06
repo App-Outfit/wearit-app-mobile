@@ -1,4 +1,5 @@
 from app.repositories.wardrobe_repo import WardrobeRepository
+from app.repositories.storage import StorageRepository
 from app.api.schemas.wardrobe import ClothResponse, ClothCreate, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
 from app.core.errors import NotFoundError
 from app.core.logging_config import logger
@@ -6,8 +7,9 @@ from datetime import datetime
 import uuid
 
 class WardrobeService:
-    def __init__(self, repository: WardrobeRepository = None):
+    def __init__(self, repository: WardrobeRepository = None, storage_repo: StorageRepository = None):
         self.repository = repository or WardrobeRepository()
+        self.storage_repo = StorageRepository()
 
     async def create_cloth(self, cloth: ClothCreate):
         """
@@ -22,14 +24,19 @@ class WardrobeService:
         # Create a unique ID for the cloth
         cloth_id = str(uuid.uuid4())
 
-        # Upload image to S3
+        # Upload image to S3 TODO: Fix S3
+        #image_url = await self.storage_repo.upload_cloth_image(cloth.user_id, cloth_id, str(cloth.image_url))
+        image_url = str(cloth.image_url)
+        #if not image_url:
+        #    logger.error(f"🔴 [Service] Failed to upload image to S3")
+        #    raise Exception("Failed to upload image to S3")
 
         # Prepare cloth object
         data = {
             "user_id": cloth.user_id,
             "name": cloth.name,
             "type": cloth.type,
-            "image_url": str(cloth.image_url),
+            "image_url": str(image_url),
             "created_at": datetime.now()
         }
 
@@ -88,7 +95,10 @@ class WardrobeService:
         if not cloth:
             logger.warning(f"🔴 [Service] Cloth {cloth_id} not found")
             raise NotFoundError(f"Cloth {cloth_id} not found")
-        
+
+        # Delete image from S3 TODO: Fix S3
+        #await self.storage_repo.delete_cloth_image(cloth["user_id"], cloth_id)
+
         await self.repository.delete_cloth(cloth_id)
         logger.debug(f"🟢 [Service] Cloth {cloth_id} deleted")
         return ClothDeleteResponse(
