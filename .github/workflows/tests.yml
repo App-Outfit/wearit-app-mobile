@@ -45,6 +45,8 @@ jobs:
       
       - name: 🚀 Run tests
         env:
+          JWT_SECRET_KEY: "zQszkS6YnVJ6zKhVbhiZQ1jz9zVTiv6f+VTC3R2EqVE="
+          JWT_ALGORITHM: HS256
           MONGO_URI: "mongodb://localhost:27017/test_wearit"
     
         run: |
