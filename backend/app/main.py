@@ -7,6 +7,7 @@ import os
 from app.api.routes import wardrobe_route 
 from app.api.routes import body_route
 from app.api.routes import favorite_route
+from app.api.routes import auth_route
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -54,6 +55,7 @@ async def shutdown_event():
 app.include_router(wardrobe_route.router)
 app.include_router(body_route.router)
 app.include_router(favorite_route.router)
+app.include_router(auth_route.router)
 
 # 📌 Entry point when running directly
 if __name__ == "__main__":

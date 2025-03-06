@@ -1,5 +1,9 @@
 from fastapi import HTTPException
 
+class ConflictError(HTTPException):
+    def __init__(self, detail="Resource already exists"):
+        super().__init__(status_code=409, detail=detail)
+
 class NotFoundError(HTTPException):
     def __init__(self, detail="Resource not found"):
         super().__init__(status_code=404, detail=detail)
