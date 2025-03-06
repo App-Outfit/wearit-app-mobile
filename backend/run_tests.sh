@@ -1,1 +1,1 @@
-PYTHONPATH=$(pwd) pytest -v --disable-warnings tests/
+PYTHONPATH=$(pwd) pytest --disable-warnings tests/

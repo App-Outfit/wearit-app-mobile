@@ -1,9 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock
 from app.services.wardrobe_service import WardrobeService
-from app.repositories.storage_repo import StorageRepository
 from app.api.schemas.wardrobe_schema import (
-    ClothCreate, ClothResponse, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
+    ClothResponse, ClothCreateResponse, ClothDeleteResponse
 )
 from app.core.errors import NotFoundError
 import io
@@ -56,7 +55,7 @@ async def test_create_cloth(service, mock_repo, mock_storage_repo):
 
 
 @pytest.mark.asyncio
-async def test_create_cloth_failure(service, mock_repo, mock_storage_repo):
+async def test_create_cloth_failure(service, mock_storage_repo):
     """Test de l'échec de création d'un vêtement"""
     file_data = io.BytesIO(b"some file data")
     upload_file = UploadFile(file=file_data, filename="test_image.jpg")

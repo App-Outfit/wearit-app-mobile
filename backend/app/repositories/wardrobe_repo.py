@@ -36,6 +36,7 @@ class WardrobeRepository:
         logger.info(f"🟡 [Repository] Querying MongoDB for user_id: {user_id} and type: {cloth_type}")
         try:
             collection = self.db.wardrobe
+            # TODO change user_id to ObjectId
             clothes = await collection.find({"user_id": user_id, "type": cloth_type}).to_list(length=100)
             return clothes
         except Exception as e:

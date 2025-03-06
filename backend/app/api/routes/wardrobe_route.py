@@ -5,7 +5,7 @@ from app.api.schemas.wardrobe_schema import ClothResponse, ClothCreateResponse, 
 from app.core.logging_config import logger
 from fastapi import Form, UploadFile, File
 
-router = APIRouter()
+router = APIRouter(prefix="/wardrobe", tags=["Wardrobe"])
 
 from fastapi import Depends
 
@@ -13,7 +13,7 @@ def get_wardrobe_service(repo: WardrobeRepository = Depends()):
     return WardrobeService(repo)
 
 # POST a new cloth
-@router.post("/wardrobe/clothes", response_model=ClothCreateResponse)
+@router.post("/", response_model=ClothCreateResponse)
 async def create_cloth(
     user_id: str = Form(...),  # 🔥 FormData pour envoyer du texte
     name: str = Form(...),
@@ -30,19 +30,19 @@ async def create_cloth(
     return await service.create_cloth(cloth_data)
 
 # GET a cloth by its ID
-@router.get("/wardrobe/clothes/{cloth_id}", response_model=ClothResponse)
+@router.get("/cloth{cloth_id}", response_model=ClothResponse)
 async def get_cloth(cloth_id: str, service: WardrobeService = Depends(get_wardrobe_service)):
     logger.info(f"🔵 [API] Received GET request for cloth_id: {cloth_id}")
     return await service.get_cloth_by_id(cloth_id)
 
 # Get a list of all clothes by user_id and type
-@router.get("/wardrobe/clothes", response_model=ClothListResponse)
+@router.get("/{user_id}/{cloth_type}", response_model=ClothListResponse)
 async def get_clothes(user_id: str, cloth_type: str, service: WardrobeService = Depends(get_wardrobe_service)):
     logger.info(f"🔵 [API] Received GET request for user_id: {user_id} and type: {cloth_type}")
     return await service.get_clothes(user_id, cloth_type)
 
 # DELETE a cloth by its ID
-@router.delete("/wardrobe/clothes/{cloth_id}", response_model=ClothDeleteResponse)
+@router.delete("/{cloth_id}", response_model=ClothDeleteResponse)
 async def delete_cloth(cloth_id: str, service: WardrobeService = Depends(get_wardrobe_service)):
     logger.info(f"🔵 [API] Received DELETE request for cloth_id: {cloth_id}")
     return await service.delete_cloth(cloth_id)
