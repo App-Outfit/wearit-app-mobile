@@ -1,10 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import wardrobe_route  # Importing routes
-from app.api.routes import body_route  # Importing routes
 from app.infrastructure.database.mongodb import MongoDB
 from app.infrastructure.storage.s3_client import S3Client  # Importing S3 Client
 import os
+
+from app.api.routes import wardrobe_route 
+from app.api.routes import body_route
+from app.api.routes import favorite_route
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -50,6 +53,7 @@ async def shutdown_event():
 # 📌 Include API routes
 app.include_router(wardrobe_route.router)
 app.include_router(body_route.router)
+app.include_router(favorite_route.router)
 
 # 📌 Entry point when running directly
 if __name__ == "__main__":
