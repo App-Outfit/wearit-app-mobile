@@ -70,3 +70,4 @@ pytest
 pytest-asyncio
 motor
 httpx
+boto3
