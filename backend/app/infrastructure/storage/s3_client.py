@@ -1,5 +1,4 @@
 import boto3
-import os
 from botocore.exceptions import NoCredentialsError
 from app.core.logging_config import logger
 

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import wardrobe  # Importing routes
+from app.api.routes import wardrobe_route  # Importing routes
 from app.infrastructure.database.mongodb import MongoDB
 from app.infrastructure.storage.s3_client import S3Client  # Importing S3 Client
 import os
@@ -47,7 +47,7 @@ async def shutdown_event():
     await S3Client.close()
 
 # 📌 Include API routes
-app.include_router(wardrobe.router)
+app.include_router(wardrobe_route.router)
 
 # 📌 Entry point when running directly
 if __name__ == "__main__":

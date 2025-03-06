@@ -14,7 +14,7 @@ async def test_create_cloth(repo):
         "user_id": "001",
         "name": "Test Jacket",
         "type": "upper",
-        "image_url": "https://example.com/jacket.jpg"
+        "file": "test.jpg"
     }
     cloth_id = await repo.create_cloth(cloth_data)
 

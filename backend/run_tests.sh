@@ -1,1 +1,1 @@
-PYTHONPATH=$(pwd) pytest tests/
+PYTHONPATH=$(pwd) pytest -v tests/

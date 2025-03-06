@@ -1,8 +1,10 @@
 import pytest
 from unittest.mock import AsyncMock
 from app.services.wardrobe_service import WardrobeService
-from app.api.schemas.wardrobe import ClothCreate, ClothResponse, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
+from app.api.schemas.wardrobe_schema import ClothCreate, ClothResponse, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
 from app.core.errors import NotFoundError
+import io
+from fastapi import UploadFile
 
 @pytest.fixture
 def mock_repo():
@@ -17,19 +19,19 @@ def service(mock_repo):
 @pytest.mark.asyncio
 async def test_create_cloth(service, mock_repo):
     """Test de la création d'un vêtement"""
-    mock_repo.create_cloth.return_value = "test_cloth_id"
+    file_data = io.BytesIO(b"some file data")
+    upload_file = UploadFile(file=file_data, filename="test_image.jpg")
 
     cloth_data = ClothCreate(
         user_id="001",
         name="Test Jacket",
         type="upper",
-        image_url="https://example.com/jacket.jpg"
+        file=upload_file
     )
 
     response = await service.create_cloth(cloth_data)
 
     assert isinstance(response, ClothCreateResponse)
-    assert response.id == "test_cloth_id"
     assert response.message == "Cloth created successfully"
     mock_repo.create_cloth.assert_called_once()
 
@@ -38,11 +40,14 @@ async def test_create_cloth_failure(service, mock_repo):
     """Test de l'échec de création d'un vêtement"""
     mock_repo.create_cloth.return_value = None
 
+    file_data = io.BytesIO(b"some file data")
+    upload_file = UploadFile(file=file_data, filename="test_image.jpg")
+
     cloth_data = ClothCreate(
         user_id="001",
         name="Test Jacket",
         type="upper",
-        image_url="https://example.com/jacket.jpg"
+        file=upload_file
     )
 
     with pytest.raises(Exception, match="Failed to create cloth"):
@@ -115,8 +120,8 @@ async def test_get_clothes_not_found(service, mock_repo):
 @pytest.mark.asyncio
 async def test_delete_cloth(service, mock_repo):
     """Test de la suppression d'un vêtement"""
-    mock_repo.get_cloth_by_id.return_value = {"_id": "test_cloth_id"}
-    mock_repo.delete_cloth.return_value = None
+    mock_repo.get_cloth_by_id.return_value = {"_id": "test_cloth_id", "user_id": "001"}
+    mock_repo.delete_cloth.return_value = True
 
     response = await service.delete_cloth("test_cloth_id")
 

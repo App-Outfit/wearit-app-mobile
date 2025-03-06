@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from app.services.wardrobe_service import WardrobeService
 from app.repositories.wardrobe_repo import WardrobeRepository
-from app.api.schemas.wardrobe import ClothResponse, ClothCreate, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
+from app.api.schemas.wardrobe_schema import ClothResponse, ClothCreate, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
 from app.core.logging_config import logger
 
 router = APIRouter()
