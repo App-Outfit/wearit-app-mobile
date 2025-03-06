@@ -32,8 +32,11 @@ class StorageRepository:
         object_name = f"users/{user_id}/clothes/{cloth_id}.jpg"
         try:
             self.s3_client.delete_object(Bucket=self.bucket_name, Key=object_name)
-            logger.info(f"🟢 [S3] Successfully deleted: {object_name}")
+            logger.info(f"🟢 [S3] Deletion successful: {object_name}")
             return True
+        except NoCredentialsError:
+            logger.error("🔴 [S3] Error: AWS credentials missing")
+            return False
         except Exception as e:
-            logger.error(f"🔴 [S3] Error while deleting: {e}")
+            logger.error(f"🔴 [S3] Deletion failed: {e}")
             return False

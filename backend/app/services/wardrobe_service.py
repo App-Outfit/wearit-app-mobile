@@ -4,14 +4,14 @@ from app.api.schemas.wardrobe_schema import ClothResponse, ClothCreate, ClothCre
 from app.core.errors import NotFoundError
 from app.core.logging_config import logger
 from datetime import datetime
-import uuid
+from bson import ObjectId
 
 class WardrobeService:
     def __init__(self, repository: WardrobeRepository = None, storage_repo: StorageRepository = None):
         self.repository = repository or WardrobeRepository()
         self.storage_repo = storage_repo or StorageRepository()
 
-    async def create_cloth(self, cloth: ClothCreate):
+    async def create_cloth(self, cloth: dict):
         """
         Create a new cloth in the wardrobe
         - Upload original image to S3
@@ -22,10 +22,10 @@ class WardrobeService:
         logger.info(f"🟡 [Service] Creating new cloth in repository")
 
         # Generate unique ID for the cloth
-        cloth_id = str(uuid.uuid4())
+        cloth_id = ObjectId()
 
         # Upload original image to S3
-        image_url = await self.storage_repo.upload_cloth_image(cloth.user_id, cloth_id, cloth.file)
+        image_url = await self.storage_repo.upload_cloth_image(cloth["user_id"], str(cloth_id), cloth["file"])
 
         if not image_url:
             logger.error(f"🔴 [Service] Failed to upload image to S3")
@@ -45,9 +45,9 @@ class WardrobeService:
         # Save cloth to database
         data = {
             "_id": cloth_id,
-            "user_id": cloth.user_id,
-            "name": cloth.name,
-            "type": cloth.type,
+            "user_id": cloth["user_id"],
+            "name": cloth["name"],
+            "type": cloth["type"],
             "image_url": image_url,
             "created_at": datetime.now()
         }

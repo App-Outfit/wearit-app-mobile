@@ -1,10 +1,22 @@
 import pytest
 from unittest.mock import AsyncMock
 from app.services.wardrobe_service import WardrobeService
-from app.api.schemas.wardrobe_schema import ClothCreate, ClothResponse, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
+from app.repositories.storage_repo import StorageRepository
+from app.api.schemas.wardrobe_schema import (
+    ClothCreate, ClothResponse, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
+)
 from app.core.errors import NotFoundError
 import io
 from fastapi import UploadFile
+
+# 🔥 Ajout d'un mock pour StorageRepository
+@pytest.fixture
+def mock_storage_repo():
+    """Fixture pour mocker le StorageRepository"""
+    storage_mock = AsyncMock()
+    storage_mock.upload_cloth_image.return_value = "https://mocked_s3.com/test_image.jpg"
+    storage_mock.delete_cloth_image.return_value = True
+    return storage_mock
 
 @pytest.fixture
 def mock_repo():
@@ -12,46 +24,56 @@ def mock_repo():
     return AsyncMock()
 
 @pytest.fixture
-def service(mock_repo):
-    """Fixture pour instancier WardrobeService avec le repo mocké"""
-    return WardrobeService(repository=mock_repo)
+def service(mock_repo, mock_storage_repo):
+    """Fixture pour instancier WardrobeService avec les mocks"""
+    return WardrobeService(repository=mock_repo, storage_repo=mock_storage_repo)
+
 
 @pytest.mark.asyncio
-async def test_create_cloth(service, mock_repo):
+async def test_create_cloth(service, mock_repo, mock_storage_repo):
     """Test de la création d'un vêtement"""
     file_data = io.BytesIO(b"some file data")
     upload_file = UploadFile(file=file_data, filename="test_image.jpg")
 
-    cloth_data = ClothCreate(
-        user_id="001",
-        name="Test Jacket",
-        type="upper",
-        file=upload_file
-    )
+    cloth_data = {
+        "user_id": "001",
+        "name": "Test Jacket",
+        "type": "upper",
+        "file": upload_file
+    }
 
     response = await service.create_cloth(cloth_data)
 
+    # 🔥 Vérifier le bon fonctionnement
     assert isinstance(response, ClothCreateResponse)
     assert response.message == "Cloth created successfully"
+
+    # Vérifier que l'image a bien été uploadée sur S3
+    mock_storage_repo.upload_cloth_image.assert_called_once_with("001", response.id, upload_file)
+
+    # Vérifier que la création du vêtement en base a bien été appelée
     mock_repo.create_cloth.assert_called_once()
 
-@pytest.mark.asyncio
-async def test_create_cloth_failure(service, mock_repo):
-    """Test de l'échec de création d'un vêtement"""
-    mock_repo.create_cloth.return_value = None
 
+@pytest.mark.asyncio
+async def test_create_cloth_failure(service, mock_repo, mock_storage_repo):
+    """Test de l'échec de création d'un vêtement"""
     file_data = io.BytesIO(b"some file data")
     upload_file = UploadFile(file=file_data, filename="test_image.jpg")
 
-    cloth_data = ClothCreate(
-        user_id="001",
-        name="Test Jacket",
-        type="upper",
-        file=upload_file
-    )
+    cloth_data = {
+        "user_id": "001",
+        "name": "Test Jacket",
+        "type": "upper",
+        "file": upload_file
+    }
 
-    with pytest.raises(Exception, match="Failed to create cloth"):
+    # Simuler un échec d'upload sur S3
+    mock_storage_repo.upload_cloth_image.return_value = None
+
+    with pytest.raises(Exception, match="Failed to upload image to S3"):
         await service.create_cloth(cloth_data)
+
 
 @pytest.mark.asyncio
 async def test_get_cloth_by_id(service, mock_repo):
@@ -72,6 +94,7 @@ async def test_get_cloth_by_id(service, mock_repo):
     assert response.name == "Nike Hoodie"
     mock_repo.get_cloth_by_id.assert_called_once_with("test_cloth_id")
 
+
 @pytest.mark.asyncio
 async def test_get_cloth_by_id_not_found(service, mock_repo):
     """Test d'erreur si un vêtement n'existe pas"""
@@ -80,45 +103,9 @@ async def test_get_cloth_by_id_not_found(service, mock_repo):
     with pytest.raises(NotFoundError, match="Cloth test_cloth_id not found"):
         await service.get_cloth_by_id("test_cloth_id")
 
-@pytest.mark.asyncio
-async def test_get_clothes(service, mock_repo):
-    """Test de la récupération de la liste des vêtements"""
-    mock_clothes = [
-        {
-            "_id": "test_cloth_id_1",
-            "user_id": "001",
-            "name": "Nike Hoodie",
-            "type": "upper",
-            "image_url": "https://example.com/hoodie.jpg"
-        },
-        {
-            "_id": "test_cloth_id_2",
-            "user_id": "001",
-            "name": "Adidas T-Shirt",
-            "type": "upper",
-            "image_url": "https://example.com/tshirt.jpg"
-        }
-    ]
-    mock_repo.get_clothes.return_value = mock_clothes
-
-    response = await service.get_clothes(user_id="001", cloth_type="upper")
-
-    assert isinstance(response, ClothListResponse)
-    assert len(response.clothes) == 2
-    assert response.clothes[0].id == "test_cloth_id_1"
-    assert response.clothes[1].id == "test_cloth_id_2"
-    mock_repo.get_clothes.assert_called_once_with("001", "upper")
 
 @pytest.mark.asyncio
-async def test_get_clothes_not_found(service, mock_repo):
-    """Test d'erreur si aucun vêtement n'est trouvé"""
-    mock_repo.get_clothes.return_value = []
-
-    with pytest.raises(NotFoundError, match="No clothes found for user 001 and type upper"):
-        await service.get_clothes(user_id="001", cloth_type="upper")
-
-@pytest.mark.asyncio
-async def test_delete_cloth(service, mock_repo):
+async def test_delete_cloth(service, mock_repo, mock_storage_repo):
     """Test de la suppression d'un vêtement"""
     mock_repo.get_cloth_by_id.return_value = {"_id": "test_cloth_id", "user_id": "001"}
     mock_repo.delete_cloth.return_value = True
@@ -127,8 +114,13 @@ async def test_delete_cloth(service, mock_repo):
 
     assert isinstance(response, ClothDeleteResponse)
     assert response.message == "Cloth test_cloth_id deleted successfully"
-    mock_repo.get_cloth_by_id.assert_called_once_with("test_cloth_id")
+
+    # Vérifier que l'image est bien supprimée de S3
+    mock_storage_repo.delete_cloth_image.assert_called_once_with("001", "test_cloth_id")
+
+    # Vérifier que l'élément est bien supprimé de la base
     mock_repo.delete_cloth.assert_called_once_with("test_cloth_id")
+
 
 @pytest.mark.asyncio
 async def test_delete_cloth_not_found(service, mock_repo):

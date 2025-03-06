@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from app.services.wardrobe_service import WardrobeService
 from app.repositories.wardrobe_repo import WardrobeRepository
-from app.api.schemas.wardrobe_schema import ClothResponse, ClothCreate, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
+from app.api.schemas.wardrobe_schema import ClothResponse, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
 from app.core.logging_config import logger
+from fastapi import Form, UploadFile, File
 
 router = APIRouter()
 
@@ -13,9 +14,20 @@ def get_wardrobe_service(repo: WardrobeRepository = Depends()):
 
 # POST a new cloth
 @router.post("/wardrobe/clothes", response_model=ClothCreateResponse)
-async def create_cloth(cloth: ClothCreate, service: WardrobeService = Depends(get_wardrobe_service)):
+async def create_cloth(
+    user_id: str = Form(...),  # 🔥 FormData pour envoyer du texte
+    name: str = Form(...),
+    type: str = Form(...),
+    file: UploadFile = File(...),  # 🔥 File pour envoyer une image
+    service: WardrobeService = Depends(get_wardrobe_service)):
     logger.info(f"🔵 [API] Received POST request to create a new cloth")
-    return await service.create_cloth(cloth)
+    cloth_data = {
+        "user_id": user_id,
+        "name": name,
+        "type": type,
+        "file": file
+    }
+    return await service.create_cloth(cloth_data)
 
 # GET a cloth by its ID
 @router.get("/wardrobe/clothes/{cloth_id}", response_model=ClothResponse)
