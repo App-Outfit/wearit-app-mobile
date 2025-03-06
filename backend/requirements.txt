@@ -71,3 +71,4 @@ pytest-asyncio
 motor
 httpx
 boto3
+moto
