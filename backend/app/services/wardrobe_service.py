@@ -3,15 +3,16 @@ from app.repositories.storage_repo import StorageRepository
 from app.api.schemas.wardrobe_schema import ClothResponse, ClothCreate, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
 from app.core.errors import NotFoundError
 from app.core.logging_config import logger
+from fastapi import HTTPException
 from datetime import datetime
-from bson import ObjectId
+import uuid
 
 class WardrobeService:
-    def __init__(self, repository: WardrobeRepository = None, storage_repo: StorageRepository = None):
-        self.repository = repository or WardrobeRepository()
+    def __init__(self, repository: WardrobeRepository, storage_repo: StorageRepository = None):
+        self.repository = repository
         self.storage_repo = storage_repo or StorageRepository()
 
-    async def create_cloth(self, cloth: dict):
+    async def create_cloth(self, cloth: ClothCreate):
         """
         Create a new cloth in the wardrobe
         - Upload original image to S3
@@ -22,10 +23,10 @@ class WardrobeService:
         logger.info(f"🟡 [Service] Creating new cloth in repository")
 
         # Generate unique ID for the cloth
-        cloth_id = ObjectId()
+        cloth_id = str(uuid.uuid4())
 
         # Upload original image to S3
-        image_url = await self.storage_repo.upload_cloth_image(cloth["user_id"], str(cloth_id), cloth["file"])
+        image_url = await self.storage_repo.upload_cloth_image(cloth.user_id, str(cloth_id), cloth.file)
 
         if not image_url:
             logger.error(f"🔴 [Service] Failed to upload image to S3")
@@ -44,10 +45,10 @@ class WardrobeService:
 
         # Save cloth to database
         data = {
-            "_id": cloth_id,
-            "user_id": cloth["user_id"],
-            "name": cloth["name"],
-            "type": cloth["type"],
+            "id": cloth_id,
+            "user_id": cloth.user_id,
+            "name": cloth.name,
+            "type": cloth.type,
             "image_url": image_url,
             "created_at": datetime.now()
         }
@@ -113,7 +114,7 @@ class WardrobeService:
             raise NotFoundError(f"Cloth {cloth_id} not found")
 
         # Delete image from S3
-        success_s3 = await self.storage_repo.delete_cloth_image(cloth["user_id"], cloth_id)
+        success_s3 = await self.storage_repo.delete_cloth_image(cloth.user_id, cloth_id)
         
         if not success_s3:
             logger.error(f"🔴 [Service] Failed to delete image from S3")

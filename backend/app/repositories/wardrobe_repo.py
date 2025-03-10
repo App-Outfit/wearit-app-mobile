@@ -1,59 +1,88 @@
-from app.infrastructure.database.mongodb import MongoDB
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.exc import SQLAlchemyError
+from app.infrastructure.database.models.cloth import Cloth
 from app.core.logging_config import logger
-from bson import ObjectId
+from app.infrastructure.database.models.user import User
+from fastapi import HTTPException
 
 class WardrobeRepository:
-    def __init__(self, db=None):
-        self.db = db if db is not None else MongoDB().get_database()
-        
+    def __init__(self, db: AsyncSession):
+        self.db_session = db    
+
     async def create_cloth(self, cloth: dict):
-        logger.info(f"🟡 [Repository] Inserting new cloth into MongoDB")
-        try:
-            collection = self.db.wardrobe
-            result = await collection.insert_one(cloth)
-            return result.inserted_id
-        except Exception as e:
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
-            return None
+        """Insère un nouveau vêtement dans la base PostgreSQL."""
+        logger.info("🟡 [Repository] Inserting new cloth into PostgreSQL")
+
+        async with self.db_session as session:
+            try:
+                # ✅ Vérifier si l'utilisateur existe
+                result = await session.execute(select(User).filter(User.id == cloth["user_id"]))
+                user = result.scalars().first()
+                if not user:
+                    logger.warning(f"🔴 [Repository] User {cloth['user_id']} not found")
+                    raise HTTPException(status_code=404, detail="User not found")
+
+                # ✅ Créer et insérer l'habit
+                new_cloth = Cloth(**cloth)
+                session.add(new_cloth)
+                await session.commit()
+                await session.refresh(new_cloth)  # Récupère l'objet après insertion
+
+                logger.info(f"🟢 [Repository] Cloth {new_cloth.id} inserted successfully")
+                return new_cloth.id
+
+            except SQLAlchemyError as e:
+                await session.rollback()  # Annule la transaction en cas d'erreur
+                logger.error(f"🔴 [Repository] An error occurred: {e}")
+                raise HTTPException(status_code=500, detail="Database error")
 
     async def get_cloth_by_id(self, cloth_id: str):
-        logger.info(f"🟡 [Repository] Querying MongoDB for cloth_id: {cloth_id}")
+        """Récupère un vêtement par son ID."""
+        logger.info(f"🟡 [Repository] Querying PostgreSQL for cloth_id: {cloth_id}")
         try:
-            collection = self.db.wardrobe
-            cloth = await collection.find_one({"_id": ObjectId(cloth_id)})
-
+            result = await self.db_session.execute(select(Cloth).where(Cloth.id == cloth_id))
+            cloth = result.scalars().first()
+            print(cloth)
             if cloth:
                 logger.debug(f"🟢 [Repository] Cloth {cloth_id} found")
                 return cloth
             else:
                 logger.warning(f"🔴 [Repository] Cloth {cloth_id} not found")
                 return None
-        except Exception as e:
+        except SQLAlchemyError as e:
             logger.error(f"🔴 [Repository] An error occurred: {e}")
             return None
         
     async def get_clothes(self, user_id: str, cloth_type: str):
-        logger.info(f"🟡 [Repository] Querying MongoDB for user_id: {user_id} and type: {cloth_type}")
+        """Récupère tous les vêtements d'un utilisateur en fonction du type."""
+        logger.info(f"🟡 [Repository] Querying PostgreSQL for user_id: {user_id} and type: {cloth_type}")
         try:
-            collection = self.db.wardrobe
-            # TODO change user_id to ObjectId
-            clothes = await collection.find({"user_id": user_id, "type": cloth_type}).to_list(length=100)
+            result = await self.db_session.execute(
+                select(Cloth).where(Cloth.user_id == user_id, Cloth.type == cloth_type)
+            )
+            clothes = result.scalars().all()
             return clothes
-        except Exception as e:
+        except SQLAlchemyError as e:
             logger.error(f"🔴 [Repository] An error occurred: {e}")
             return None
         
     async def delete_cloth(self, cloth_id: str):
-        logger.info(f"🟡 [Repository] Deleting cloth {cloth_id} from MongoDB")
+        """Supprime un vêtement par son ID."""
+        logger.info(f"🟡 [Repository] Deleting cloth {cloth_id} from PostgreSQL")
         try:
-            collection = self.db.wardrobe
-            result = await collection.delete_one({"_id": ObjectId(cloth_id)})
-            if result.deleted_count == 1:
-                logger.debug(f"🟢 [Repository] Cloth {cloth_id} deleted")
-                return True
-            else:
+            result = await self.db_session.execute(select(Cloth).where(Cloth.id == cloth_id))
+            cloth = result.scalars().first()
+
+            if not cloth:
                 logger.warning(f"🔴 [Repository] Cloth {cloth_id} not found")
                 return False
-        except Exception as e:
+
+            await self.db_session.delete(cloth)
+            await self.db_session.commit()
+            logger.debug(f"🟢 [Repository] Cloth {cloth_id} deleted")
+            return True
+        except SQLAlchemyError as e:
+            await self.db_session.rollback()
             logger.error(f"🔴 [Repository] An error occurred: {e}")
             return False

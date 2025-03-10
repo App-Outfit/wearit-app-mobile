@@ -10,3 +10,7 @@ pydantic
 pydantic[email]
 python-jose
 httpx
+postgresql
+psycopg2
+sqlalchemy 
+asyncpg

@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, EmailStr
 
 class BaseAuth(BaseModel):
     """Base model for authentication."""
+    name: str = Field(..., min_length=2, max_length=50, description="Name of the user")
     email: EmailStr = Field(..., description="Email of the user")
     password: str = Field(..., min_length=8, max_length=128, description="Password of the user")
 

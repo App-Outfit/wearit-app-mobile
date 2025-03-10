@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.infrastructure.database.mongodb import MongoDB
 from app.infrastructure.storage.s3_client import S3Client  # Importing S3 Client
+from app.infrastructure.database.postgres import postgres_db
 import os
 
 from app.api.routes import wardrobe_route 
@@ -14,14 +15,10 @@ load_dotenv()
 
 app = FastAPI()
 
-MONGO_URL = os.getenv("MONGODB_URI_LOCAL")
-DB_NAME = os.getenv("MONGODB_DATABASE_LOCAL")
-
 AWS_REGION = os.getenv("AWS_REGION_NAME")
 AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
 AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-
 
 # 📌 FastAPI Application Initialization
 app = FastAPI(
@@ -42,13 +39,13 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """ Initialize MongoDB and S3 connection on startup """
-    await MongoDB.connect(MONGO_URL, DB_NAME)
+    await postgres_db.connect()
     await S3Client.connect(AWS_REGION, AWS_BUCKET_NAME, AWS_ACCESS_KEY, AWS_SECRET_KEY)  # Initialize S3 connection
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """ Properly close MongoDB and S3 connection on shutdown """
-    await MongoDB.close()
+    await postgres_db.close()
     await S3Client.close()
 
 # 📌 Include API routes
