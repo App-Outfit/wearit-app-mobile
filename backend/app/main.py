@@ -7,7 +7,7 @@ import os
 
 from app.infrastructure.database.postgres import postgres_db
 from app.infrastructure.storage.s3_client import S3Client
-from app.api.routes import wardrobe_route, body_route, favorite_route, auth_route
+from app.api.routes import wardrobe_route, body_route, auth_route
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -67,7 +67,6 @@ async def shutdown_event():
     await S3Client.close()
 
 # 📌 Inclusion des routes
+app.include_router(auth_route.router)
 app.include_router(wardrobe_route.router)
 app.include_router(body_route.router)
-app.include_router(favorite_route.router)
-app.include_router(auth_route.router)
