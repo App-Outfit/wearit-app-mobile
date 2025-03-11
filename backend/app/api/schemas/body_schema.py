@@ -2,14 +2,19 @@ from pydantic import BaseModel, HttpUrl, Field, field_validator
 from typing import Literal, List
 from datetime import datetime
 from fastapi import UploadFile, File
+from uuid import UUID
 
 class BodyBase(BaseModel):
     """Base model for Body, used as a foundation for other schemas."""
-    user_id: str = Field(..., description="User ID of the body owner")
+    user_id: UUID = Field(..., description="User ID of the body owner")
+
+class BodyCreate(BodyBase):
+    """Schema for creating a new body (input)."""
+    file: UploadFile = File(..., description="Image file of the body")
 
 class BodyCreateResponse(BaseModel):
     """Response model after successfully creating a body."""
-    id: str
+    id: UUID = Field(..., description="Unique ID of the body")
     message: str = "Body created successfully"
     created_at: datetime
     image_url: HttpUrl = Field(..., description="URL of the body image")
@@ -22,7 +27,7 @@ class BodyCreateResponse(BaseModel):
     
 class BodyResponse(BodyBase):
     """Response model when fetching a body."""
-    id: str
+    id: UUID = Field(..., description="Unique ID of the body")
     image_url: HttpUrl = Field(..., description="URL of the body image")
 
     @field_validator("image_url", mode="before")
@@ -38,5 +43,3 @@ class BodyListResponse(BaseModel):
 class BodyDeleteResponse(BaseModel):
     """Response model after deleting a body."""
     message: str = "Body deleted successfully"
-
-    

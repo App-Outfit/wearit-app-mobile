@@ -57,7 +57,7 @@ class WardrobeService:
 
         if not inserted_id:
             logger.error(f"🔴 [Service] Failed to create cloth in database")
-            raise Exception("Failed to create cloth")
+            raise InternalServerError("Failed to create cloth")
         
         
         logger.debug(f"🟢 [Service] Cloth created with ID: {cloth_id}")

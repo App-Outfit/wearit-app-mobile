@@ -4,7 +4,6 @@ from app.services.wardrobe_service import WardrobeService
 from app.infrastructure.database.postgres import get_db
 from app.api.schemas.wardrobe_schema import ClothCreate, ClothResponse, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
 from app.core.logging_config import logger
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.wardrobe_repo import WardrobeRepository
 
 # 📌 Définition du router

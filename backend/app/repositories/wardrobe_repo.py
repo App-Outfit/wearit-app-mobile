@@ -4,7 +4,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.infrastructure.database.models.cloth import Cloth
 from app.core.logging_config import logger
 from app.infrastructure.database.models.user import User
-from fastapi import HTTPException
 
 class WardrobeRepository:
     def __init__(self, db: AsyncSession):
@@ -13,29 +12,27 @@ class WardrobeRepository:
     async def create_cloth(self, cloth: dict):
         """Insère un nouveau vêtement dans la base PostgreSQL."""
         logger.info("🟡 [Repository] Inserting new cloth into PostgreSQL")
+        try:
+            # ✅ Vérifier si l'utilisateur existe
+            result = await self.db_session.execute(select(User).filter(User.id == cloth["user_id"]))
+            user = result.scalars().first()
+            if not user:
+                logger.warning(f"🔴 [Repository] User {cloth['user_id']} not found")
+                return None
 
-        async with self.db_session as session:
-            try:
-                # ✅ Vérifier si l'utilisateur existe
-                result = await session.execute(select(User).filter(User.id == cloth["user_id"]))
-                user = result.scalars().first()
-                if not user:
-                    logger.warning(f"🔴 [Repository] User {cloth['user_id']} not found")
-                    raise HTTPException(status_code=404, detail="User not found")
+            # ✅ Créer et insérer l'habit
+            new_cloth = Cloth(**cloth)
+            self.db_session.add(new_cloth)
+            await self.db_session.commit()
+            await self.db_session.refresh(new_cloth)  # Récupère l'objet après insertion
 
-                # ✅ Créer et insérer l'habit
-                new_cloth = Cloth(**cloth)
-                session.add(new_cloth)
-                await session.commit()
-                await session.refresh(new_cloth)  # Récupère l'objet après insertion
+            logger.info(f"🟢 [Repository] Cloth {new_cloth.id} inserted successfully")
+            return new_cloth.id
 
-                logger.info(f"🟢 [Repository] Cloth {new_cloth.id} inserted successfully")
-                return new_cloth.id
-
-            except SQLAlchemyError as e:
-                await session.rollback()  # Annule la transaction en cas d'erreur
-                logger.error(f"🔴 [Repository] An error occurred: {e}")
-                raise HTTPException(status_code=500, detail="Database error")
+        except SQLAlchemyError as e:
+            await self.db_session.rollback()  # Annule la transaction en cas d'erreur
+            logger.error(f"🔴 [Repository] An error occurred: {e}")
+            return None
 
     async def get_cloth_by_id(self, cloth_id: str):
         """Récupère un vêtement par son ID."""
@@ -62,7 +59,12 @@ class WardrobeRepository:
                 select(Cloth).where(Cloth.user_id == user_id, Cloth.type == cloth_type)
             )
             clothes = result.scalars().all()
-            return clothes
+            if clothes:
+                logger.debug(f"🟢 [Repository] Clothes found for user {user_id} and type {cloth_type}")
+                return clothes
+            else:
+                logger.warning(f"🔴 [Repository] No clothes found for user {user_id} and type {cloth_type}")
+                return None
         except SQLAlchemyError as e:
             logger.error(f"🔴 [Repository] An error occurred: {e}")
             return None
