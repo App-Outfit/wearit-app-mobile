@@ -8,11 +8,9 @@ class Outfit(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    body_image_id = Column(UUID(as_uuid=True), ForeignKey("body_images.id", ondelete="CASCADE"), nullable=False)
     outfit_image_url = Column(String, nullable=False)
     clothes_ids = Column(ARRAY(UUID(as_uuid=True)), nullable=False)
     created_at = Column(TIMESTAMP, default=func.now())
 
     # Relations
     user = relationship("User", back_populates="outfits")
-    body_image = relationship("BodyImage")

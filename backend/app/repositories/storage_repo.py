@@ -55,3 +55,19 @@ class StorageRepository:
         """ Delete an image of a body """
         object_name = f"users/{user_id}/bodies/{body_id}.jpg"
         return await self._delete_from_s3(object_name)
+    
+    async def delete_account_images(self, user_id: str):
+        """ Delete all images of a user """
+        try:
+            objects = self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=f"users/{user_id}/")
+            if "Contents" in objects:
+                for obj in objects["Contents"]:
+                    self.s3_client.delete_object(Bucket=self.bucket_name, Key=obj["Key"])
+            logger.info(f"🟢 [S3] Deleted all images for user {user_id}")
+            return True
+        except NoCredentialsError:
+            logger.error("🔴 [S3] Error: AWS credentials missing")
+            return False
+        except Exception as e:
+            logger.error(f"🔴 [S3] Deletion failed: {e}")
+            return False

@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import delete
 from sqlalchemy.exc import SQLAlchemyError
 from app.infrastructure.database.models.user import User
 from app.core.logging_config import logger
@@ -42,3 +43,16 @@ class AuthRepository:
         except SQLAlchemyError as e:
             logger.error(f"🔴 [Repository] Database error: {e}")
             return None
+        
+    async def delete_user_by_id(self, user_id: str):
+        """Supprime un utilisateur par son ID."""
+        try:
+            # Utiliser la fonction delete() de SQLAlchemy
+            await self.db.execute(delete(User).where(User.id == user_id))
+            await self.db.commit()
+            logger.debug(f"🟢 [Repository] User {user_id} deleted successfully")
+            return True
+        except SQLAlchemyError as e:
+            await self.db.rollback()
+            logger.error(f"🔴 [Repository] Failed to delete user: {e}")
+            return False

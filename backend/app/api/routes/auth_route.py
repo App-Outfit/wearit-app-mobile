@@ -3,12 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.logging_config import logger
 from app.services.auth_service import AuthService
 from app.repositories.auth_repo import AuthRepository
+from app.api.dependencies import get_current_user
 from app.infrastructure.database.postgres import get_db  # Fonction pour récupérer la session
 from app.core.config import GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI
 from app.api.schemas.auth_schema import (
     AuthSignup, AuthSignupResponse,
     AuthLogin, AuthLoginResponse,
-    AuthGoogleResponse
+    AuthGoogleResponse, AuthLogoutResponse,
+    AuthDeleteResponse
 )
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -65,3 +67,24 @@ async def google_callback(request: Request, service: AuthService = Depends(get_a
         raise HTTPException(status_code=400, detail="Google authentication failed")
 
     return response
+
+# ✅ POST logout
+@router.post("/logout", response_model=AuthLogoutResponse)
+async def logout(service: AuthService = Depends(get_auth_service)):
+    """
+    Logout endpoint.
+    Pour une authentification JWT stateless, le serveur demande simplement au client de supprimer son token.
+    """
+    return await service.logout()
+
+# ✅ DELETE account
+@router.delete("/account", response_model=AuthDeleteResponse)
+async def delete_account(
+    current_user = Depends(get_current_user),
+    service: AuthService = Depends(get_auth_service)
+):
+    """
+    Delete account endpoint.
+    Supprime le compte de l'utilisateur actuellement connecté.
+    """
+    return await service.delete_account(current_user)

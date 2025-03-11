@@ -11,7 +11,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
 
-    body_images = relationship("BodyImage", back_populates="user")
-    clothes = relationship("Cloth", back_populates="user")
-    tryon_history = relationship("TryOnHistory", back_populates="user")
-    outfits = relationship("Outfit", back_populates="user")
+    body_images = relationship("BodyImage", back_populates="user", cascade="all, delete-orphan")
+    clothes = relationship("Cloth", back_populates="user", cascade="all, delete-orphan")
+    tryon_history = relationship("TryOnHistory", back_populates="user", cascade="all, delete-orphan")
+    outfits = relationship("Outfit", back_populates="user", cascade="all, delete-orphan")

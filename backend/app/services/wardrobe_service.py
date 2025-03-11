@@ -1,11 +1,11 @@
 from app.repositories.wardrobe_repo import WardrobeRepository
 from app.repositories.storage_repo import StorageRepository
 from app.api.schemas.wardrobe_schema import ClothResponse, ClothCreate, ClothCreateResponse, ClothListResponse, ClothDeleteResponse
-from app.core.errors import NotFoundError
+from app.core.errors import NotFoundError, InternalServerError
 from app.core.logging_config import logger
-from fastapi import HTTPException
 from datetime import datetime
 import uuid
+from uuid import UUID
 
 class WardrobeService:
     def __init__(self, repository: WardrobeRepository, storage_repo: StorageRepository = None):
@@ -30,7 +30,7 @@ class WardrobeService:
 
         if not image_url:
             logger.error(f"🔴 [Service] Failed to upload image to S3")
-            raise Exception("Failed to upload image to S3")
+            raise InternalServerError("Failed to upload image to S3")
         
         # TODO: Call pre-processing service for cloth
         # Call pre-processing service for cloth
@@ -62,7 +62,7 @@ class WardrobeService:
         
         logger.debug(f"🟢 [Service] Cloth created with ID: {cloth_id}")
         return ClothCreateResponse(
-            id=str(cloth_id), 
+            id=UUID(cloth_id), 
             message=f"Cloth created successfully",
             image_url=image_url,
             created_at=data["created_at"]
@@ -77,11 +77,11 @@ class WardrobeService:
             raise NotFoundError(f"Cloth {cloth_id} not found")
         logger.debug(f"🟢 [Service] Cloth {cloth_id} found")
         return ClothResponse(
-            id=str(cloth["_id"]),
-            user_id=cloth["user_id"],
-            name=cloth["name"],
-            type=cloth["type"],
-            image_url=cloth["image_url"],
+            id=cloth.id,
+            user_id=cloth.user_id,
+            name=cloth.name,
+            type=cloth.type,
+            image_url=cloth.image_url,
         )
     
     async def get_clothes(self, user_id: str, cloth_type: str):
@@ -95,11 +95,11 @@ class WardrobeService:
         logger.debug(f"🟢 [Service] Clothes found for user {user_id} and type {cloth_type}")
         return ClothListResponse(clothes=[
             ClothResponse(
-                id=str(cloth["_id"]),
-                user_id=cloth["user_id"],
-                name=cloth["name"],
-                type=cloth["type"],
-                image_url=str(cloth["image_url"])
+                id=str(cloth.id),
+                user_id=cloth.user_id,
+                name=cloth.name,
+                type=cloth.type,
+                image_url=str(cloth.image_url)
             ) for cloth in clothes
         ])
     
@@ -118,14 +118,14 @@ class WardrobeService:
         
         if not success_s3:
             logger.error(f"🔴 [Service] Failed to delete image from S3")
-            raise Exception("Failed to delete image from S3")
+            raise InternalServerError("Failed to delete image from S3")
         
         # Delete cloth from database
         succes_db = await self.repository.delete_cloth(cloth_id)
         
         if not succes_db:
             logger.error(f"🔴 [Service] Failed to delete cloth from database")
-            raise Exception("Failed to delete cloth from database")
+            raise InternalServerError("Failed to delete cloth from database")
         
         logger.debug(f"🟢 [Service] Cloth {cloth_id} deleted")
         return ClothDeleteResponse(
