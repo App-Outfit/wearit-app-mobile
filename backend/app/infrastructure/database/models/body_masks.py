@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from app.infrastructure.database.models.base import Base
 import uuid
 
-class BodyMask(Base):
+class BodyMasks(Base):
     __tablename__ = "body_masks"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

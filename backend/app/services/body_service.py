@@ -79,7 +79,7 @@ class BodyService:
             image_url=body.image_url,
         )
     
-    async def get_bodies(self, user_id: str):
+    async def get_bodies(self, user_id: UUID):
         logger.info(f"🟡 [Service] Fetching bodies for user {user_id}")
         bodies = await self.repository.get_bodies(user_id)
 

@@ -1,13 +1,12 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
-from fastapi.openapi.models import APIKey, SecurityScheme
 from fastapi.openapi.utils import get_openapi
 import os
 
 from app.infrastructure.database.postgres import postgres_db
 from app.infrastructure.storage.s3_client import S3Client
-from app.api.routes import wardrobe_route, body_route, auth_route
+from app.api.routes import wardrobe_route, body_route, auth_route, tryon_route
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -68,5 +67,6 @@ async def shutdown_event():
 
 # 📌 Inclusion des routes
 app.include_router(auth_route.router)
-app.include_router(wardrobe_route.router)
 app.include_router(body_route.router)
+app.include_router(wardrobe_route.router)
+app.include_router(tryon_route.router)

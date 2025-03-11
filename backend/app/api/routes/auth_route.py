@@ -25,11 +25,7 @@ async def signup(
     service: AuthService = Depends(get_auth_service)
 ):
     logger.info(f"🔵 [API] Received POST request to sign up")
-    response = await service.signup(auth)
-    if not response:
-        raise HTTPException(status_code=400, detail="User creation failed")
-    
-    return response
+    return await service.signup(auth)
 
 # ✅ POST login
 @router.post("/login", response_model=AuthLoginResponse)
@@ -38,11 +34,7 @@ async def login(
     service: AuthService = Depends(get_auth_service)
 ):
     logger.info(f"🔵 [API] Received POST request to log in")
-    response = await service.login(auth)
-    if not response:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    return response
+    return await service.login(auth)
 
 # ✅ GET Google login
 @router.get("/google")
@@ -62,11 +54,7 @@ async def google_auth():
 async def google_callback(request: Request, service: AuthService = Depends(get_auth_service)):
     """Récupère le code de Google et authentifie l'utilisateur"""
     logger.info(f"🔵 [API] Received Google authentication callback")
-    response = await service.google_login(request)
-    if not response:
-        raise HTTPException(status_code=400, detail="Google authentication failed")
-
-    return response
+    return await service.google_login(request)
 
 # ✅ POST logout
 @router.post("/logout", response_model=AuthLogoutResponse)

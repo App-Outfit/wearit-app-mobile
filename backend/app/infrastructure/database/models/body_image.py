@@ -13,4 +13,4 @@ class BodyImage(Base):
 
     # Relations
     user = relationship("User", back_populates="body_images")
-    body_masks = relationship("BodyMask", back_populates="body_image")
+    body_masks = relationship("BodyMasks", back_populates="body_image")
