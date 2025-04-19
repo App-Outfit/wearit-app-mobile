@@ -19,7 +19,7 @@ export function Onboarding({ navigation }: any) {
     const male_onboarding = require('../../assets/images/auth/male-onboarding.png');
 
     const handlePress = () => {
-        navigation.navigate('SignUp');
+        navigation.navigate('NameStep');
     };
 
     return (
