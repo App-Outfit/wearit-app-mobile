@@ -7,7 +7,7 @@ import { TextInput } from 'react-native-gesture-handler';
 import { validatePassword } from '../../../utils/validation';
 import { CButton } from '../../../components/core/Buttons';
 
-export const ResetPassword = () => {
+export const ResetPassword = ({ navigation }: any) => {
     const [password, setPassword] = useState<string>('');
     const [passwordValidation, setPasswordValidation] = useState<string>('');
 
@@ -61,6 +61,8 @@ export const ResetPassword = () => {
 
     const handleSubmit = () => {
         // Send email to the server
+
+        navigation.navigate('CodeVerification');
     };
 
     return (

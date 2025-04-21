@@ -16,6 +16,7 @@ import Question3Step from '../screens/AuthScreen/SignUp/Question3Step';
 import MailStep from '../screens/AuthScreen/SignUp/MailStep';
 import BrandStep from '../screens/AuthScreen/SignUp/Brand Step';
 import SuccessStep from '../screens/AuthScreen/SignUp/SuccessStep';
+import { CodeVerification } from '../screens/AuthScreen/SignIn/CodeVerification';
 
 const AuthStack = createStackNavigator();
 const SignInStack = createStackNavigator();
@@ -122,13 +123,19 @@ export const SignInNavigator = () => {
             <SignInStack.Screen
                 name="ForgotPassword"
                 component={ForgotPassword}
-                options={{ headerShown: false }}
+                options={{ headerTitle: '' }}
             />
 
             <SignInStack.Screen
                 name="ResetPassword"
                 component={ResetPassword}
-                options={{ headerShown: false }}
+                options={{ headerTitle: '' }}
+            />
+
+            <SignInStack.Screen
+                name="CodeVerification"
+                component={CodeVerification}
+                options={{ headerTitle: '' }}
             />
         </SignInStack.Navigator>
     );
