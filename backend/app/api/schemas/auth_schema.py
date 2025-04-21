@@ -39,3 +39,57 @@ class AuthLogoutResponse(BaseModel):
 class AuthDeleteResponse(BaseModel):
     """Response model after deleting an account."""
     message: str = Field("Account deleted successfully", description="Message after deleting an account")
+
+# 1) Request a reset code
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr = Field(
+        ..., 
+        description="The email address where the reset code will be sent"
+    )
+
+class ForgotPasswordResponse(BaseModel):
+    message: str = Field(
+        ..., 
+        description="Confirmation that a reset code has been sent"
+    )
+
+# 2) Verify the reset code
+class VerifyResetCodeRequest(BaseModel):
+    email: EmailStr = Field(
+        ..., 
+        description="The email address associated with the account"
+    )
+    code: str = Field(
+        ..., 
+        min_length=4, max_length=4,
+        description="4‑digit reset code received by email"
+    )
+
+class VerifyResetCodeResponse(BaseModel):
+    valid: bool = Field(
+        ..., 
+        description="Whether the provided reset code is valid"
+    )
+
+# 3) Perform the password reset
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr = Field(
+        ..., 
+        description="The email address associated with the account"
+    )
+    code: str = Field(
+        ..., 
+        min_length=4, max_length=4,
+        description="4‑digit reset code received by email"
+    )
+    new_password: str = Field(
+        ..., 
+        min_length=8,
+        description="New password (at least 8 characters)"
+    )
+
+class ResetPasswordResponse(BaseModel):
+    message: str = Field(
+        ..., 
+        description="Confirmation that the password has been successfully reset"
+    )

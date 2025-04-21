@@ -1,195 +1,206 @@
-from sqlalchemy.exc import SQLAlchemyError
+# app/services/auth_service.py
 from datetime import datetime, timedelta
+from typing import Any
 from passlib.context import CryptContext
-from app.core.errors import ConflictError, NotFoundError, InternalServerError, UnauthorizedError, ValidationError
 from jose import jwt
 from fastapi import Request
-from app.repositories.storage_repo import StorageRepository
 import httpx
 import secrets
+import random
 
-from app.core.logging_config import logger
-from app.core.config import (
-    JWT_SECRET_KEY, JWT_ALGORITHM, 
-    GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
+from app.core.errors import (
+    ConflictError, NotFoundError, InternalServerError,
+    UnauthorizedError, ValidationError
 )
+from app.core.logging_config import logger
+from app.core.config import settings
+from app.services.email_service import EmailService
 from app.repositories.auth_repo import AuthRepository
+from app.repositories.password_reset_repo import PasswordResetRepository
+from app.repositories.storage_repo import StorageRepository
 from app.api.schemas.auth_schema import (
     AuthSignup, AuthSignupResponse,
     AuthLogin, AuthLoginResponse,
-    AuthGoogleResponse
+    AuthGoogleResponse, ResetPasswordRequest,
+    ForgotPasswordRequest, ForgotPasswordResponse,
+    VerifyResetCodeRequest, VerifyResetCodeResponse,
+    ResetPasswordResponse, AuthDeleteResponse
 )
 
 class AuthService:
-    def __init__(self, repository: AuthRepository):
-        self.repository = repository
-        self.storage = StorageRepository()
-        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    def __init__(
+        self,
+        repo: AuthRepository,
+        storage: StorageRepository,
+        pwd_ctx: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto"),
+        email_service: EmailService = None,
+        reset_repo: PasswordResetRepository = None
+    ):
+        self.repo = repo
+        self.storage = storage
+        self.pwd = pwd_ctx
+        self.email_service = email_service or EmailService()
+        if reset_repo is not None:
+            self.reset_repo = reset_repo
+        elif repo is not None:
+            self.reset_repo = PasswordResetRepository(db=repo.db)
+        else:
+            self.reset_repo = None
 
     def hash_password(self, password: str) -> str:
-        """Hash a password securely"""
-        return self.pwd_context.hash(password)
-    
-    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """Verify a hashed password"""
-        return self.pwd_context.verify(plain_password, hashed_password)
-    
-    def create_access_token(self, data: dict):
-        """Create a JWT access token"""
-        to_encode = data.copy()
-        expire = datetime.now() + timedelta(minutes=60)
-        to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
-        return encoded_jwt
-    
-    async def signup(self, user: AuthSignup):
-        """Sign up a new user in PostgreSQL"""
-        logger.info("🟡 [Service] Signing up new user")
+        return self.pwd.hash(password)
+
+    def verify_password(self, plain: str, hashed: str) -> bool:
+        return self.pwd.verify(plain, hashed)
+
+    def create_access_token(self, subject: str) -> str:
+        data = {"sub": subject}
+        expire = datetime.now() + timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
+        data["exp"] = expire
+        return jwt.encode(data, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+    async def signup(self, user: AuthSignup) -> AuthSignupResponse:
         email = user.email.lower()
-        password = user.password
+        logger.info("Signup attempt for %s", email)
 
-        # Vérifier si l'utilisateur existe déjà
-        existing_user = await self.repository.get_user_by_email(email)
-        if existing_user:
-            logger.error("🔴 [Service] User already exists")
-            raise ConflictError("User already exists")
+        # 1) Vérifier unicité
+        if await self.repo.get_user_by_email(email):
+            logger.warning("Email already in use: %s", email)
+            raise ConflictError("Email already registered")
 
-        # Hasher le mot de passe
-        hashed_password = self.hash_password(password)
+        # 2) Hash du mot de passe
+        hashed = self.hash_password(user.password)
 
-        # Créer et insérer l'utilisateur dans la base
+        # 3) Création de l'utilisateur avec gestion complète des erreurs
         try:
-            new_user = await self.repository.create_user(email, hashed_password, user.name)
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Service] Database error: {e}")
-            raise InternalServerError("Database error")
+            new_user = await self.repo.create_user(email, hashed, user.name)
+        except Exception as e:
+            logger.error("🔴 [Service] Failed to create user: %s", e)
+            raise InternalServerError("Failed to create user")
 
-        # Générer un JWT token
-        access_token = self.create_access_token(data={"sub": new_user.email})
-        logger.debug("🟢 [Service] User signed up successfully")
-        return AuthSignupResponse(message="Signed up successfully", token=access_token)
-    
-    async def login(self, user: AuthLogin):
-        """Log in a user"""
-        logger.info("🟡 [Service] Logging in user")
+        if new_user is None:
+            logger.error("🔴 [Service] Repository returned None on create_user")
+            raise InternalServerError("Failed to create user")
+
+        # 4) Génération du token
+        token = self.create_access_token({"sub": new_user.email})
+        logger.info("Signup successful for %s", email)
+        return AuthSignupResponse(token=token, message="Signed up successfully")
+
+    async def login(self, user: AuthLogin) -> AuthLoginResponse:
         email = user.email.lower()
-        password = user.password
+        logger.info("Login attempt for %s", email)
 
-        # Récupérer l'utilisateur
-        existing_user = await self.repository.get_user_by_email(email)
-        if not existing_user:
-            logger.error("🔴 [Service] User not found")
+        existing = await self.repo.get_user_by_email(email)
+        if not existing:
+            logger.warning("User not found: %s", email)
             raise NotFoundError("User not found")
-        
-        # Vérifier le mot de passe
-        if not self.verify_password(password, existing_user.password):
-            logger.error("🔴 [Service] Incorrect password")
-            raise UnauthorizedError("Incorrect password")
-        
-        # Générer un JWT token
-        access_token = self.create_access_token(data={"sub": existing_user.email})
-        logger.debug("🟢 [Service] User logged in successfully")
-        return AuthLoginResponse(message="Logged in successfully", token=access_token)
-    
-    async def google_login(self, request: Request):
-        """Log in a user with Google"""
-        logger.info("🟡 [Service] Processing Google login")
 
-        # ✅ Récupérer le code d'authentification depuis les paramètres de l'URL
+        if not self.verify_password(user.password, existing.password):
+            logger.warning("Wrong password for %s", email)
+            raise UnauthorizedError("Incorrect credentials")
+
+        token = self.create_access_token(existing.email)
+        logger.info("Login successful for %s", email)
+        return AuthLoginResponse(token=token, message="Logged in successfully")
+
+    async def google_login(self, request: Request) -> AuthGoogleResponse:
         code = request.query_params.get("code")
-
         if not code:
-            logger.error("🔴 [Service] No authorization code received from Google")
-            raise ValidationError("No authorization code received from Google")
+            raise ValidationError("Missing Google auth code")
 
-        # 📡 Échanger le code contre un access token
-        token_url = "https://oauth2.googleapis.com/token"
-        data = {
-            "code": code,
-            "client_id": GOOGLE_CLIENT_ID,
-            "client_secret": GOOGLE_CLIENT_SECRET,
-            "redirect_uri": GOOGLE_REDIRECT_URI,
-            "grant_type": "authorization_code",
-        }
-
-        async with httpx.AsyncClient() as client:
-            response = await client.post(token_url, data=data)
-            token_data = response.json()
-
-        if "access_token" not in token_data:
-            logger.error(f"🔴 [Service] Failed to get access token from Google: {token_data}")
-            raise InternalServerError("Failed to get access token from Google")
-
-        access_token = token_data["access_token"]
-
-        # 📡 Récupérer les informations utilisateur
-        user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
-        headers = {"Authorization": f"Bearer {access_token}"}
-
-        async with httpx.AsyncClient() as client:
-            user_response = await client.get(user_info_url, headers=headers)
-            user_info = user_response.json()
-
-        if "email" not in user_info:
-            logger.error(f"🔴 [Service] Failed to retrieve user info from Google: {user_info}")
-            raise InternalServerError("Failed to retrieve user info from Google")
-
-        email = user_info["email"]
-
-        # 📦 Vérifier si l'utilisateur existe déjà
-        existing_user = await self.repository.get_user_by_email(email)
-
-        if existing_user is None:
-            # Créer un nouvel utilisateur si nécessaire
-            try:
-                random_password = secrets.token_urlsafe(32)
-                hashed_password = self.hash_password(random_password)
-                new_user = await self.repository.create_user(email, hashed_password, user_info.get("name", "Google User"))
-            except SQLAlchemyError as e:
-                logger.error(f"🔴 [Service] Failed to create Google user: {e}")
-                raise InternalServerError("Failed to create user")
-            
-            logger.debug("🟢 [Service] Created new user with Google login")
-
-        # 🔑 Générer un JWT token pour l'utilisateur
-        access_token = self.create_access_token(data={"sub": email})
-        logger.debug("🟢 [Service] User logged in with Google successfully")
-
-        return AuthGoogleResponse(
-            message="Logged in with Google successfully",
-            token=access_token
-        )
-    
-    async def logout(self):
-        """
-        Pour un système JWT stateless, le logout se gère souvent côté client.
-        Ici, on renvoie simplement un message indiquant que le logout a réussi.
-        """
-        # Si tu souhaites implémenter une révocation de token, c'est ici que tu le ferais.
-        logger.info("🟢 [Service] Logout successful")
-        return {"message": "Logged out successfully"}
-
-    async def delete_account(self, user):
-        """
-        Supprime le compte de l'utilisateur connecté.
-        `user` doit être l'objet utilisateur actuellement authentifié.
-        """
-        logger.info(f"🟡 [Service] Deleting account for user {user.id}")
+        # Exchange code → token
         try:
-            # Supprimer l'utilisateur de S3
-            deleted_images = await self.storage.delete_account_images(user.id)
-            if not deleted_images:
-                logger.error("🔴 [Service] Failed to delete user images from S3")
-                raise InternalServerError("Failed to delete user images")
-            
-            # Supprimer l'utilisateur de PostgreSQL
-            deleted = await self.repository.delete_user_by_id(user.id)
-            if not deleted:
-                logger.error("🔴 [Service] Failed to delete user from PostgreSQL")
-                raise InternalServerError("Failed to delete user")
-            
-            logger.debug("🟢 [Service] Account deleted successfully")
-            return {"message": "Account deleted successfully"}
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Service] Database error: {e}")
-            raise InternalServerError("Database error")
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    "https://oauth2.googleapis.com/token",
+                    data={
+                        "code": code,
+                        "client_id": settings.GOOGLE_CLIENT_ID,
+                        "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+                        "grant_type": "authorization_code",
+                    },
+                    timeout=10.0
+                )
+                resp.raise_for_status()
+                token_data = resp.json()
+        except httpx.HTTPError as e:
+            logger.exception("HTTP error during Google token exchange")
+            raise InternalServerError("Google authentication failed")
+
+        access_token = token_data.get("access_token")
+        if not access_token:
+            raise InternalServerError("No access token from Google")
+
+        # Fetch user info
+        try:
+            async with httpx.AsyncClient() as client:
+                user_resp = await client.get(
+                    "https://www.googleapis.com/oauth2/v2/userinfo",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                    timeout=10.0
+                )
+                user_resp.raise_for_status()
+                info = user_resp.json()
+        except httpx.HTTPError:
+            logger.exception("HTTP error fetching Google userinfo")
+            raise InternalServerError("Failed to retrieve Google user info")
+
+        email = info.get("email")
+        if not email:
+            raise InternalServerError("No email in Google user info")
+
+        # Upsert user
+        existing = await self.repo.get_user_by_email(email)
+        if not existing:
+            random_pw = secrets.token_urlsafe(32)
+            hashed = self.hash_password(random_pw)
+            existing = await self.repo.create_user(email, hashed, info.get("name", "Google User"))
+
+        token = self.create_access_token(email)
+        return AuthGoogleResponse(token=token, message="Logged in with Google successfully")
+
+    async def delete_account(self, user: Any) -> AuthDeleteResponse:
+        # 1) delete images
+        try:
+            await self.storage.delete_account_images(user.id)
+        except Exception:
+            logger.exception("Failed to delete S3 images")
+            raise InternalServerError("Could not delete user images")
+
+        # 2) delete user doc
+        await self.repo.delete_user_by_id(user.id)
+        logger.info("Account deleted for %s", user.id)
+        return AuthDeleteResponse(message="Account deleted successfully")
+
+    async def forgot_password(self, request: ForgotPasswordRequest) -> ForgotPasswordResponse:
+        email = request.email.lower()
+        user = await self.repo.get_user_by_email(email)
+        # pour ne pas révéler l’existence de l’email, on répond toujours OK
+        if user:
+            # génère un code aléatoire à 4 chiffres
+            code = f"{random.randint(0,9999):04d}"
+            await self.reset_repo.upsert_code(email, code, settings.PASSWORD_RESET_EXPIRE_MINUTES)
+            await self.email_service.send_reset_code(to_email=email, code=code)
+        return ForgotPasswordResponse(message="If the email exists, a reset code has been sent")
+
+    async def verify_reset_code(self, request: VerifyResetCodeRequest) -> VerifyResetCodeResponse:
+        email = request.email.lower()
+        doc = await self.reset_repo.get_code_doc(email)
+        if not doc or doc.get("code") != request.code or doc.get("expires_at") < datetime.now():
+            return VerifyResetCodeResponse(valid=False)
+        return VerifyResetCodeResponse(valid=True)
+
+    async def reset_password(self, request: ResetPasswordRequest) -> ResetPasswordResponse:
+        email = request.email.lower()
+        # 1) vérifier le code
+        valid = await self.verify_reset_code(VerifyResetCodeRequest(**request.model_dump()))
+        if not valid.valid:
+            raise ValidationError("Invalid or expired reset code")
+        # 2) hash + update
+        new_hashed = self.hash_password(request.new_password)
+        await self.repo.update_password(email, new_hashed)
+        # 3) cleanup
+        await self.reset_repo.delete_code(email)
+        return ResetPasswordResponse(message="Password reset successfully")

@@ -1,22 +1,24 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.logging_config import logger
 from app.services.auth_service import AuthService
 from app.repositories.auth_repo import AuthRepository
-from app.api.dependencies import get_current_user
-from app.infrastructure.database.postgres import get_db  # Fonction pour récupérer la session
-from app.core.config import GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI
+from app.repositories.storage_repo import StorageRepository
+from app.api.dependencies import get_current_user, get_db
+from app.core.config import settings
 from app.api.schemas.auth_schema import (
     AuthSignup, AuthSignupResponse,
     AuthLogin, AuthLoginResponse,
     AuthGoogleResponse, AuthLogoutResponse,
-    AuthDeleteResponse
+    AuthDeleteResponse, ForgotPasswordResponse,
+    ResetPasswordResponse, ResetPasswordRequest,
+    ForgotPasswordRequest, VerifyResetCodeRequest,
+    VerifyResetCodeResponse
 )
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-def get_auth_service(db: AsyncSession = Depends(get_db)):
-    return AuthService(AuthRepository(db))
+def get_auth_service(db = Depends(get_db)):
+    return AuthService(AuthRepository(db), storage=StorageRepository())
 
 # ✅ POST sign up
 @router.post("/signup", response_model=AuthSignupResponse)
@@ -42,8 +44,8 @@ async def google_auth():
     """Redirige l'utilisateur vers Google pour l'authentification OAuth2"""
     google_auth_url = (
         f"https://accounts.google.com/o/oauth2/auth"
-        f"?client_id={GOOGLE_CLIENT_ID}"
-        f"&redirect_uri={GOOGLE_REDIRECT_URI}"
+        f"?client_id={settings.GOOGLE_CLIENT_ID}"
+        f"&redirect_uri={settings.GOOGLE_REDIRECT_URI}"
         f"&response_type=code"
         f"&scope=email profile"
     )
@@ -76,3 +78,24 @@ async def delete_account(
     Supprime le compte de l'utilisateur actuellement connecté.
     """
     return await service.delete_account(current_user)
+
+@router.post("/forgot-password", response_model=ForgotPasswordResponse, summary="Request a password reset code")
+async def forgot_password(
+    payload: ForgotPasswordRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    return await service.forgot_password(payload)
+
+@router.post("/forgot-password/verify", response_model=VerifyResetCodeResponse, summary="Verify the reset code")
+async def verify_reset_code(
+    payload: VerifyResetCodeRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    return await service.verify_reset_code(payload)
+
+@router.post("/reset-password", response_model=ResetPasswordResponse, summary="Reset the password")
+async def reset_password(
+    payload: ResetPasswordRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    return await service.reset_password(payload)

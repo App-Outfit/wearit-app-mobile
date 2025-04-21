@@ -1,80 +1,82 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional, List
+from datetime import datetime
+from bson import ObjectId
+from pymongo.database import Database
+from pymongo.errors import PyMongoError
+from pydantic import BaseModel
+from app.core.errors import InternalServerError
 from app.core.logging_config import logger
-from sqlalchemy.future import select
-from sqlalchemy.exc import SQLAlchemyError
-from app.infrastructure.database.models.body_image import BodyImage
-from app.infrastructure.database.models.user import User
 
+class BodyInDB(BaseModel):
+    id: str
+    user_id: str
+    image_url: str
+    created_at: datetime
 
 class BodyRepository:
-    def __init__(self, db: AsyncSession):
-        self.db_session = db
-        
-    async def create_body(self, body: dict):
-        logger.info(f"🟡 [Repository] Inserting new body into MongoDB")
-        try:
-            result = await self.db_session.execute(select(User).filter(User.id == body["user_id"]))
-            user = result.scalars().first()
-            if not user:
-                logger.warning(f"🔴 [Repository] User {body['user_id']} not found")
-                return None
-            
-            new_body = BodyImage(**body)
-            self.db_session.add(new_body)
-            await self.db_session.commit()
-            await self.db_session.refresh(new_body)
+    def __init__(self, db: Database):
+        self._col = db["bodies"]
 
-            logger.info(f"🟢 [Repository] Body {new_body.id} inserted successfully")
-            return new_body.id
-        except SQLAlchemyError as e:
-            await self.db_session.rollback()
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
+    async def create_body(
+        self,
+        body_id: str,
+        user_id: str,
+        image_url: str,
+        created_at: datetime,
+    ) -> BodyInDB:
+        doc = {
+            "_id": body_id,
+            "user_id": user_id,
+            "image_url": image_url,
+            "created_at": created_at,
+        }
+        try:
+            await self._col.insert_one(doc)
+            return BodyInDB(
+                id=body_id,
+                user_id=user_id,
+                image_url=image_url,
+                created_at=created_at,
+            )
+        except PyMongoError as e:
+            logger.exception("🔴 [Repository] MongoDB insert error")
+            raise InternalServerError("Unable to create body")
+
+    async def get_body_by_id(self, body_id: str) -> Optional[BodyInDB]:
+        try:
+            doc = await self._col.find_one({"_id": body_id})
+        except PyMongoError as e:
+            logger.exception("🔴 [Repository] MongoDB find error")
+            raise InternalServerError("Database failure")
+        if not doc:
             return None
-        
-    async def get_body_by_id(self, body_id: str):
-        logger.info(f"🟡 [Repository] Querying MongoDB for body_id: {body_id}")
-        try:
-            result = await self.db_session.execute(select(BodyImage).where(BodyImage.id == body_id))
-            body = result.scalars().first()
-            if body:
-                logger.debug(f"🟢 [Repository] Body {body_id} found")
-                return body
-            else:
-                logger.warning(f"🔴 [Repository] Body {body_id} not found")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
-            return None
-        
-    async def get_bodies(self, user_id: str):
-        logger.info(f"🟡 [Repository] Querying MongoDB for user_id: {user_id}")
-        try:
-            result = await self.db_session.execute(select(BodyImage).where(BodyImage.user_id == user_id))
-            bodies = result.scalars().all()
-            if bodies:
-                logger.debug(f"🟢 [Repository] Bodies found for user {user_id}")
-                return bodies
-            else:
-                logger.warning(f"🔴 [Repository] No bodies found for user {user_id}")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
-            return None    
-        
-    async def delete_body(self, body_id: str):
-        logger.info(f"🟡 [Repository] Deleting body {body_id} from MongoDB")
-        try:
-            result = await self.db_session.execute(select(BodyImage).where(BodyImage.id == body_id))
-            body = result.scalars().first()
+        return BodyInDB(
+            id=str(doc["_id"]),
+            user_id=doc["user_id"],
+            image_url=doc["image_url"],
+            created_at=doc["created_at"],
+        )
 
-            if not body:
-                logger.warning(f"🔴 [Repository] Body {body_id} not found")
-                return False
+    async def get_bodies(self, user_id: str) -> List[BodyInDB]:
+        try:
+            cursor = self._col.find({"user_id": user_id})
+            docs = await cursor.to_list(length=None)
+        except PyMongoError as e:
+            logger.exception("🔴 [Repository] MongoDB find error")
+            raise InternalServerError("Database failure")
+        return [
+            BodyInDB(
+                id=str(d["_id"]),
+                user_id=d["user_id"],
+                image_url=d["image_url"],
+                created_at=d["created_at"],
+            ) for d in docs
+        ]
 
-            await self.db_session.delete(body)
-            await self.db_session.commit()
-            logger.info(f"🟢 [Repository] Body {body_id} deleted successfully")
-            return True
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
-            return False
+    async def delete_body(self, body_id: str) -> bool:
+        try:
+            result = await self._col.delete_one({"_id": body_id})
+        except PyMongoError as e:
+            logger.exception("🔴 [Repository] MongoDB delete error")
+            raise InternalServerError("Unable to delete body")
+        return result.deleted_count == 1

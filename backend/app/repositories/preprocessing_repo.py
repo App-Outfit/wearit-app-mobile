@@ -1,77 +1,73 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.exc import SQLAlchemyError
-from app.infrastructure.database.models.body_image import BodyImage
-from app.infrastructure.database.models.body_masks import BodyMasks
+# app/repositories/preprocessing_repo.py
+
+from typing import Optional, Dict
+from datetime import datetime
+
+from motor.motor_asyncio import AsyncIOMotorDatabase
+from pydantic import BaseModel
+
+from app.core.errors import InternalServerError
 from app.core.logging_config import logger
 
+
+class BodyMasksInDB(BaseModel):
+    id: str  # str(self._id)
+    body_id: str
+    mask_upper: str
+    mask_lower: str
+    mask_overall: str
+    created_at: datetime
+
+
+class BodyImageInDB(BaseModel):
+    id: str
+    image_url: str
+    created_at: datetime
+
+
 class PreprocessingRepository:
-    """Gère l'accès aux données pour le preprocessing des images de corps."""
+    def __init__(self, db: AsyncIOMotorDatabase):
+        # collections MongoDB
+        self._masks_col = db["body_masks"]
+        self._images_col = db["body_images"]
 
-    def __init__(self, db: AsyncSession):
-        self.db = db
-
-    async def get_body_masks(self, body_id: str):
-        """
-        Vérifie si des masques existent déjà pour un body donné.
-        """
-        logger.info(f"🟡 [Repository] Checking existing masks for body_id: {body_id}")
-
+    async def get_body_masks(self, body_id: str) -> Optional[BodyMasksInDB]:
         try:
-            query = select(BodyMasks).filter(BodyMasks.body_id == body_id)
-            result = await self.db.execute(query)
-            body_masks = result.scalars().first()
-
-            if body_masks:
-                logger.info(f"🟢 [Repository] Masks found for body_id: {body_id}")
-            else:
-                logger.warning(f"🔴 [Repository] No masks found for body_id: {body_id}")
-
-            return body_masks
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] Database error while checking masks: {e}")
+            doc = await self._masks_col.find_one({"body_id": body_id})
+        except Exception as e:
+            logger.exception("🔴 [Repo] MongoDB error reading body_masks")
+            raise InternalServerError("Database failure when checking masks")
+        if not doc:
             return None
+        # Pydantic attend un champ 'id'
+        doc["id"] = str(doc["_id"])
+        return BodyMasksInDB(**doc)
 
-    async def get_body_image_url(self, body_id: str):
-        """
-        Récupère l'URL de l'image du body dans la base de données.
-        """
-        logger.info(f"🟡 [Repository] Fetching body image URL for body_id: {body_id}")
-
+    async def get_body_image_url(self, body_id: str) -> Optional[BodyImageInDB]:
         try:
-            query = select(BodyImage).filter(BodyImage.id == body_id)
-            result = await self.db.execute(query)
-            body_image = result.scalars().first()
-
-            if body_image:
-                logger.info(f"🟢 [Repository] Body image found: {body_image.image_url}")
-            else:
-                logger.warning(f"🔴 [Repository] No body image found for body_id: {body_id}")
-
-            return body_image
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] Database error while fetching body image: {e}")
+            doc = await self._images_col.find_one({"id": body_id})
+        except Exception as e:
+            logger.exception("🔴 [Repo] MongoDB error reading body_images")
+            raise InternalServerError("Database failure when fetching body image")
+        if not doc:
             return None
+        return BodyImageInDB(**doc)
 
-    async def save_body_masks(self, body_id: str, mask_urls: dict):
-        """
-        Sauvegarde les URLs des masques après preprocessing.
-        """
-        logger.info(f"🟡 [Repository] Saving masks for body_id: {body_id}")
-
-        new_masks = BodyMasks(
-            body_id=body_id,
-            mask_upper=mask_urls["upper_mask_url"],
-            mask_lower=mask_urls["lower_mask_url"],
-            mask_overall=mask_urls["overall_mask_url"]
-        )
-
+    async def save_body_masks(
+        self, body_id: str, mask_urls: Dict[str, str]
+    ) -> BodyMasksInDB:
+        now = datetime.utcnow()
+        to_insert = {
+            "body_id": body_id,
+            "mask_upper": mask_urls["upper_mask_url"],
+            "mask_lower": mask_urls["lower_mask_url"],
+            "mask_overall": mask_urls["overall_mask_url"],
+            "created_at": now,
+        }
         try:
-            self.db.add(new_masks)
-            await self.db.commit()
-            logger.info(f"🟢 [Repository] Masks saved successfully for body_id: {body_id}")
-            return new_masks
-        except SQLAlchemyError as e:
-            await self.db.rollback()
-            logger.error(f"🔴 [Repository] Database error while saving masks: {e}")
-            return None
+            res = await self._masks_col.insert_one(to_insert)
+        except Exception as e:
+            logger.exception("🔴 [Repo] MongoDB error inserting body_masks")
+            raise InternalServerError("Database failure when saving masks")
+        to_insert["id"] = str(res.inserted_id)
+        return BodyMasksInDB(**to_insert)

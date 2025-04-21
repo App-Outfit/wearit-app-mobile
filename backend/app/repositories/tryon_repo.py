@@ -1,77 +1,80 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional, List
+from pymongo.errors import PyMongoError
+from pymongo.database import Database
+from pydantic import BaseModel
+from datetime import datetime
+
+from app.core.errors import InternalServerError
 from app.core.logging_config import logger
-from sqlalchemy.future import select
-from sqlalchemy.exc import SQLAlchemyError
-from app.infrastructure.database.models.tryon_history import TryOnHistory
-from app.infrastructure.database.models.body_image import BodyImage
-from app.infrastructure.database.models.cloth import Cloth
+
+class TryonRecord(BaseModel):
+    id: str
+    user_id: str
+    body_image_id: str
+    cloth_id: str
+    tryon_image_url: str
+    created_at: datetime
 
 class TryonRepository:
-    def __init__(self, db: AsyncSession):
-        self.db_session = db
-        
-    async def get_body(self, body_id: str):
-        #logger.info(f"🟡 [Repository] Querying PostgreSQL for body with body_id: {body_id}")
-        try:
-            result = await self.db_session.execute(select(BodyImage).where(BodyImage.id == body_id))
-            body = result.scalars().first()
-            if body:
-                #logger.debug(f"🟢 [Repository] Body found")
-                return body
-            else:
-                logger.warning(f"🔴 [Repository] Body not found")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
-            return None
-        
-    async def get_cloth(self, cloth_id: str):
-        #logger.info(f"🟡 [Repository] Querying PostgreSQL for cloth with cloth_id: {cloth_id}")
-        try:
-            result = await self.db_session.execute(select(Cloth).where(Cloth.id == cloth_id))
-            cloth = result.scalars().first()
-            if cloth:
-                #logger.debug(f"🟢 [Repository] Cloth found")
-                return cloth
-            else:
-                logger.warning(f"🔴 [Repository] Cloth not found")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
-            return None
+    def __init__(self, db: Database):
+        self._col = db["tryons"]
 
-    async def get_tryon(self, user_id: str, body_id: str, cloth_id: str):
-        logger.info(f"🟡 [Repository] Querying PostgreSQL for try-on with user_id: {user_id}, body_id: {body_id}, and cloth_id: {cloth_id}")
+    async def get_body(self, body_id: str) -> Optional[TryonRecord]:
         try:
-            result = await self.db_session.execute(
-                select(TryOnHistory).where(
-                    TryOnHistory.user_id == user_id,
-                    TryOnHistory.body_image_id == body_id,
-                    TryOnHistory.cloth_id == cloth_id
-                )
-            )
-            tryon = result.scalars().first()
-            if tryon:
-                logger.debug(f"🟢 [Repository] Try-on found")
-                return tryon
-            else:
-                logger.warning(f"🔴 [Repository] Try-on not found")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
+            doc = await self._col.database["bodies"].find_one({"_id": body_id})
+        except PyMongoError:
+            logger.exception("🔴 [Repository] Failed to fetch body")
+            raise InternalServerError("Database failure")
+        if not doc:
             return None
-        
-    async def get_tryon_history(self, user_id: str):
-        logger.info(f"🟡 [Repository] Querying PostgreSQL for try-on history with user_id: {user_id}")
+        # on ne convertit qu’aux champs utiles
+        return TryonRecord(
+            id=body_id,
+            user_id=doc["user_id"],
+            body_image_id=doc["_id"],
+            cloth_id="",          # pas utilisé ici
+            tryon_image_url="",   # pas utilisé ici
+            created_at=doc["created_at"],
+        )
+
+    async def get_cloth(self, cloth_id: str) -> Optional[TryonRecord]:
         try:
-            result = await self.db_session.execute(select(TryOnHistory).where(TryOnHistory.user_id == user_id))
-            tryons = result.scalars().all()
-            if tryons:
-                logger.debug(f"🟢 [Repository] Try-on history found")
-                return tryons
-            else:
-                logger.warning(f"🔴 [Repository] Try-on history not found")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"🔴 [Repository] An error occurred: {e}")
+            doc = await self._col.database["clothes"].find_one({"_id": cloth_id})
+        except PyMongoError:
+            logger.exception("🔴 [Repository] Failed to fetch cloth")
+            raise InternalServerError("Database failure")
+        if not doc:
             return None
+        return TryonRecord(
+            id=cloth_id,
+            user_id=doc["user_id"],
+            body_image_id="",     # pas utilisé ici
+            cloth_id=doc["_id"],
+            tryon_image_url="",   # pas utilisé ici
+            created_at=doc["created_at"],
+        )
+
+    async def get_tryon(
+        self, user_id: str, body_id: str, cloth_id: str
+    ) -> Optional[TryonRecord]:
+        try:
+            doc = await self._col.find_one({
+                "user_id": user_id,
+                "body_image_id": body_id,
+                "cloth_id": cloth_id,
+            })
+        except PyMongoError:
+            logger.exception("🔴 [Repository] Failed to fetch try‑on")
+            raise InternalServerError("Database failure")
+        if not doc:
+            return None
+        return TryonRecord(**doc)
+
+    async def get_tryon_history(self, user_id: str) -> List[TryonRecord]:
+        try:
+            cursor = self._col.find({"user_id": user_id})
+            docs = await cursor.to_list(length=None)
+        except PyMongoError:
+            logger.exception("🔴 [Repository] Failed to fetch try‑on history")
+            raise InternalServerError("Database failure")
+        return [TryonRecord(**d) for d in docs]
