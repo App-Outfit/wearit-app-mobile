@@ -1,11 +1,11 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Header } from '../../components/core/Typography';
-import { lightTheme } from '../../styles/theme';
-import { InputField } from '../../components/core/PlaceHolders';
+import { Header } from '../../../components/core/Typography';
+import { lightTheme } from '../../../styles/theme';
+import { InputField } from '../../../components/core/PlaceHolders';
 import { TextInput } from 'react-native-gesture-handler';
-import { validateEmail } from '../../utils/validation';
-import { CButton } from '../../components/core/Buttons';
+import { validateEmail } from '../../../utils/validation';
+import { CButton } from '../../../components/core/Buttons';
 
 export const ForgotPassword = ({ navigation }: any) => {
     const [email, setEmail] = useState<string | undefined>(undefined);
@@ -107,3 +107,5 @@ const styles = StyleSheet.create({
         color: lightTheme.colors.black,
     },
 });
+
+export default ForgotPassword;

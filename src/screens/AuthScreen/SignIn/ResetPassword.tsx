@@ -1,11 +1,11 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Keyboard } from 'react-native';
-import { Header } from '../../components/core/Typography';
-import { lightTheme } from '../../styles/theme';
-import { InputField } from '../../components/core/PlaceHolders';
+import { Header } from '../../../components/core/Typography';
+import { lightTheme } from '../../../styles/theme';
+import { InputField } from '../../../components/core/PlaceHolders';
 import { TextInput } from 'react-native-gesture-handler';
-import { validatePassword } from '../../utils/validation';
-import { CButton } from '../../components/core/Buttons';
+import { validatePassword } from '../../../utils/validation';
+import { CButton } from '../../../components/core/Buttons';
 
 export const ResetPassword = () => {
     const [password, setPassword] = useState<string>('');

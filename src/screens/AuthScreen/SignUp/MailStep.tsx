@@ -57,7 +57,7 @@ const MailStep: React.FC<MailStepProps> = ({
     }, []);
 
     const handleContinue = () => {
-        navigation.navigate('NextStep');
+        navigation.navigate('SuccessStep');
     };
 
     return (

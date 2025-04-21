@@ -19,7 +19,11 @@ export function Onboarding({ navigation }: any) {
     const male_onboarding = require('../../assets/images/auth/male-onboarding.png');
 
     const handlePress = () => {
-        navigation.navigate('NameStep');
+        navigation.navigate('SignUp');
+    };
+
+    const goToSignIn = () => {
+        navigation.navigate('SignIn');
     };
 
     return (
@@ -65,6 +69,21 @@ export function Onboarding({ navigation }: any) {
                         >
                             Commencer
                         </CButton>
+
+                        <View>
+                            <Text style={styles.signinText}>
+                                {`Déjà inscrit ? `}
+                                <Text
+                                    onPress={goToSignIn}
+                                    style={[
+                                        styles.signinText,
+                                        styles.signinTextUnderline,
+                                    ]}
+                                >
+                                    Connectez-vous
+                                </Text>
+                            </Text>
+                        </View>
                     </View>
                 </LinearGradient>
             </View>
@@ -133,15 +152,26 @@ const styles = StyleSheet.create({
         width: 256,
         lineHeight: 15,
         paddingTop: 4,
+        transform: [{ translateY: -10 }],
     },
     buttonBottomContainer: {
         height: 100,
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
+
+        transform: [{ translateY: -30 }],
     },
     button: {
         width: normalize(340),
+    },
+    signinText: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 15,
+    },
+    signinTextUnderline: {
+        textDecorationLine: 'underline',
+        color: lightTheme.colors.primary,
     },
     buttonText: {
         color: '#FFF',
