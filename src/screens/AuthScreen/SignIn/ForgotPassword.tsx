@@ -30,9 +30,8 @@ export const ForgotPassword = ({ navigation }: any) => {
         // TODO: Change 'true' by email validation
         if (true) {
             // Send email to the server
-
             // Redirect to the next screen
-            navigation.push('ResetPassword');
+            navigation.push('CodeVerification');
         }
     };
 
