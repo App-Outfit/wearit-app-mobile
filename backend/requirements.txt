@@ -1,5 +1,7 @@
 pytest
 pytest-asyncio
+pytest-cov
+pytest-mock
 motor
 boto3
 moto
@@ -10,7 +12,6 @@ pydantic
 pydantic[email]
 python-jose
 httpx
-postgresql
 psycopg2
 sqlalchemy 
 asyncpg
