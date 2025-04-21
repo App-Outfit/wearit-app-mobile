@@ -10,6 +10,9 @@ import {
     Subheading,
 } from 'react-native-paper';
 
+import { useAppDispatch } from '../../../utils/hooks';
+import { setGender } from '../../../store/onboardingSlice';
+
 interface GenderStepProps {
     /** Callback appelé quand on passe à l’étape suivante */
     navigation: any;
@@ -33,8 +36,10 @@ export const GenderStep: React.FC<GenderStepProps> = ({
     const [genre, setGenre] = useState<string>('');
     const { colors } = useTheme();
     const progress = currentStep / totalSteps;
+    const dispatch = useAppDispatch();
 
     const handlePress = () => {
+        dispatch(setGender(genre));
         navigation.navigate('AgeStep');
     };
 

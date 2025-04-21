@@ -24,6 +24,9 @@ interface AgeStepProps {
     totalSteps?: number;
 }
 
+import { useAppDispatch } from '../../../utils/hooks';
+import { setAge } from '../../../store/onboardingSlice';
+
 const ageRanges = ['-18', '18‑24', '25‑34', '35‑44', '45‑54', '55‑64', '65+'];
 
 const ITEM_HEIGHT = 50; // hauteur de chaque item
@@ -39,6 +42,7 @@ export const AgeStep: React.FC<AgeStepProps> = ({
     const { colors } = useTheme();
     const wheelRef = useRef<FlatList<string>>(null);
     const progress = currentStep / totalSteps;
+    const dispatch = useAppDispatch();
 
     // Au montage, on scroll vers la valeur par défaut sans animation
     useEffect(() => {
@@ -66,6 +70,7 @@ export const AgeStep: React.FC<AgeStepProps> = ({
     };
 
     const handlePress = () => {
+        dispatch(setAge(ageRange));
         navigation.navigate('Question1Step', { ageRange });
     };
 

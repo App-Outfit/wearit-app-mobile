@@ -10,3 +10,13 @@ In the Main Folder **src** you will find :
 - **`store/`**: Global state management.
 - **`utils/`**: Utility functions, constants, and custom hooks.
 - **`assets/`**: Static resources (images, fonts, icons, etc.).
+
+
+Lancer le backend:
+uvicorn app.main:app \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --reload
+
+Lancer le front:
+npx expo start -c     

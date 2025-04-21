@@ -1,5 +1,5 @@
 // MailStep.tsx
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     View,
     StyleSheet,
@@ -18,6 +18,15 @@ import {
 import { DividerText } from '../../../components/core/Divider';
 import { validateEmail, validatePassword } from '../../../utils/validation';
 
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import {
+    setEmail,
+    setPassword,
+    resetOnboarding,
+} from '../../../store/onboardingSlice';
+import { signupUser } from '../../../store/authSlice';
+import { SignupData } from '../../../services/authService';
+
 interface MailStepProps {
     navigation: any;
     currentStep?: number;
@@ -29,8 +38,8 @@ const MailStep: React.FC<MailStepProps> = ({
     currentStep = 8,
     totalSteps = 9,
 }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setLocalEmail] = useState('');
+    const [password, setLocalPassword] = useState('');
     const { colors } = useTheme();
     const progress = currentStep / totalSteps;
 
@@ -40,15 +49,19 @@ const MailStep: React.FC<MailStepProps> = ({
     const [emailValid, setEmailValid] = useState<boolean>(false);
     const [passwordValid, setPasswordValid] = useState<boolean>(false);
 
+    const dispatch = useAppDispatch();
+    const onboarding = useAppSelector((s) => s.onboarding);
+    const { status, error, token } = useAppSelector((s) => s.auth);
+
     const handleEmailChange = useCallback((text: string) => {
-        setEmail(text);
+        setLocalEmail(text);
         const is_valid = validateEmail(text);
         setEmailValid(is_valid);
         setErrorEmail(is_valid ? '' : 'Email invalide');
     }, []);
 
     const handlePasswordChange = useCallback((text: string) => {
-        setPassword(text);
+        setLocalPassword(text);
         const is_valid = validatePassword(text);
         setPasswordValid(is_valid);
         setErrorPassword(
@@ -57,8 +70,37 @@ const MailStep: React.FC<MailStepProps> = ({
     }, []);
 
     const handleContinue = () => {
-        navigation.navigate('SuccessStep');
+        console.log(email);
+        dispatch(setEmail(email));
+        dispatch(setPassword(password));
+
+        const ob = onboarding;
+
+        const payload: SignupData = {
+            name: ob.name!,
+            email: email,
+            password: password,
+            answers: {
+                gender: ob.gender!,
+                age: String(ob.age),
+                q1: ob.answers1!.join(','),
+                q2: ob.answers2!.join(','),
+                q3: ob.answers3!.join(','),
+                brand: ob.brands!.join(','),
+            },
+        };
+
+        console.log(payload);
+
+        dispatch(signupUser(payload));
     };
+
+    useEffect(() => {
+        if (status === 'succeeded' && token) {
+            dispatch(resetOnboarding());
+            navigation.navigate('SuccessStep');
+        }
+    }, [status, token]);
 
     return (
         <KeyboardAvoidingView

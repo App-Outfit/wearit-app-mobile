@@ -21,6 +21,9 @@ import BrandChoice, {
 } from '../../../components/choice_component/BrandChoice';
 import { BrandIcons } from '../../../assets/index';
 
+import { useAppDispatch } from '../../../utils/hooks';
+import { setBrands } from '../../../store/onboardingSlice';
+
 // Dynamically build options from BrandIcons keys
 const options: Option[] = Object.keys(BrandIcons).map((key) => ({
     key,
@@ -41,8 +44,10 @@ const BrandStep: React.FC<BrandStepProps> = ({
     const [selected, setSelected] = useState<string[]>([]);
     const { colors } = useTheme();
     const progress = currentStep / totalSteps;
+    const dispatch = useAppDispatch();
 
     const handleNext = () => {
+        dispatch(setBrands(selected));
         navigation.navigate('MailStep', { answers: selected });
     };
 

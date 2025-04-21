@@ -13,6 +13,9 @@ import MultiChoice, {
     Option,
 } from '../../../components/choice_component/MultipleChoice';
 
+import { useAppDispatch } from '../../../utils/hooks';
+import { setAnswers2 } from '../../../store/onboardingSlice';
+
 interface Question1StepProps {
     navigation: any;
     currentStep?: number;
@@ -50,8 +53,10 @@ const Question2Step: React.FC<Question1StepProps> = ({
     const [selected, setSelected] = useState<string[]>([]);
     const { colors } = useTheme();
     const progress = currentStep / totalSteps;
+    const dispatch = useAppDispatch();
 
     const handleNext = () => {
+        dispatch(setAnswers2(selected));
         navigation.navigate('Question3Step', { answers: selected });
     };
 

@@ -8,6 +8,9 @@ import { preloadEssentialImages } from '../../assets/loading_image';
 
 import styles from './LoadingScreen.styles';
 
+import { useAppDispatch, useAppSelector } from '../../utils/hooks';
+import { loadToken } from '../../store/authSlice';
+
 export function LoadingScreen({ navigation }: any) {
     const font_base_bath = '../../assets/fonts/';
 
@@ -32,21 +35,28 @@ export function LoadingScreen({ navigation }: any) {
         ),
     });
 
-    useEffect(() => {
-        let timer: NodeJS.Timeout;
-        const loadAssets = async () => {
-            await preloadEssentialImages();
+    const dispatch = useAppDispatch();
+    const { status, token } = useAppSelector((state) => state.auth);
 
-            if (fontsLoaded) {
-                timer = setTimeout(() => {
+    useEffect(() => {
+        dispatch(loadToken());
+    }, []);
+
+    useEffect(() => {
+        const init = async () => {
+            await preloadEssentialImages();
+            // n’avance que si nos fonts sont prêtes ET que loadToken est fini
+            if (fontsLoaded && status !== 'loading') {
+                // ⑤ on remplace la route selon la présence du token
+                if (token) {
+                    navigation.replace('HomeScreen');
+                } else {
                     navigation.replace('Auth');
-                }, 130);
+                }
             }
         };
-        loadAssets();
-
-        return () => clearTimeout(timer);
-    }, [navigation, fontsLoaded]);
+        init();
+    }, [fontsLoaded, status, token]);
 
     return (
         <View style={styles.loading_screen}>

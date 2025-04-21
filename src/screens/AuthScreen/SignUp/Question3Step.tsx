@@ -14,6 +14,9 @@ import MultiChoice, {
 } from '../../../components/choice_component/MultipleChoice';
 import UniqueChoice from '../../../components/choice_component/UniqueChoice';
 
+import { useAppDispatch } from '../../../utils/hooks';
+import { setAnswers3 } from '../../../store/onboardingSlice';
+
 interface Question1StepProps {
     navigation: any;
     currentStep?: number;
@@ -47,8 +50,10 @@ const Question3Step: React.FC<Question1StepProps> = ({
     const [selected, setSelected] = useState<string[]>([]);
     const { colors } = useTheme();
     const progress = currentStep / totalSteps;
+    const dispatch = useAppDispatch();
 
     const handleNext = () => {
+        dispatch(setAnswers3(selected));
         navigation.navigate('BrandStep', { answers: selected });
     };
 
@@ -67,7 +72,7 @@ const Question3Step: React.FC<Question1StepProps> = ({
             <View style={styles.content}>
                 <View>
                     <Title style={styles.title}>
-                        Que veux-tu faire principalement avec WearIT ?
+                        Comment décrirais-tu ton rapport aux vêtements ?
                     </Title>
                     <Subheading style={styles.subtitle}>
                         Cela nous permet d'en savoir plus sur toi

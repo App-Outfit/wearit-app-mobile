@@ -1,5 +1,6 @@
 // src/services/authService.ts
 import api from './api';
+import { AxiosError } from 'axios';
 
 export interface AuthResponse {
     token: string;
@@ -16,8 +17,15 @@ export interface SignupData {
 }
 
 export const authService = {
-    signup: (data: SignupData) =>
-        api.post<AuthResponse>('/auth/signup', data).then((r) => r.data),
+    signup: async (data: SignupData): Promise<AuthResponse> => {
+        try {
+            const resp = await api.post<AuthResponse>('/auth/signup', data);
+            return resp.data;
+        } catch (err) {
+            const e = err as AxiosError;
+            throw e;
+        }
+    },
 
     login: (data: { email: string; password: string }) =>
         api.post<AuthResponse>('/auth/login', data).then((r) => r.data),

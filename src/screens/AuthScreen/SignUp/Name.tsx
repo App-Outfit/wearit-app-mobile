@@ -10,6 +10,9 @@ import {
     useTheme,
 } from 'react-native-paper';
 
+import { useAppDispatch } from '../../../utils/hooks';
+import { setName } from '../../../store/onboardingSlice';
+
 interface NameStepProps {
     /** Callback appelé quand on passe à l’étape suivante */
     //   onNext: (prenom: string) => void;
@@ -26,11 +29,13 @@ export const NameStep: React.FC<NameStepProps> = ({
     currentStep = 1,
     totalSteps = 9,
 }) => {
-    const [name, setName] = useState('');
+    const [name, setLocalName] = useState('');
     const { colors } = useTheme();
     const progress = currentStep / totalSteps;
+    const dispatch = useAppDispatch();
 
     const handlePress = () => {
+        dispatch(setName(name));
         navigation.navigate('GenderStep');
     };
 
@@ -60,7 +65,7 @@ export const NameStep: React.FC<NameStepProps> = ({
                     mode="flat"
                     placeholder="          Prénom"
                     value={name}
-                    onChangeText={setName}
+                    onChangeText={setLocalName}
                     style={styles.input}
                     placeholderTextColor="rgba(128, 128, 128, 0.5)"
                     underlineColor="transparent"

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
     authService,
     AuthResponse,
@@ -15,12 +16,19 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-    token: localStorage.getItem('token'),
+    token: null,
     status: 'idle',
     error: null,
     message: null,
     resetValid: null,
 };
+
+export const loadToken = createAsyncThunk<string | null>(
+    'auth/loadToken',
+    async () => {
+        return await AsyncStorage.getItem('token');
+    },
+);
 
 export const signupUser = createAsyncThunk<
     AuthResponse,
@@ -28,7 +36,9 @@ export const signupUser = createAsyncThunk<
     { rejectValue: string }
 >('auth/signup', async (data, { rejectWithValue }) => {
     try {
-        return await authService.signup(data);
+        const resp = await authService.signup(data);
+        await AsyncStorage.setItem('token', resp.token);
+        return resp;
     } catch (e: any) {
         return rejectWithValue(e.response?.data?.detail || e.message);
     }
@@ -40,7 +50,9 @@ export const loginUser = createAsyncThunk<
     { rejectValue: string }
 >('auth/login', async (creds, { rejectWithValue }) => {
     try {
-        return await authService.login(creds);
+        const resp = await authService.login(creds);
+        await AsyncStorage.setItem('token', resp.token);
+        return resp;
     } catch (e: any) {
         return rejectWithValue(e.response?.data?.detail || e.message);
     }
@@ -50,6 +62,7 @@ export const logoutUser = createAsyncThunk<void>(
     'auth/logout',
     async (_, { dispatch }) => {
         await authService.logout();
+        await AsyncStorage.removeItem('token');
         dispatch(logout());
     },
 );
@@ -108,7 +121,6 @@ const authSlice = createSlice({
     reducers: {
         logout(state) {
             state.token = null;
-            localStorage.removeItem('token');
             state.status = 'idle';
             state.message = null;
             state.error = null;
@@ -116,7 +128,6 @@ const authSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        // signup & login share logic
         [signupUser, loginUser].forEach((thunk) => {
             builder
                 .addCase(thunk.pending, (state) => {
@@ -129,7 +140,6 @@ const authSlice = createSlice({
                         state.status = 'succeeded';
                         state.token = action.payload.token;
                         state.message = action.payload.message;
-                        localStorage.setItem('token', action.payload.token);
                     },
                 )
                 .addCase(thunk.rejected, (state, action) => {
@@ -143,6 +153,20 @@ const authSlice = createSlice({
         });
 
         builder
+            .addCase(loadToken.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(loadToken.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.token = action.payload;
+            })
+            .addCase(loadToken.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            });
+
+        builder
             .addCase(deleteAccount.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
@@ -151,14 +175,12 @@ const authSlice = createSlice({
                 state.status = 'succeeded';
                 state.message = action.payload.message;
                 state.token = null;
-                localStorage.removeItem('token');
             })
             .addCase(deleteAccount.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });
 
-        // forgot
         builder
             .addCase(forgotPassword.pending, (state) => {
                 state.status = 'loading';
@@ -173,7 +195,6 @@ const authSlice = createSlice({
                 state.error = action.payload as string;
             });
 
-        // verify
         builder
             .addCase(verifyReset.pending, (state) => {
                 state.status = 'loading';
@@ -188,7 +209,6 @@ const authSlice = createSlice({
                 state.error = action.payload as string;
             });
 
-        // reset
         builder
             .addCase(resetPassword.pending, (state) => {
                 state.status = 'loading';
