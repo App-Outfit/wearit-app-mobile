@@ -13,6 +13,7 @@ class UserInDB(BaseModel):
     email: EmailStr
     password: str
     name: str
+    answers: dict[str,str] | None = None
     created_at: datetime
 
 class ResetRecord(BaseModel):
@@ -24,12 +25,13 @@ class AuthRepository:
         self.db = db
         self._col = db["users"]
 
-    async def create_user(self, email: str, hashed_password: str, name: str) -> UserInDB:
+    async def create_user(self, email: str, hashed_password: str, name: str, answers: dict[str, str]) -> UserInDB:
         """Insère un document user et renvoie son DTO."""
         doc = {
             "email": email,
             "password": hashed_password,
             "name": name,
+            "answers": answers,
             "created_at": datetime.now(),
         }
         try:
@@ -40,6 +42,7 @@ class AuthRepository:
                 email=doc["email"],
                 password=doc["password"],
                 name=doc["name"],
+                answers=doc.get("answers"),
                 created_at=doc["created_at"],
             )
         except PyMongoError as e:
@@ -60,6 +63,7 @@ class AuthRepository:
             email=doc["email"],
             password=doc["password"],
             name=doc.get("name", ""),
+            answers=doc.get("answers", None),
             created_at=doc.get("created_at"),
         )
 

@@ -73,7 +73,7 @@ class AuthService:
 
         # 3) Création de l'utilisateur avec gestion complète des erreurs
         try:
-            new_user = await self.repo.create_user(email, hashed, user.name)
+            new_user = await self.repo.create_user(email, hashed, user.name, user.answers)
         except Exception as e:
             logger.error("🔴 [Service] Failed to create user: %s", e)
             raise InternalServerError("Failed to create user")
