@@ -8,13 +8,15 @@ import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
 import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScreen';
 
 import { AuthNavigator } from './AuthNavigator';
+import { PaiementNavigator } from './PaiementNavigator';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="LaunchScreen">
+            {/* <Stack.Navigator initialRouteName="LaunchScreen"> */}
+            <Stack.Navigator initialRouteName="Paiement">
                 <Stack.Screen
                     name="LaunchScreen"
                     component={LoadingScreen}
@@ -36,6 +38,12 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name="Auth"
                     component={AuthNavigator}
+                    options={{ headerShown: false }}
+                />
+
+                <Stack.Screen
+                    name="Paiement"
+                    component={PaiementNavigator}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>
