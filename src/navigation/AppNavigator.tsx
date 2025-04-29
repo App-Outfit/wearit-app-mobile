@@ -8,28 +8,37 @@ import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
 import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScreen';
 
 import { AuthNavigator } from './AuthNavigator';
+import { DressingNavigator } from './DressingNavigator';
+import MainTabNavigator from './NavigationComponents/MainTabNavigator';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
+    const developerMode = true; // Set this to false in production
+    const developerInitialRoute = 'MainTabs';
+    const initialRouteName = developerMode
+        ? developerInitialRoute
+        : 'LaunchScreen';
+
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="LaunchScreen">
+            <Stack.Navigator initialRouteName={initialRouteName}>
                 <Stack.Screen
                     name="LaunchScreen"
                     component={LoadingScreen}
                     options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="HomeScreen"
-                    component={HomeScreen}
-                    options={{ headerShown: true, title: 'Home' }}
                 />
 
                 <Stack.Screen
                     name="Core"
                     component={CoreExampleScreen}
                     options={{ headerShown: true, title: 'Core' }}
+                />
+
+                <Stack.Screen
+                    name="MainTabs"
+                    component={MainTabNavigator}
+                    options={{ headerShown: false }}
                 />
 
                 {/* AuthNavigator is a stack navigator that contains all the auth screens */}
