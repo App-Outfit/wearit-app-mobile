@@ -16,6 +16,7 @@ import {
     StyleSheet,
 } from 'react-native';
 import { lightTheme } from '../styles/theme';
+import { ScrollView } from 'react-native-gesture-handler';
 
 type TabParamList = {
     Categories: undefined;
@@ -54,14 +55,11 @@ export default function CategoryOutfitNavigator() {
             backBehavior="history"
             tabBar={(props) => <TabBar {...props} />}
             screenOptions={{
-                // swipeEnable/d: false,
                 tabBarPressColor: 'transparent',
                 tabBarScrollEnabled: false,
                 sceneStyle: {
                     backgroundColor: 'white',
-
-                    borderTopColor: 'black',
-                    borderWidth: 1,
+                    paddingHorizontal: 16,
                 },
             }}
         >
@@ -109,7 +107,7 @@ function TabBar({ state, descriptors, navigation }: MaterialTopTabBarProps) {
                     style={[
                         styles.activePill,
                         {
-                            width: tabWidth - 8, // 8 = margin*2
+                            width: tabWidth - 18, // 18 = margin*2
                             left: state.index * tabWidth + 4, // 4 = margin left
                         },
                     ]}
@@ -177,6 +175,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 8,
         marginVertical: 5,
+        marginHorizontal: 5,
     },
     tabButton: {
         flex: 1,
