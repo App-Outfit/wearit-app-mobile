@@ -7,6 +7,12 @@ export const screenOptions: StackNavigationOptions = {
     },
     cardStyle: {
         backgroundColor: '#ffffff',
-        paddingHorizontal: 20,
+        paddingHorizontal: 0,
+    },
+    headerTitleStyle: {
+        fontSize: 22,
+        fontWeight: 700,
+        fontFamily: 'Poppins',
+        letterSpacing: 0.5,
     },
 };
