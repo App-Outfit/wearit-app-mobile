@@ -13,7 +13,7 @@ function getHost(): string {
     if (Platform.OS === 'android') return '10.0.2.2';
     if (Platform.OS === 'ios') {
         // 👉 Remplacez '192.168.1.42' par l’IP de votre Mac/PC sur le réseau local
-        return '192.168.1.123';
+        return '192.168.1.26';
     }
     // par défaut (web, etc.)
     return 'localhost';

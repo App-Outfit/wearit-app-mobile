@@ -87,7 +87,14 @@ export const forgotPassword = createAsyncThunk<
     try {
         return await authService.forgotPassword(email);
     } catch (e: any) {
-        return rejectWithValue(e.response?.data?.detail || e.message);
+        const detail = e.response?.data?.detail;
+        // si c'est un tableau de validation errors FastAPI
+        if (Array.isArray(detail)) {
+            const msgs = detail.map((d) => d.msg).join(', ');
+            return rejectWithValue(msgs);
+        }
+        // sinon on tombe sur e.response.data.message ou e.message
+        return rejectWithValue(e.response?.data?.message || e.message);
     }
 });
 
@@ -99,7 +106,15 @@ export const verifyReset = createAsyncThunk<
     try {
         return await authService.verifyResetCode(payload);
     } catch (e: any) {
-        return rejectWithValue(e.response?.data?.detail || e.message);
+        console.log('💥 verifyReset failed, response.data =', e.response?.data);
+        const detail = e.response?.data?.detail;
+        // si c'est un tableau de validation errors FastAPI
+        if (Array.isArray(detail)) {
+            const msgs = detail.map((d) => d.msg).join(', ');
+            return rejectWithValue(msgs);
+        }
+        // sinon on tombe sur e.response.data.message ou e.message
+        return rejectWithValue(e.response?.data?.message || e.message);
     }
 });
 
@@ -111,7 +126,14 @@ export const resetPassword = createAsyncThunk<
     try {
         return await authService.resetPassword(payload);
     } catch (e: any) {
-        return rejectWithValue(e.response?.data?.detail || e.message);
+        const detail = e.response?.data?.detail;
+        // si c'est un tableau de validation errors FastAPI
+        if (Array.isArray(detail)) {
+            const msgs = detail.map((d) => d.msg).join(', ');
+            return rejectWithValue(msgs);
+        }
+        // sinon on tombe sur e.response.data.message ou e.message
+        return rejectWithValue(e.response?.data?.message || e.message);
     }
 });
 
@@ -125,6 +147,11 @@ const authSlice = createSlice({
             state.message = null;
             state.error = null;
             state.resetValid = null;
+        },
+        clearStatus(state) {
+            state.status = 'idle';
+            state.error = null;
+            state.message = null;
         },
     },
     extraReducers: (builder) => {
@@ -225,5 +252,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, clearStatus } = authSlice.actions;
 export default authSlice.reducer;

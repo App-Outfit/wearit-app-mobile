@@ -16,6 +16,11 @@ export interface SignupData {
     answers: Record<string, string>;
 }
 
+export interface SinginData {
+    email: string;
+    password: string;
+}
+
 export const authService = {
     signup: async (data: SignupData): Promise<AuthResponse> => {
         try {
@@ -27,9 +32,15 @@ export const authService = {
         }
     },
 
-    login: (data: { email: string; password: string }) =>
-        api.post<AuthResponse>('/auth/login', data).then((r) => r.data),
-
+    login: (data: SinginData): Promise<AuthResponse> => {
+        try {
+            const resp = api.post<AuthResponse>('/auth/login', data);
+            return resp.then((r) => r.data);
+        } catch (err) {
+            const e = err as AxiosError;
+            throw e;
+        }
+    },
     logout: () =>
         api.post<{ message: string }>('/auth/logout').then((r) => r.data),
 

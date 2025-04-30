@@ -11,6 +11,9 @@ import styles from './LoadingScreen.styles';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { loadToken } from '../../store/authSlice';
 
+import { logout } from '../../store/authSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export function LoadingScreen({ navigation }: any) {
     const font_base_bath = '../../assets/fonts/';
 
@@ -46,14 +49,17 @@ export function LoadingScreen({ navigation }: any) {
         const init = async () => {
             await preloadEssentialImages();
             // n’avance que si nos fonts sont prêtes ET que loadToken est fini
-            if (fontsLoaded && status !== 'loading') {
-                // ⑤ on remplace la route selon la présence du token
-                if (token) {
-                    navigation.replace('HomeScreen');
-                } else {
-                    navigation.replace('Auth');
-                }
-            }
+            // if (fontsLoaded && status !== 'loading') {
+            //     // ⑤ on remplace la route selon la présence du token
+            //     if (token) {
+            //         navigation.replace('HomeScreen');
+            //     } else {
+            //         navigation.replace('Auth');
+            //     }
+            // }
+            AsyncStorage.removeItem('token');
+            dispatch(logout());
+            navigation.replace('Auth');
         };
         init();
     }, [fontsLoaded, status, token]);

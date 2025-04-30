@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
     Text,
     TextInput,
@@ -15,6 +15,9 @@ import { validateEmail } from '../../../utils/validation';
 import { DividerText } from '../../../components/core/Divider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
+import { loginUser } from '../../../store/authSlice';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+
 export const LogIn: React.FC = ({ navigation }: any) => {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -29,6 +32,9 @@ export const LogIn: React.FC = ({ navigation }: any) => {
     const [passwordValid, setPasswordValid] = useState<boolean | undefined>(
         undefined,
     );
+
+    const dispatch = useAppDispatch();
+    const { status, token, error } = useAppSelector((state) => state.auth);
 
     const emailRef = React.useRef<TextInput>(null);
     const passwordRef = React.useRef<TextInput>(null);
@@ -59,10 +65,16 @@ export const LogIn: React.FC = ({ navigation }: any) => {
     );
 
     const handleSubmit = useCallback(() => {
-        if (emailValid && passwordValid) {
-            // Submit the form
+        if (emailValid && passwordValid && email && password) {
+            dispatch(loginUser({ email, password }));
         }
-    }, [emailValid, passwordValid]);
+    }, [emailValid, passwordValid, email, password]);
+
+    useEffect(() => {
+        if (status === 'succeeded' && token) {
+            navigation.replace('HomeScreen');
+        }
+    }, [status, token]);
 
     const moveToSignInPage = () => {
         navigation.navigate('SignUp');

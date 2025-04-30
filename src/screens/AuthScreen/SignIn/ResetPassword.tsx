@@ -1,119 +1,155 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Keyboard } from 'react-native';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    Keyboard,
+    TouchableWithoutFeedback,
+} from 'react-native';
 import { Header } from '../../../components/core/Typography';
 import { lightTheme } from '../../../styles/theme';
 import { InputField } from '../../../components/core/PlaceHolders';
 import { TextInput } from 'react-native-gesture-handler';
 import { validatePassword } from '../../../utils/validation';
 import { CButton } from '../../../components/core/Buttons';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import { resetPassword } from '../../../store/authSlice';
 
-export const ResetPassword = ({ navigation }: any) => {
-    const [password, setPassword] = useState<string>('');
-    const [passwordValidation, setPasswordValidation] = useState<string>('');
+export const ResetPassword: React.FC<any> = ({ navigation, route }) => {
+    const dispatch = useAppDispatch();
+    const { status, error } = useAppSelector((state) => state.auth);
 
-    const [errorPassword, setErrorPassword] = useState<string>('');
-    const [errorPasswordValidation, setErrorPasswordValidation] =
-        useState<string>('');
+    // on récupère email+code passés en params
+    const { email, code } = route.params as {
+        email: string;
+        code: string;
+    };
 
-    const [passwordValid, setPasswordValid] = useState<boolean | undefined>(
-        undefined,
-    );
-    const [passwordValidationValid, setPasswordValidationValid] = useState<
-        boolean | undefined
-    >(undefined);
+    // local state pour les deux champs
+    const [password, setPassword] = useState('');
+    const [passwordValidation, setPasswordValidation] = useState('');
+
+    const [errorPassword, setErrorPassword] = useState('');
+    const [errorPasswordValidation, setErrorPasswordValidation] = useState('');
+
+    const [passwordValid, setPasswordValid] = useState<boolean>(false);
+    const [passwordValidationValid, setPasswordValidationValid] =
+        useState<boolean>(false);
 
     const passwordRef = useRef<TextInput>(null);
     const passwordValidationRef = useRef<TextInput>(null);
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [showPasswordValidation, setShowPasswordValidation] = useState(false);
-
-    const handlePasswordChange = (text: string) => {
-        setPassword(text);
-        const is_valid = validatePassword(text);
-        setPasswordValid(is_valid);
-        setPasswordValidationValid(passwordValidation === text);
-        if (passwordValidation === text) {
-            setErrorPasswordValidation('');
-        } else {
+    // 1️⃣ validation mot de passe
+    const handlePasswordChange = useCallback(
+        (text: string) => {
+            setPassword(text);
+            const ok = validatePassword(text);
+            setPasswordValid(ok);
+            if (!ok) {
+                setErrorPassword('Mot de passe invalide (ex: GTH6dk_dk!)');
+            } else {
+                setErrorPassword('');
+            }
+            // on revérifie la confirmation
+            const match = text === passwordValidation;
+            setPasswordValidationValid(match);
             setErrorPasswordValidation(
-                'Les mots de passe doivent être identiques.',
+                match ? '' : 'Les mots de passe doivent être identiques.',
             );
+        },
+        [passwordValidation],
+    );
+
+    // 2️⃣ validation confirmation
+    const handlePasswordValidationChange = useCallback(
+        (text: string) => {
+            setPasswordValidation(text);
+            const match = text === password;
+            setPasswordValidationValid(match);
+            setErrorPasswordValidation(
+                match ? '' : 'Les mots de passe doivent être identiques.',
+            );
+        },
+        [password],
+    );
+
+    // 3️⃣ dispatch du thunk
+    const handleSubmit = useCallback(() => {
+        if (passwordValid && passwordValidationValid) {
+            dispatch(resetPassword({ email, code, new_password: password }));
         }
+    }, [
+        dispatch,
+        email,
+        code,
+        password,
+        passwordValid,
+        passwordValidationValid,
+    ]);
 
-        const errorMessage = !is_valid
-            ? 'Mot de passe invalide (ex: GTH6dk_dk!)'
-            : '';
-        setErrorPassword(errorMessage);
-    };
-
-    const handlePasswordValidationChange = (text: string) => {
-        setPasswordValidation(text);
-
-        const is_valid = text === password;
-        setPasswordValidationValid(is_valid);
-
-        const errorMessage = !is_valid
-            ? 'Les mots de passe doivent être identiques.'
-            : '';
-        setErrorPasswordValidation(errorMessage);
-    };
-
-    const handleSubmit = () => {
-        // Send email to the server
-
-        navigation.navigate('CodeVerification');
-    };
+    // 4️⃣ écoute du status pour naviguer
+    useEffect(() => {
+        if (status === 'succeeded') {
+            // une fois réinitialisé, on va à l'écran de connexion
+            navigation.replace('LogIn');
+        }
+    }, [status, navigation]);
 
     return (
-        <View style={styles.pageContainer}>
-            <View style={styles.container}>
-                <Header variant="h2" style={styles.header}>
-                    Réinitialiser le mot de passe
-                </Header>
-                <Text style={styles.subtitle}>
-                    Définissez le nouveau mot de passe de votre compte afin de
-                    pouvoir vous connecter et accéder à toutes les
-                    fonctionnalités.
-                </Text>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={styles.pageContainer}>
+                <View style={styles.container}>
+                    <Header variant="h2" style={styles.header}>
+                        Réinitialiser le mot de passe
+                    </Header>
+                    <Text style={styles.subtitle}>
+                        Définissez le nouveau mot de passe pour continuer.
+                    </Text>
 
-                {/* Formulaire */}
-                <View style={styles.form}>
-                    <Text style={styles.label}>Nouveau mot de passe :</Text>
-                    <InputField
-                        ref={passwordRef}
-                        placeholder="Entrez votre nouveau mot de passe"
-                        secureTextEntry={!showPassword}
-                        returnKeyType="done"
-                        onSubmitEditing={() => Keyboard.dismiss()}
-                        isValid={passwordValid}
-                        onChangeText={handlePasswordChange}
-                        errorMessage={errorPassword}
-                    />
-                    <Text style={styles.label}>Confirmer le mot de passe</Text>
-                    <InputField
-                        ref={passwordValidationRef}
-                        placeholder="Confirmer le mot de passe"
-                        secureTextEntry={!showPasswordValidation}
-                        returnKeyType="done"
-                        onSubmitEditing={() => Keyboard.dismiss()}
-                        isValid={passwordValidationValid}
-                        onChangeText={handlePasswordValidationChange}
-                        errorMessage={errorPasswordValidation}
-                    />
+                    <View style={styles.form}>
+                        <Text style={styles.label}>Nouveau mot de passe :</Text>
+                        <InputField
+                            ref={passwordRef}
+                            placeholder="Entrez votre nouveau mot de passe"
+                            secureTextEntry
+                            isValid={passwordValid}
+                            onChangeText={handlePasswordChange}
+                            errorMessage={errorPassword}
+                        />
+
+                        <Text style={styles.label}>
+                            Confirmez le mot de passe :
+                        </Text>
+                        <InputField
+                            ref={passwordValidationRef}
+                            placeholder="Confirmer le mot de passe"
+                            secureTextEntry
+                            isValid={passwordValidationValid}
+                            onChangeText={handlePasswordValidationChange}
+                            errorMessage={errorPasswordValidation}
+                        />
+                    </View>
+
+                    {status === 'failed' && error && (
+                        <Text style={styles.errorText}>{error}</Text>
+                    )}
                 </View>
-            </View>
 
-            <CButton
-                variant="primary"
-                size="xlarge"
-                disabled={!passwordValid || !passwordValidationValid}
-                onPress={handleSubmit}
-                style={{ alignSelf: 'flex-end' }}
-            >
-                Continuer
-            </CButton>
-        </View>
+                <CButton
+                    variant="primary"
+                    size="xlarge"
+                    disabled={
+                        !passwordValid ||
+                        !passwordValidationValid ||
+                        status === 'loading'
+                    }
+                    onPress={handleSubmit}
+                    style={{ alignSelf: 'flex-end' }}
+                >
+                    Continuer
+                </CButton>
+            </View>
+        </TouchableWithoutFeedback>
     );
 };
 
@@ -139,12 +175,18 @@ const styles = StyleSheet.create({
     form: {
         marginBottom: 0,
         justifyContent: 'center',
-        alignItems: 'flex-start',
     },
     label: {
         fontSize: 14,
         fontFamily: 'Poppins-Medium',
-        marginBottom: 0,
         color: lightTheme.colors.black,
+        marginTop: 12,
+    },
+    errorText: {
+        color: '#B00020',
+        textAlign: 'center',
+        marginTop: 8,
     },
 });
+
+export default ResetPassword;
