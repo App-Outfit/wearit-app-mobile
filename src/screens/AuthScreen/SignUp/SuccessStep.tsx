@@ -31,7 +31,7 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({
     const progress = currentStep / totalSteps;
 
     const handlePress = () => {
-        navigation.navigate('HomeScreen');
+        navigation.navigate('MainTabs');
     };
 
     return (

@@ -1,197 +1,159 @@
-// MailStep.tsx
+// src/screens/onboarding/MailStep.tsx
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import {
-    View,
-    StyleSheet,
-    KeyboardAvoidingView,
-    Platform,
-    Text,
-} from 'react-native';
-import {
+    TextInput,
+    Button,
     ProgressBar,
     Title,
     Subheading,
-    TextInput,
-    Button,
+    HelperText,
     useTheme,
 } from 'react-native-paper';
-import { DividerText } from '../../../components/core/Divider';
-import { validateEmail, validatePassword } from '../../../utils/validation';
-
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
 import {
-    setEmail,
-    setPassword,
+    setEmail as setOnboardEmail,
+    setPassword as setOnboardPassword,
     resetOnboarding,
 } from '../../../store/onboardingSlice';
-import { signupUser } from '../../../store/authSlice';
-import { SignupData } from '../../../services/authService';
+import { signupUser, clearStatus } from '../../../store/authSlice';
+import { validateEmail, validatePassword } from '../../../utils/validation';
+import type { SignupData } from '../../../services/authService';
 
-interface MailStepProps {
+interface Props {
     navigation: any;
     currentStep?: number;
     totalSteps?: number;
 }
 
-const MailStep: React.FC<MailStepProps> = ({
+const MailStep: React.FC<Props> = ({
     navigation,
     currentStep = 8,
     totalSteps = 9,
 }) => {
-    const [email, setLocalEmail] = useState('');
-    const [password, setLocalPassword] = useState('');
-    const { colors } = useTheme();
-    const progress = currentStep / totalSteps;
-
-    const [errorEmail, setErrorEmail] = useState<string>('');
-    const [errorPassword, setErrorPassword] = useState<string>('');
-
-    const [emailValid, setEmailValid] = useState<boolean>(false);
-    const [passwordValid, setPasswordValid] = useState<boolean>(false);
-
     const dispatch = useAppDispatch();
-    const onboarding = useAppSelector((s) => s.onboarding);
+    const { colors } = useTheme();
     const { status, error, token } = useAppSelector((s) => s.auth);
+    const onboarding = useAppSelector((s) => s.onboarding);
 
-    const handleEmailChange = useCallback((text: string) => {
-        setLocalEmail(text);
-        const is_valid = validateEmail(text);
-        setEmailValid(is_valid);
-        setErrorEmail(is_valid ? '' : 'Email invalide');
-    }, []);
+    // champs contrôlés + touched pour n’afficher l’erreur qu’après le premier blur
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [emailTouched, setEmailTouched] = useState(false);
+    const [passwordTouched, setPasswordTouched] = useState(false);
 
-    const handlePasswordChange = useCallback((text: string) => {
-        setLocalPassword(text);
-        const is_valid = validatePassword(text);
-        setPasswordValid(is_valid);
-        setErrorPassword(
-            is_valid ? '' : 'Mot de passe invalide (ex: GTH6dk_dk!)',
-        );
-    }, []);
+    // validité dérivée
+    const emailValid = validateEmail(email);
+    const passwordValid = validatePassword(password);
+    const isFormValid = emailValid && passwordValid;
 
-    const handleContinue = () => {
-        console.log(email);
-        dispatch(setEmail(email));
-        dispatch(setPassword(password));
+    // au montage, on nettoie tout ancien status/erreur
+    useEffect(() => {
+        dispatch(clearStatus());
+    }, [dispatch]);
 
-        const ob = onboarding;
-
-        const payload: SignupData = {
-            name: ob.name!,
-            email: email,
-            password: password,
-            answers: {
-                gender: ob.gender!,
-                age: String(ob.age),
-                q1: ob.answers1!.join(','),
-                q2: ob.answers2!.join(','),
-                q3: ob.answers3!.join(','),
-                brand: ob.brands!.join(','),
-            },
-        };
-
-        console.log(payload);
-
-        dispatch(signupUser(payload));
-    };
-
+    // navigation automatique en cas de succès
     useEffect(() => {
         if (status === 'succeeded' && token) {
             dispatch(resetOnboarding());
-            navigation.navigate('SuccessStep');
+            navigation.replace('SuccessStep');
         }
-    }, [status, token]);
+    }, [status, token, dispatch, navigation]);
+
+    const handleContinue = useCallback(() => {
+        // on marque comme touché pour déclencher l’affichage des erreurs
+        setEmailTouched(true);
+        setPasswordTouched(true);
+        if (!isFormValid) return;
+
+        // on enregistre temporairement dans le store onboarding
+        dispatch(setOnboardEmail(email));
+        dispatch(setOnboardPassword(password));
+
+        // on construit le payload complet
+        const { name, gender, age, answers1, answers2, answers3, brands } =
+            onboarding;
+        const payload: SignupData = {
+            name: name!,
+            email,
+            password,
+            answers: {
+                gender: gender!,
+                age: String(age),
+                q1: answers1!.join(','),
+                q2: answers2!.join(','),
+                q3: answers3!.join(','),
+                brand: brands!.join(','),
+            },
+        };
+
+        dispatch(signupUser(payload));
+    }, [dispatch, email, password, isFormValid, onboarding]);
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.container}
         >
             <ProgressBar
-                progress={progress}
+                progress={currentStep / totalSteps}
                 color={colors.primary}
                 style={styles.progressBar}
             />
 
             <View style={styles.content}>
-                <View>
-                    <Title style={styles.title}>Finalise ton inscription</Title>
-                    <Subheading style={styles.subtitle}>
-                        Cela nous permet d'en savoir plus sur toi
-                    </Subheading>
-                </View>
+                <Title style={styles.title}>Finalise ton inscription</Title>
+                <Subheading style={styles.subtitle}>
+                    Cela nous permet d'en savoir plus sur toi
+                </Subheading>
 
-                <View style={styles.contentBody}>
-                    <View>
-                        <TextInput
-                            mode="flat"
-                            placeholder="Adresse email"
-                            value={email}
-                            onChangeText={handleEmailChange}
-                            style={styles.input}
-                            placeholderTextColor="rgba(128, 128, 128, 0.5)"
-                            // underlineColor="transparent"
-                        />
-                        {errorEmail ? (
-                            <Text style={styles.errorText}>{errorEmail}</Text>
-                        ) : null}
+                <TextInput
+                    label="Adresse email"
+                    value={email}
+                    onChangeText={(t) => setEmail(t)}
+                    onBlur={() => setEmailTouched(true)}
+                    error={emailTouched && !emailValid}
+                    mode="flat"
+                />
+                <HelperText type="error" visible={emailTouched && !emailValid}>
+                    Email invalide
+                </HelperText>
 
-                        <TextInput
-                            mode="flat"
-                            placeholder="Mot de passe"
-                            value={password}
-                            onChangeText={handlePasswordChange}
-                            style={styles.input}
-                            placeholderTextColor="rgba(128, 128, 128, 0.5)"
-                            // underlineColor="transparent"
-                            secureTextEntry
-                        />
-                        {errorPassword ? (
-                            <Text style={styles.errorText}>
-                                {errorPassword}
-                            </Text>
-                        ) : null}
+                <TextInput
+                    label="Mot de passe"
+                    value={password}
+                    onChangeText={(t) => setPassword(t)}
+                    onBlur={() => setPasswordTouched(true)}
+                    secureTextEntry
+                    error={passwordTouched && !passwordValid}
+                    mode="flat"
+                    style={styles.input}
+                />
+                <HelperText
+                    type="error"
+                    visible={passwordTouched && !passwordValid}
+                >
+                    Mot de passe invalide (ex: GTH6dk_dk!)
+                </HelperText>
 
-                        <Button
-                            mode="contained"
-                            disabled={!emailValid || !passwordValid}
-                            onPress={handleContinue}
-                            contentStyle={styles.buttonContent}
-                            style={styles.button}
-                        >
-                            Continuer
-                        </Button>
-                    </View>
+                {/* Erreur serveur */}
+                {error && (
+                    <HelperText type="error" visible style={styles.serverError}>
+                        {error}
+                    </HelperText>
+                )}
 
-                    <DividerText text="Ou alors" />
-
-                    <View style={styles.buttonsContainer}>
-                        <Button
-                            mode="outlined"
-                            icon="google"
-                            onPress={() => {
-                                // TODO: intégration Google Sign-In
-                            }}
-                            contentStyle={styles.socialButtonContent}
-                            style={[styles.button, styles.socialButton]}
-                        >
-                            Continuer avec Google
-                        </Button>
-
-                        <Button
-                            mode="outlined"
-                            icon="apple"
-                            onPress={() => {
-                                // TODO: intégration Apple Sign-In
-                            }}
-                            contentStyle={styles.socialButtonContent}
-                            style={[styles.button, styles.socialButton]}
-                        >
-                            Continuer avec Apple
-                        </Button>
-                    </View>
-                </View>
+                <Button
+                    mode="contained"
+                    onPress={handleContinue}
+                    disabled={!isFormValid || status === 'loading'}
+                    loading={status === 'loading'}
+                    contentStyle={styles.buttonContent}
+                    style={styles.button}
+                >
+                    Continuer
+                </Button>
             </View>
         </KeyboardAvoidingView>
     );
@@ -200,73 +162,42 @@ const MailStep: React.FC<MailStepProps> = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#ffffff',
-        justifyContent: 'space-between',
-        paddingVertical: 50,
+        backgroundColor: '#fff',
         paddingHorizontal: 20,
+        paddingVertical: 50,
     },
     progressBar: {
         height: 10,
-        marginTop: 20,
-        marginBottom: 50,
         borderRadius: 5,
+        marginBottom: 24,
     },
     content: {
         flex: 1,
-        justifyContent: 'space-between',
+        justifyContent: 'center',
     },
     title: {
         textAlign: 'center',
-        fontFamily: 'Poppins-SemiBold',
-        marginBottom: 8,
         fontSize: 24,
+        marginBottom: 8,
     },
     subtitle: {
         textAlign: 'center',
-        marginBottom: 24,
         fontSize: 16,
         color: '#666',
-    },
-    contentBody: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        marginTop: 40,
+        marginBottom: 24,
     },
     input: {
-        marginHorizontal: 18,
-        marginVertical: 6,
-        backgroundColor: 'transparent',
-        textAlign: 'left',
-        elevation: 0,
-        borderBottomWidth: 0,
-        fontSize: 16,
-        transform: [{ translateY: -20 }],
+        marginTop: 16,
     },
-    errorText: {
-        color: '#B00020',
-        fontSize: 12,
-        marginHorizontal: 18,
-        marginBottom: 30,
+    serverError: {
         textAlign: 'center',
-    },
-    buttonsContainer: {
-        alignItems: 'center',
-        marginTop: 20,
+        marginBottom: 16,
     },
     button: {
+        marginTop: 24,
         borderRadius: 24,
-        width: '80%',
-        marginBottom: 20,
-        alignSelf: 'center',
     },
     buttonContent: {
-        height: 48,
-    },
-    socialButton: {
-        borderColor: '#ccc',
-        marginVertical: 0,
-    },
-    socialButtonContent: {
         height: 48,
     },
 });

@@ -15,7 +15,7 @@ const Stack = createStackNavigator();
 
 const AppNavigator = () => {
     const developerMode = true; // Set this to false in production
-    const developerInitialRoute = 'MainTabs';
+    const developerInitialRoute = 'Auth';
     const initialRouteName = developerMode
         ? developerInitialRoute
         : 'LaunchScreen';

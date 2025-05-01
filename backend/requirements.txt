@@ -16,3 +16,5 @@ httpx
 psycopg2
 sqlalchemy 
 asyncpg
+fastapi
+uvicorn

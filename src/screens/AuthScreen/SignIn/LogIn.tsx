@@ -73,7 +73,7 @@ export const LogIn: React.FC = ({ navigation }: any) => {
 
     useEffect(() => {
         if (status === 'succeeded' && token) {
-            navigation.replace('HomeScreen');
+            navigation.replace('MainTabs');
         }
     }, [status, token]);
 
@@ -133,20 +133,25 @@ export const LogIn: React.FC = ({ navigation }: any) => {
                 </Text>
             </View>
 
+            {/* Erreur serveur */}
+            {status === 'failed' && error && (
+                <Text style={styles.serverError}>{error}</Text>
+            )}
+
             {/* Bouton Connexion */}
             <CButton
                 variant="primary"
                 size="xlarge"
-                disabled={!emailValid || !passwordValid} // Désactiver le bouton si un champ est invalide
+                disabled={!emailValid || !passwordValid || status === 'loading'}
                 onPress={handleSubmit}
             >
                 Se Connecter
             </CButton>
 
-            <DividerText text="Ou" />
+            {/* <DividerText text="Ou" /> */}
 
             {/* Boutons Google et Facebook */}
-            <TouchableOpacity style={styles.googleButton}>
+            {/* <TouchableOpacity style={styles.googleButton}>
                 <Image
                     source={{
                         uri: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
@@ -156,19 +161,7 @@ export const LogIn: React.FC = ({ navigation }: any) => {
                 <Text style={styles.googleButtonText}>
                     Inscrivez-vous avec Google
                 </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.facebookButton}>
-                <Image
-                    source={{
-                        uri: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_2019.png',
-                    }}
-                    style={styles.socialIcon}
-                />
-                <Text style={styles.facebookButtonText}>
-                    Inscrivez-vous avec Facebook
-                </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {/* Inscription */}
             <Text style={styles.loginText}>
@@ -256,5 +249,12 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    serverError: {
+        color: '#B00020',
+        fontSize: 12,
+        marginHorizontal: 18,
+        marginBottom: 30,
+        textAlign: 'center',
     },
 });

@@ -1,11 +1,15 @@
+// src/store/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+
 import {
     authService,
     AuthResponse,
     VerifyResponse,
     SignupData,
 } from '../services/authService';
+import { parseApiError } from '../utils/apiError';
 
 interface AuthState {
     token: string | null;
@@ -23,13 +27,17 @@ const initialState: AuthState = {
     resetValid: null,
 };
 
+/**
+ * Charge le token depuis AsyncStorage au démarrage de l'app
+ */
 export const loadToken = createAsyncThunk<string | null>(
     'auth/loadToken',
-    async () => {
-        return await AsyncStorage.getItem('token');
-    },
+    async () => AsyncStorage.getItem('token'),
 );
 
+/**
+ * Inscription
+ */
 export const signupUser = createAsyncThunk<
     AuthResponse,
     SignupData,
@@ -39,11 +47,14 @@ export const signupUser = createAsyncThunk<
         const resp = await authService.signup(data);
         await AsyncStorage.setItem('token', resp.token);
         return resp;
-    } catch (e: any) {
-        return rejectWithValue(e.response?.data?.detail || e.message);
+    } catch (e: unknown) {
+        return rejectWithValue(parseApiError(e));
     }
 });
 
+/**
+ * Connexion
+ */
 export const loginUser = createAsyncThunk<
     AuthResponse,
     { email: string; password: string },
@@ -53,11 +64,21 @@ export const loginUser = createAsyncThunk<
         const resp = await authService.login(creds);
         await AsyncStorage.setItem('token', resp.token);
         return resp;
-    } catch (e: any) {
-        return rejectWithValue(e.response?.data?.detail || e.message);
+    } catch (e: unknown) {
+        if (axios.isAxiosError(e)) {
+            const status = e.response?.status;
+            if (status === 400 || status === 401) {
+                return rejectWithValue('E-mail ou mot de passe incorrect');
+            }
+            return rejectWithValue(parseApiError(e));
+        }
+        return rejectWithValue('Une erreur est survenue');
     }
 });
 
+/**
+ * Déconnexion
+ */
 export const logoutUser = createAsyncThunk<void>(
     'auth/logout',
     async (_, { dispatch }) => {
@@ -67,6 +88,9 @@ export const logoutUser = createAsyncThunk<void>(
     },
 );
 
+/**
+ * Suppression de compte
+ */
 export const deleteAccount = createAsyncThunk<
     { message: string },
     void,
@@ -74,11 +98,14 @@ export const deleteAccount = createAsyncThunk<
 >('auth/deleteAccount', async (_, { rejectWithValue }) => {
     try {
         return await authService.deleteAccount();
-    } catch (e: any) {
-        return rejectWithValue(e.response?.data?.detail || e.message);
+    } catch (e: unknown) {
+        return rejectWithValue(parseApiError(e));
     }
 });
 
+/**
+ * Mot de passe oublié (envoi du code)
+ */
 export const forgotPassword = createAsyncThunk<
     { message: string },
     string,
@@ -86,38 +113,33 @@ export const forgotPassword = createAsyncThunk<
 >('auth/forgotPassword', async (email, { rejectWithValue }) => {
     try {
         return await authService.forgotPassword(email);
-    } catch (e: any) {
-        const detail = e.response?.data?.detail;
-        // si c'est un tableau de validation errors FastAPI
-        if (Array.isArray(detail)) {
-            const msgs = detail.map((d) => d.msg).join(', ');
-            return rejectWithValue(msgs);
-        }
-        // sinon on tombe sur e.response.data.message ou e.message
-        return rejectWithValue(e.response?.data?.message || e.message);
+    } catch (e: unknown) {
+        return rejectWithValue(parseApiError(e));
     }
 });
 
+/**
+ * Vérification du code de reset
+ */
 export const verifyReset = createAsyncThunk<
     VerifyResponse,
     { email: string; code: string },
     { rejectValue: string }
 >('auth/verifyReset', async (payload, { rejectWithValue }) => {
     try {
-        return await authService.verifyResetCode(payload);
-    } catch (e: any) {
-        console.log('💥 verifyReset failed, response.data =', e.response?.data);
-        const detail = e.response?.data?.detail;
-        // si c'est un tableau de validation errors FastAPI
-        if (Array.isArray(detail)) {
-            const msgs = detail.map((d) => d.msg).join(', ');
-            return rejectWithValue(msgs);
+        const resp = await authService.verifyResetCode(payload);
+        if (!resp.valid) {
+            return rejectWithValue('Code de réinitialisation invalide');
         }
-        // sinon on tombe sur e.response.data.message ou e.message
-        return rejectWithValue(e.response?.data?.message || e.message);
+        return resp;
+    } catch (e: unknown) {
+        return rejectWithValue(parseApiError(e));
     }
 });
 
+/**
+ * Réinitialisation du mot de passe
+ */
 export const resetPassword = createAsyncThunk<
     { message: string },
     { email: string; code: string; new_password: string },
@@ -125,15 +147,8 @@ export const resetPassword = createAsyncThunk<
 >('auth/resetPassword', async (payload, { rejectWithValue }) => {
     try {
         return await authService.resetPassword(payload);
-    } catch (e: any) {
-        const detail = e.response?.data?.detail;
-        // si c'est un tableau de validation errors FastAPI
-        if (Array.isArray(detail)) {
-            const msgs = detail.map((d) => d.msg).join(', ');
-            return rejectWithValue(msgs);
-        }
-        // sinon on tombe sur e.response.data.message ou e.message
-        return rejectWithValue(e.response?.data?.message || e.message);
+    } catch (e: unknown) {
+        return rejectWithValue(parseApiError(e));
     }
 });
 
@@ -155,6 +170,7 @@ const authSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
+        // signup & login partagent la même logique de transition d'états
         [signupUser, loginUser].forEach((thunk) => {
             builder
                 .addCase(thunk.pending, (state) => {
@@ -171,7 +187,7 @@ const authSlice = createSlice({
                 )
                 .addCase(thunk.rejected, (state, action) => {
                     state.status = 'failed';
-                    state.error = action.payload as string;
+                    state.error = action.payload || 'Erreur inconnue';
                 });
         });
 
@@ -179,28 +195,30 @@ const authSlice = createSlice({
             state.status = 'idle';
         });
 
+        // loadToken
         builder
             .addCase(loadToken.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(loadToken.fulfilled, (state, action) => {
+            .addCase(loadToken.fulfilled, (state, { payload }) => {
                 state.status = 'succeeded';
-                state.token = action.payload;
+                state.token = payload;
             })
             .addCase(loadToken.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });
 
+        // deleteAccount
         builder
             .addCase(deleteAccount.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(deleteAccount.fulfilled, (state, action) => {
+            .addCase(deleteAccount.fulfilled, (state, { payload }) => {
                 state.status = 'succeeded';
-                state.message = action.payload.message;
+                state.message = payload.message;
                 state.token = null;
             })
             .addCase(deleteAccount.rejected, (state, action) => {
@@ -208,42 +226,45 @@ const authSlice = createSlice({
                 state.error = action.payload as string;
             });
 
+        // forgotPassword
         builder
             .addCase(forgotPassword.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(forgotPassword.fulfilled, (state, action) => {
+            .addCase(forgotPassword.fulfilled, (state, { payload }) => {
                 state.status = 'succeeded';
-                state.message = action.payload.message;
+                state.message = payload.message;
             })
             .addCase(forgotPassword.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });
 
+        // verifyReset
         builder
             .addCase(verifyReset.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(verifyReset.fulfilled, (state, action) => {
+            .addCase(verifyReset.fulfilled, (state, { payload }) => {
                 state.status = 'succeeded';
-                state.resetValid = action.payload.valid;
+                state.resetValid = payload.valid;
             })
             .addCase(verifyReset.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });
 
+        // resetPassword
         builder
             .addCase(resetPassword.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(resetPassword.fulfilled, (state, action) => {
+            .addCase(resetPassword.fulfilled, (state, { payload }) => {
                 state.status = 'succeeded';
-                state.message = action.payload.message;
+                state.message = payload.message;
             })
             .addCase(resetPassword.rejected, (state, action) => {
                 state.status = 'failed';

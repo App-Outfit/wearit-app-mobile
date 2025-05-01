@@ -1,13 +1,16 @@
+# app/main.py
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.utils import get_openapi
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.config import settings       # votre Pydantic Settings
-from app.core.errors import AppError       # base de toutes vos erreurs métiers
+from app.core.config import settings
+from app.core.errors import AppError
 from app.infrastructure.database.mongodb import MongoDB
 from app.infrastructure.storage.s3_client import S3Client
 from app.api.routes import (
@@ -20,11 +23,7 @@ from app.api.routes import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Démarrage
-    await MongoDB.connect(
-        db_url=settings.MONGODB_URI,
-        db_name=settings.MONGODB_DB,
-    )
+    await MongoDB.connect(db_url=settings.MONGODB_URI, db_name=settings.MONGODB_DB)
     await S3Client.connect(
         region=settings.AWS_REGION_NAME,
         bucket_name=settings.AWS_BUCKET_NAME,
@@ -32,7 +31,6 @@ async def lifespan(app: FastAPI):
         secret_key=settings.AWS_SECRET_ACCESS_KEY,
     )
     yield
-    # Arrêt
     await MongoDB.close()
     await S3Client.close()
 
@@ -45,20 +43,61 @@ app = FastAPI(
     docs_url=f"{settings.API_V1_STR}/docs",
 )
 
-# OAuth2 pour Swagger/OpenAPI
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
 
-# Exception handler global pour vos AppError
+# 1) Vos erreurs métier
 @app.exception_handler(AppError)
 async def handle_app_error(request: Request, exc: AppError):
     return JSONResponse(
         status_code=exc.status_code,
-        content={"code": exc.error_code, "message": exc.message},
+        content={
+            "error_code": exc.error_code,
+            "message": exc.message,
+        },
     )
 
 
-# Personnalisation de l’OpenAPI avec BearerAuth
+# 2) Erreurs de validation des requêtes (Pydantic / FastAPI)
+@app.exception_handler(RequestValidationError)
+async def handle_validation_error(request: Request, exc: RequestValidationError):
+    # la liste des messages (ex: "field required", "ensure this value..."), jointe en une seule chaîne
+    messages = [err["msg"] for err in exc.errors()]
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error_code": "validation_error",
+            "message": ", ".join(messages),
+        },
+    )
+
+
+# 3) Erreurs HTTP “classiques” (404, etc.), pour unifier le format
+@app.exception_handler(StarletteHTTPException)
+async def handle_http_exception(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error_code": "http_error",
+            "message": exc.detail if isinstance(exc.detail, str) else str(exc.detail),
+        },
+    )
+
+
+# 4) (Optionnel) Catch-all pour éviter les traces brutes
+@app.exception_handler(Exception)
+async def handle_unexpected_error(request: Request, exc: Exception):
+    # Vous pouvez logger exc ici
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error_code": "internal_error",
+            "message": "Internal server error",
+        },
+    )
+
+
+# Personnalisation de l’OpenAPI pour BearerAuth…
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -93,11 +132,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Inclusion des routers avec prefix versionné
-API_V1 = settings.API_V1_STR     # ex. "/api/v1"
+# Vos routers
+API_V1 = settings.API_V1_STR
 app.include_router(auth_route.router, prefix=API_V1, tags=["Auth"])
 app.include_router(body_route.router, prefix=API_V1, tags=["Body"])
 app.include_router(wardrobe_route.router, prefix=API_V1, tags=["Wardrobe"])
-app.include_router(tryon_route.router, prefix=API_V1, tags=["Try‑On"])
+app.include_router(tryon_route.router, prefix=API_V1, tags=["Try-On"])
 app.include_router(health_route.router, prefix=API_V1, tags=["Health"])

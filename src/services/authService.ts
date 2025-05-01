@@ -16,6 +16,11 @@ export interface SignupData {
     answers: Record<string, string>;
 }
 
+export interface AuthGoogleResponse {
+    token: string;
+    message: string;
+}
+
 export interface SinginData {
     email: string;
     password: string;
