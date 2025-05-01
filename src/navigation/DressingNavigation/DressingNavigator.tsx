@@ -14,18 +14,31 @@ import {
     LayoutChangeEvent,
     TouchableOpacity,
     StyleSheet,
+    ImageSourcePropType,
 } from 'react-native';
 import { lightTheme } from '../../styles/theme';
 import { ScrollView } from 'react-native-gesture-handler';
 import { DressingClothNavigator } from './DressingClothNavigation';
-import { DressingClothGaleryScreen } from '../../screens/DressingScreen/DressingClothsScreen';
+import {
+    DressingClothGaleryScreen,
+    DressingClothGaleryScreenProps,
+} from '../../screens/DressingScreen/DressingClothsScreen';
 
 type TabParamList = {
     Cloths: undefined;
     Outfits: undefined;
 };
 
-const DressingStack = createStackNavigator();
+export type DressingNavigatorParamList = {
+    Dressing: undefined;
+    DressingClothGalery: {
+        title: string;
+        subtitle: string;
+        clothes: ImageSourcePropType[];
+    };
+};
+
+const DressingStack = createStackNavigator<DressingNavigatorParamList>();
 
 export const DressingNavigator = () => {
     return (

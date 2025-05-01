@@ -63,14 +63,17 @@ const data_personal_category: TypeDataPersonalCategory[] = [
 export function DressingHomeScreen({ navigation }: any) {
     const [searchQuery, setSearchQuery] = React.useState('');
 
-    const navigateToClothGalery = () => {
+    const navigateToClothGalery = (
+        title: string,
+        subtitle: string,
+        clothes: ImageSourcePropType[],
+    ) => {
         navigation.push('DressingClothGalery', {
-            param: 'value',
+            title: title,
+            subtitle: subtitle,
+            clothes: clothes,
         });
     };
-    // const dressing_box_categories = data_personal_category.map((items, index) => {
-    //     return <DressingBoxCategory key={index}/>
-    // })
 
     return (
         <View>
@@ -132,7 +135,13 @@ export function DressingHomeScreen({ navigation }: any) {
                     return (
                         <TouchableOpacity
                             style={{ paddingTop: 5 }}
-                            onPress={navigateToClothGalery}
+                            onPress={() =>
+                                navigateToClothGalery(
+                                    realItem.name,
+                                    `${realItem.nb_clothes} vêtements`,
+                                    realItem.cloths,
+                                )
+                            }
                         >
                             <DressingBoxCategory
                                 name_category={realItem.name}

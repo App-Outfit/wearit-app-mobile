@@ -7,12 +7,15 @@ import {
     TouchableOpacity,
     FlatList,
     Image,
+    TouchableWithoutFeedback,
 } from 'react-native';
 import { AddButton } from '../../components/core/Buttons';
 import DropdownMenu from '../../components/dressing/DropDownMenu';
 import { lightTheme } from '../../styles/theme';
+import { DressingNavigatorParamList } from '../../navigation/DressingNavigation/DressingNavigator';
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const img1 = require('../../assets/images/exemples/clothing.jpg');
 const img2 = require('../../assets/images/exemples/clothing2.jpg');
@@ -52,16 +55,26 @@ const data = [
     },
 ];
 
-export function DressingClothGaleryScreen({}) {
+export type DressingClothGaleryScreenProps = NativeStackScreenProps<
+    DressingNavigatorParamList,
+    'DressingClothGalery'
+>;
+export function DressingClothGaleryScreen({
+    route,
+}: DressingClothGaleryScreenProps) {
+    const { title, subtitle, clothes } = route.params;
+
+    const addCloths = () => console.log('add clothes');
+
     return (
         <View style={styles.dressingScreen}>
             <View style={styles.titleBox}>
                 <View style={styles.titleTextBox}>
-                    <Text style={styles.title}>Mes jeans préférés</Text>
-                    <Text style={styles.subtitle}>09 vetement</Text>
+                    <Text style={styles.title}>{title}</Text>
+                    <Text style={styles.subtitle}>{subtitle}</Text>
                 </View>
                 <TouchableOpacity>
-                    <AddButton onPress={() => console.log('hello')} />
+                    <AddButton onPress={addCloths} />
                 </TouchableOpacity>
             </View>
 
@@ -73,19 +86,29 @@ export function DressingClothGaleryScreen({}) {
             </View>
 
             {/*Cloths Galery*/}
-            <FlatList
-                data={data}
-                keyExtractor={(itm) => itm.id}
-                numColumns={2}
-                contentContainerStyle={{ padding: 8, paddingBottom: 180 }}
-                columnWrapperStyle={{ justifyContent: 'space-between' }}
-                renderItem={({ item, index }) => {
-                    return <ClothItem source={item.img} />;
-                }}
-                showsVerticalScrollIndicator={false}
-                overScrollMode="never"
-                indicatorStyle="black"
-            />
+            {clothes.length === 0 ? (
+                <View style={styles.emptyBox}>
+                    <TouchableOpacity>
+                        <Text style={styles.emptyBoxText} onPress={addCloths}>
+                            Ajouter des Vêtements
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <FlatList
+                    data={clothes}
+                    keyExtractor={(_, idx) => idx.toString()}
+                    numColumns={2}
+                    contentContainerStyle={{ padding: 8, paddingBottom: 180 }}
+                    columnWrapperStyle={{ justifyContent: 'space-between' }}
+                    renderItem={({ item, index }) => {
+                        return <ClothItem source={item} />;
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    overScrollMode="never"
+                    indicatorStyle="black"
+                />
+            )}
         </View>
     );
 }
@@ -119,6 +142,20 @@ const styles = StyleSheet.create({
     filterBox: {
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
+    },
+    emptyBox: {
+        height: '80%',
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        // borderColor: "black",
+        // borderWidth: 1
+    },
+    emptyBoxText: {
+        alignSelf: 'center',
+        fontSize: 18,
+        fontWeight: 600,
+        color: lightTheme.colors.primary,
     },
 });
 
