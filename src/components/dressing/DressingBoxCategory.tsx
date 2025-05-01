@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { AddCircleButton } from '../core/Buttons';
 
 type DressinBoxCategoryProps = {
     name_category: string;
@@ -68,14 +69,6 @@ export const DressingBoxCategory: React.FC<DressinBoxCategoryProps> = ({
         </View>
     );
 };
-
-export const AddCircleButton: React.FC<{ onPress: () => void }> = ({
-    onPress,
-}) => (
-    <TouchableOpacity style={styles.addButton} onPress={onPress}>
-        <Entypo name="plus" size={24} color="#fff" />
-    </TouchableOpacity>
-);
 
 const styles = StyleSheet.create({
     boxContainer: {
@@ -156,13 +149,5 @@ const styles = StyleSheet.create({
         left: 12,
         fontSize: 12,
         color: '#7A7A7A',
-    },
-    addButton: {
-        width: 26,
-        height: 26,
-        borderRadius: 24,
-        backgroundColor: '#C839B8',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 });

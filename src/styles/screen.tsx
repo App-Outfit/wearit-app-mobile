@@ -3,7 +3,10 @@ import { StackNavigationOptions } from '@react-navigation/stack';
 export const screenOptions: StackNavigationOptions = {
     headerTitleAlign: 'center',
     headerStyle: {
-        boxShadow: '0 0px 0px rgba(0, 0, 0, 0.1)',
+        borderBottomWidth: 0,
+        elevation: 0,
+        shadowOpacity: 0,
+        backgroundColor: '#fff',
     },
     cardStyle: {
         backgroundColor: '#ffffff',

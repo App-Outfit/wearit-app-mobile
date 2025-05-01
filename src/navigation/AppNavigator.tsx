@@ -8,7 +8,7 @@ import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
 import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScreen';
 
 import { AuthNavigator } from './AuthNavigator';
-import { DressingNavigator } from './DressingNavigator';
+import { DressingNavigator } from './DressingNavigation/DressingNavigator';
 import MainTabNavigator from './NavigationComponents/MainTabNavigator';
 
 const Stack = createStackNavigator();

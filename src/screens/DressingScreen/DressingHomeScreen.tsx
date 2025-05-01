@@ -5,15 +5,17 @@ import {
     StyleSheet,
     FlatList,
     ImageSourcePropType,
+    TouchableOpacity,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import MainTabNavigator from '../../navigation/NavigationComponents/MainTabNavigator';
 import { Searchbar, Menu, Button, IconButton } from 'react-native-paper';
 
-import Icon from 'react-native-vector-icons/Entypo';
 import { DressingBoxCategory } from '../../components/dressing/DressingBoxCategory';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { lightTheme } from '../../styles/theme';
+import { useNavigation } from '@react-navigation/native';
+import DropdownMenu from '../../components/dressing/DropDownMenu';
 
 type TypeDataPersonalCategory = {
     id: string;
@@ -58,9 +60,14 @@ const data_personal_category: TypeDataPersonalCategory[] = [
     },
 ];
 
-export function DressingHomeScreen() {
+export function DressingHomeScreen({ navigation }: any) {
     const [searchQuery, setSearchQuery] = React.useState('');
 
+    const navigateToClothGalery = () => {
+        navigation.push('DressingClothGalery', {
+            param: 'value',
+        });
+    };
     // const dressing_box_categories = data_personal_category.map((items, index) => {
     //     return <DressingBoxCategory key={index}/>
     // })
@@ -123,11 +130,16 @@ export function DressingHomeScreen() {
 
                     const realItem = data_personal_category[index - 1];
                     return (
-                        <DressingBoxCategory
-                            name_category={realItem.name}
-                            nb_clothes={realItem.nb_clothes}
-                            imgs={realItem.cloths}
-                        />
+                        <TouchableOpacity
+                            style={{ paddingTop: 5 }}
+                            onPress={navigateToClothGalery}
+                        >
+                            <DressingBoxCategory
+                                name_category={realItem.name}
+                                nb_clothes={realItem.nb_clothes}
+                                imgs={realItem.cloths}
+                            />
+                        </TouchableOpacity>
                     );
                 }}
                 showsVerticalScrollIndicator={false}
@@ -180,47 +192,3 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
 });
-
-export default function DropdownMenu() {
-    const [visible, setVisible] = React.useState(false);
-
-    return (
-        <Menu
-            visible={visible}
-            onDismiss={() => setVisible(false)}
-            anchor={
-                <Button
-                    onPress={() => setVisible(true)}
-                    style={{
-                        borderWidth: 1.5,
-                        borderColor: '#E6E6E6',
-                        borderRadius: 8,
-                    }}
-                >
-                    <View style={{ paddingRight: 3 }}>
-                        <Icon name="sound-mix" size={25} color="black" />
-                    </View>
-                    <View style={{ paddingLeft: 3 }}>
-                        <Icon
-                            name="chevron-small-down"
-                            size={25}
-                            color="#999999"
-                        />
-                    </View>
-                </Button>
-            }
-            anchorPosition="bottom"
-            statusBarHeight={40}
-            contentStyle={{
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingHorizontal: 0,
-                backgroundColor: 'white',
-            }}
-        >
-            <Menu.Item onPress={() => {}} title="Option 1" />
-            <Menu.Item onPress={() => {}} title="Option 2" />
-            <Menu.Item onPress={() => {}} title="Option 3" />
-        </Menu>
-    );
-}

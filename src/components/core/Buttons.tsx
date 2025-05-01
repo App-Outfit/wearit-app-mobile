@@ -1,8 +1,11 @@
 import * as React from 'react';
 import { Button } from 'react-native-elements';
-import { StyleSheet, TextStyle } from 'react-native';
+import { StyleSheet, TextStyle, TouchableOpacity } from 'react-native';
 
 import { styles } from './Buttons.styles';
+import Entypo from 'react-native-vector-icons/Entypo';
+import { IconButton } from 'react-native-paper';
+import { lightTheme } from '../../styles/theme';
 
 type ButtonProps = {
     children: string;
@@ -64,3 +67,40 @@ export const CButton: React.FC<ButtonProps> = ({
         />
     );
 };
+
+export const AddCircleButton: React.FC<{ onPress: () => void }> = ({
+    onPress,
+}) => (
+    <TouchableOpacity style={styles2.addCircleButton} onPress={onPress}>
+        <Entypo name="plus" size={24} color="#fff" />
+    </TouchableOpacity>
+);
+
+export const AddButton = ({ onPressFunction }: any) => {
+    return (
+        <IconButton
+            style={styles2.addButton}
+            icon="plus"
+            iconColor="white"
+            size={28}
+            onPress={onPressFunction}
+        />
+    );
+};
+
+const styles2 = StyleSheet.create({
+    addCircleButton: {
+        width: 26,
+        height: 26,
+        borderRadius: 24,
+        backgroundColor: '#C839B8',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    addButton: {
+        backgroundColor: lightTheme.colors.primary,
+        width: 50,
+        height: 50,
+        borderRadius: 8,
+    },
+});

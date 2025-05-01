@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { DressingHomeScreen } from '../screens/DressingScreen/DressingHomeScreen';
-import { screenOptions } from '../styles/screen';
+import { DressingHomeScreen } from '../../screens/DressingScreen/DressingHomeScreen';
+import { screenOptions } from '../../styles/screen';
 
 import {
     MaterialTopTabBarProps,
@@ -15,15 +15,15 @@ import {
     TouchableOpacity,
     StyleSheet,
 } from 'react-native';
-import { lightTheme } from '../styles/theme';
+import { lightTheme } from '../../styles/theme';
 import { ScrollView } from 'react-native-gesture-handler';
+import { DressingClothNavigator } from './DressingClothNavigation';
+import { DressingClothGaleryScreen } from '../../screens/DressingScreen/DressingClothsScreen';
 
 type TabParamList = {
-    Categories: undefined;
+    Cloths: undefined;
     Outfits: undefined;
 };
-
-// Here all screens refer to Auth Screens
 
 const DressingStack = createStackNavigator();
 
@@ -33,12 +33,20 @@ export const DressingNavigator = () => {
             <DressingStack.Screen
                 name="Dressing"
                 component={CategoryOutfitNavigator}
-                options={
-                    {
-                        headerShown: true,
-                        title: 'Dressing',
-                    } && screenOptions
-                }
+                options={{
+                    ...screenOptions,
+                    headerShown: true,
+                    title: 'Dressing',
+                }}
+            />
+            <DressingStack.Screen
+                name="DressingClothGalery"
+                component={DressingClothGaleryScreen}
+                options={{
+                    ...screenOptions,
+                    headerShown: true,
+                    title: 'Dressing',
+                }}
             />
         </DressingStack.Navigator>
     );
@@ -51,7 +59,7 @@ export default function CategoryOutfitNavigator() {
 
     return (
         <Tab.Navigator
-            initialRouteName="Categories"
+            initialRouteName="Cloths"
             backBehavior="history"
             tabBar={(props) => <TabBar {...props} />}
             screenOptions={{
@@ -64,7 +72,7 @@ export default function CategoryOutfitNavigator() {
             }}
         >
             <Tab.Screen
-                name="Categories"
+                name="Cloths"
                 component={DressingHomeScreen}
                 options={{
                     tabBarLabel: 'Catégories',

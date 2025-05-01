@@ -15,7 +15,7 @@ import { HomeScreen } from '../../screens/HomeScreen/HomeScreen';
 // import MarketplaceScreen from '../../screens/MarketplaceScreen/MarketplaceScreen';
 // import VirtualTryOnScreen from '../screens/VirtualTryOnScreen/VirtualTryOnScreen';
 import { DressingHomeScreen } from '../../screens/DressingScreen/DressingHomeScreen';
-import { DressingNavigator } from '../DressingNavigator';
+import { DressingNavigator } from '../DressingNavigation/DressingNavigator';
 import { lightTheme } from '../../styles/theme';
 // import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 
