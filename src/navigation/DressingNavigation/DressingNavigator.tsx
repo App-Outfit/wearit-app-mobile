@@ -23,6 +23,8 @@ import {
     DressingClothGaleryScreen,
     DressingClothGaleryScreenProps,
 } from '../../screens/DressingScreen/DressingClothsScreen';
+import { DressingOutfitScreen } from '../../screens/DressingScreen/DressingOutfit';
+import { DressingOutfitDetail } from '../../screens/DressingScreen/DressingOutfitDetail';
 
 type TabParamList = {
     Cloths: undefined;
@@ -36,6 +38,7 @@ export type DressingNavigatorParamList = {
         subtitle: string;
         clothes: ImageSourcePropType[];
     };
+    DressingOutfitDetail: any;
 };
 
 const DressingStack = createStackNavigator<DressingNavigatorParamList>();
@@ -59,6 +62,13 @@ export const DressingNavigator = () => {
                     ...screenOptions,
                     headerShown: true,
                     title: 'Dressing',
+                }}
+            />
+            <DressingStack.Screen
+                name="DressingOutfitDetail"
+                component={DressingOutfitDetail}
+                options={{
+                    headerShown: false,
                 }}
             />
         </DressingStack.Navigator>
@@ -94,11 +104,7 @@ export default function CategoryOutfitNavigator() {
             />
             <Tab.Screen
                 name="Outfits"
-                component={() => (
-                    <View>
-                        <Text>Hello outfit</Text>
-                    </View>
-                )}
+                component={DressingOutfitScreen}
                 options={{
                     tabBarLabel: 'Outfits',
                     tabBarLabelStyle: { textAlign: 'center' },
