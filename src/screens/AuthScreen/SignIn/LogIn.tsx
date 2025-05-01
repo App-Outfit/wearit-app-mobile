@@ -1,4 +1,5 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import * as React from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
     Text,
     TextInput,

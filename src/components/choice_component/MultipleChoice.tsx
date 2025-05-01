@@ -1,6 +1,6 @@
 // MultiChoice.tsx
+import * as React from 'react';
 import { color } from '@rneui/base';
-import React from 'react';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { useTheme } from 'react-native-paper';
 

@@ -1,5 +1,6 @@
 // Question1Step.tsx
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import {
     ProgressBar,
@@ -82,7 +83,7 @@ const Question3Step: React.FC<Question1StepProps> = ({
                 <UniqueChoice
                     options={options}
                     selected={selected[0]}
-                    onChange={(key) => setSelected([key])}
+                    onChange={(key: any) => setSelected([key])}
                 />
 
                 <Button

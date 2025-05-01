@@ -1,5 +1,5 @@
 // UniqueChoice.tsx
-import React from 'react';
+import * as React from 'react';
 import { View, StyleSheet, Pressable, Text } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { Option } from './MultipleChoice';

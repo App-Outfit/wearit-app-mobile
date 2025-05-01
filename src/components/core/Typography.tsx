@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Text, StyleSheet, TextStyle } from 'react-native';
 import typographyStyles from './Typography.styles';
 

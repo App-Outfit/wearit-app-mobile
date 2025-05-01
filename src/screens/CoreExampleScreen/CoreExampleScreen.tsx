@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Header, BodyText } from '../../components/core/Typography';
 import { CButton } from '../../components/core/Buttons';
