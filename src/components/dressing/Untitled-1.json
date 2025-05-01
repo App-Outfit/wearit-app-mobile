@@ -1,0 +1,72 @@
+{
+  "name": "wearit-app-mobile",
+  "license": "0BSD",
+  "version": "1.0.0",
+  "main": "./src/index.tsx",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "release:start": "./scripts/start_release.sh",
+    "release:stop": "./scripts/stop_release.sh",
+    "docs:build": "make -C docs html",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "npx prettier --write",
+      "npx eslint --fix"
+    ]
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-navigation/bottom-tabs": "^7.3.10",
+    "@react-navigation/material-top-tabs": "^7.2.10",
+    "@react-navigation/stack": "^7.0.18",
+    "@reduxjs/toolkit": "^2.7.0",
+    "@rneui/base": "^4.0.0-rc.7",
+    "@rneui/themed": "^4.0.0-rc.8",
+    "axios": "^1.8.4",
+    "expo": "~52.0.11",
+    "expo-font": "~13.0.1",
+    "expo-linear-gradient": "~14.0.1",
+    "expo-network": "~7.0.5",
+    "expo-status-bar": "~2.0.0",
+    "lottie-react-native": "7.1.0",
+    "react": "18.3.1",
+    "react-native": "0.76.3",
+    "react-native-elements": "^3.4.3",
+    "react-native-gesture-handler": "~2.20.2",
+    "react-native-get-random-values": "~1.11.0",
+    "react-native-linear-gradient": "^2.8.3",
+    "react-native-paper": "^5.13.3",
+    "react-native-reanimated": "~3.16.1",
+    "react-native-safe-area-context": "^4.12.0",
+    "react-native-screens": "~4.1.0",
+    "react-native-tab-view": "^4.0.10",
+    "react-native-vector-icons": "^10.2.0",
+    "react-navigation": "^5.0.0",
+    "react-redux": "^9.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/react": "~18.3.12",
+    "@types/react-native": "^0.73.0",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-native": "^4.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.4.2",
+    "typedoc": "^0.27.3",
+    "typedoc-plugin-markdown": "^4.3.1",
+    "typescript": "^5.3.3"
+  },
+  "private": true
+}
