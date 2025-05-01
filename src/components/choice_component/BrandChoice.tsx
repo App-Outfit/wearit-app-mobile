@@ -1,8 +1,7 @@
 // BrandChoice.tsx
-import React from 'react';
+import * as React from 'react';
 import { View, StyleSheet, Text, Pressable, Image } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import type { SvgProps } from 'react-native-svg';
 import { BrandIcons } from '../../assets/index';
 
 export interface Option {

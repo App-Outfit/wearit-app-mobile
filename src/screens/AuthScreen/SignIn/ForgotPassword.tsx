@@ -1,4 +1,5 @@
-import React, { useCallback, useRef, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Header } from '../../../components/core/Typography';
 import { lightTheme } from '../../../styles/theme';

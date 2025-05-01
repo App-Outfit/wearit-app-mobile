@@ -1,4 +1,5 @@
-import React, { useState, forwardRef } from 'react';
+import * as React from 'react';
+import { useState, forwardRef } from 'react';
 import { StyleSheet } from 'react-native';
 import { Input, normalize } from 'react-native-elements';
 import { lightTheme } from '../../styles/theme';

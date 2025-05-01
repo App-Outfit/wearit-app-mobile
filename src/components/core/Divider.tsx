@@ -1,5 +1,4 @@
-import React from 'react';
-
+import * as React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { lightTheme } from '../../styles/theme';
 

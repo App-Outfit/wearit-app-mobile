@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { DressingHomeScreen } from '../screens/DressingScreen/DressingHomeScreen';
 import { screenOptions } from '../styles/screen';

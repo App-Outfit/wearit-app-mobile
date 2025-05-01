@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { View, StyleSheet, GestureResponderEvent } from 'react-native';
 import { ButtonGroup, normalize } from '@rneui/themed';
 import { lightTheme } from '../../styles/theme';

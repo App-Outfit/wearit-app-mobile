@@ -1,5 +1,5 @@
 // MainTabNavigator.tsx
-import React from 'react';
+import * as React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import {

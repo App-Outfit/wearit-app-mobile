@@ -1,5 +1,6 @@
 //SuccessStep.tsx
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import {
     ProgressBar,
