@@ -19,7 +19,7 @@ import {
     useTheme,
 } from 'react-native-paper';
 
-import { useAppDispatch } from '../../../../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setAge } from '../../../slices/onboardingSlice';
 import type { OnboardingStepProps } from '../types';
 
@@ -34,7 +34,8 @@ export default function AgeStep({
     currentStep = 1,
     totalSteps = 1,
 }: OnboardingStepProps) {
-    const [ageRange, setAgeRange] = useState<string>('18-24');
+    const onboardAge = useAppSelector((s) => s.onboarding.age ?? '18-24');
+    const [ageRange, setAgeRange] = useState<string>(onboardAge);
     const { colors } = useTheme();
     const dispatch = useAppDispatch();
     const wheelRef = useRef<FlatList<string>>(null);

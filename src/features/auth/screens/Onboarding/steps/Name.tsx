@@ -10,10 +10,9 @@ import {
     Button,
     useTheme,
 } from 'react-native-paper';
-import { useAppDispatch } from '../../../../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setName } from '../../../slices/onboardingSlice';
 import type { OnboardingStepProps } from '../types';
-import { buildCreateApi } from '@reduxjs/toolkit/query';
 
 export default function NameStep({
     onNext,
@@ -21,7 +20,8 @@ export default function NameStep({
     currentStep = 1,
     totalSteps = 1,
 }: OnboardingStepProps) {
-    const [name, setLocalName] = useState('');
+    const onboardName = useAppSelector((s) => s.onboarding.name ?? '');
+    const [name, setLocalName] = useState(onboardName);
     const dispatch = useAppDispatch();
     const { colors } = useTheme();
     const progress = (currentStep ?? 1) / (totalSteps ?? 1);

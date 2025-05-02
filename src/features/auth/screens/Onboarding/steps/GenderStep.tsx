@@ -11,7 +11,7 @@ import {
     useTheme,
 } from 'react-native-paper';
 
-import { useAppDispatch } from '../../../../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setGender } from '../../../slices/onboardingSlice';
 import type { OnboardingStepProps } from '../types';
 
@@ -27,7 +27,8 @@ export default function GenderStep({
     currentStep = 1,
     totalSteps = 1,
 }: OnboardingStepProps) {
-    const [genre, setGenre] = useState<string>('');
+    const onboardGenre = useAppSelector((s) => s.onboarding.gender ?? '');
+    const [genre, setGenre] = useState<string>(onboardGenre);
     const { colors } = useTheme();
     const dispatch = useAppDispatch();
     const progress = currentStep / totalSteps;

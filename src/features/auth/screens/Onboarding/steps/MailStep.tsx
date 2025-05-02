@@ -35,8 +35,8 @@ export default function MailStep({
     const { status, error, token } = useAppSelector((s) => s.auth);
     const onboarding = useAppSelector((s) => s.onboarding);
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState(onboarding.email ?? '');
+    const [password, setPassword] = useState(onboarding.password ?? '');
     const [emailTouched, setEmailTouched] = useState(false);
     const [passwordTouched, setPasswordTouched] = useState(false);
 

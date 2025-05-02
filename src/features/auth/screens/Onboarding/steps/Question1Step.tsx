@@ -19,7 +19,7 @@ import {
 import MultiChoice, {
     Option,
 } from '../../../../../components/choice_component/MultipleChoice';
-import { useAppDispatch } from '../../../../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setAnswers1 } from '../../../slices/onboardingSlice';
 import type { OnboardingStepProps } from '../types';
 
@@ -52,7 +52,8 @@ export default function Question1Step({
     currentStep = 1,
     totalSteps = 1,
 }: OnboardingStepProps) {
-    const [selected, setSelected] = useState<string[]>([]);
+    const onboardAnswers1 = useAppSelector((s) => s.onboarding.answers1 ?? []);
+    const [selected, setSelected] = useState<string[]>(onboardAnswers1);
     const { colors } = useTheme();
     const dispatch = useAppDispatch();
     const progress = currentStep / totalSteps;

@@ -13,7 +13,7 @@ import {
 import MultiChoice, {
     Option,
 } from '../../../../../components/choice_component/MultipleChoice';
-import { useAppDispatch } from '../../../../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setAnswers2 } from '../../../slices/onboardingSlice';
 import type { OnboardingStepProps } from '../types';
 
@@ -40,7 +40,8 @@ export default function Question2Step({
     currentStep = 1,
     totalSteps = 1,
 }: OnboardingStepProps) {
-    const [selected, setSelected] = useState<string[]>([]);
+    const onboardAnswers2 = useAppSelector((s) => s.onboarding.answers2 ?? []);
+    const [selected, setSelected] = useState<string[]>(onboardAnswers2);
     const { colors } = useTheme();
     const dispatch = useAppDispatch();
     const progress = currentStep / totalSteps;

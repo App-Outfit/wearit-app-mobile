@@ -21,7 +21,7 @@ import BrandChoice, {
     Option,
 } from '../../../../../components/choice_component/BrandChoice';
 import { BrandIcons } from '../../../../../assets/index';
-import { useAppDispatch } from '../../../../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setBrands } from '../../../slices/onboardingSlice';
 import type { OnboardingStepProps } from '../types';
 
@@ -33,11 +33,12 @@ const options: Option[] = Object.keys(BrandIcons).map((key) => ({
 
 export default function BrandStep({
     onNext,
-    onBack, // tu peux l’appeler si tu ajoutes un bouton « Précédent »
-    currentStep = 7, // correspond à l’étape 7 dans ton wizard
+    onBack,
+    currentStep = 7,
     totalSteps = 9,
 }: OnboardingStepProps) {
-    const [selected, setSelected] = useState<string[]>([]);
+    const onboardBrands = useAppSelector((s) => s.onboarding.brands ?? []);
+    const [selected, setSelected] = useState<string[]>(onboardBrands);
     const { colors } = useTheme();
     const dispatch = useAppDispatch();
     const progress = currentStep / totalSteps;
