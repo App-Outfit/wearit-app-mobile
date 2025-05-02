@@ -96,7 +96,7 @@ export const LogIn: React.FC = ({ navigation }: any) => {
                     keyboardType="email-address"
                     returnKeyType="next"
                     onSubmitEditing={() => passwordRef.current!.focus()}
-                    submitBehavior="submit"
+                    // submitBehavior="submit"
                     isValid={emailValid}
                     onChangeText={handleEmailChange}
                     errorMessage={errorEmail}

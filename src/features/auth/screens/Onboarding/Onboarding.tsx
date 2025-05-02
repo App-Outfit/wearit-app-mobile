@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Button, Text } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
-import {
-    setName,
-    setGender,
-    setAge,
-    setAnswers1,
-    setAnswers2,
-    setAnswers3,
-    setBrands,
-    setEmail,
-    setPassword,
-    resetOnboarding,
-} from '../../slices/onboardingSlice';
-import { signupUser, clearStatus } from '../../slices/authSlice';
-import type { SignupData } from '../../types/authTypes';
 
 // Vos étapes, dans l’ordre :
 import NameStep from './steps/Name';

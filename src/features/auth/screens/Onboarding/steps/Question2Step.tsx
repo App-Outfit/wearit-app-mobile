@@ -1,20 +1,12 @@
-// Question1Step.tsx
-import * as React from 'react';
-import { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import {
-    ProgressBar,
-    Title,
-    Subheading,
-    Button,
-    useTheme,
-} from 'react-native-paper';
-
+// src/features/auth/screens/Onboarding/steps/Question2Step.tsx
+import React, { useState } from 'react';
+import { useTheme } from 'react-native-paper';
 import MultiChoice, {
     Option,
 } from '../../../../../components/choice_component/MultipleChoice';
 import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setAnswers2 } from '../../../slices/onboardingSlice';
+import { StepLayout } from '../StepLayout';
 import type { OnboardingStepProps } from '../types';
 
 const options: Option[] = [
@@ -26,8 +18,14 @@ const options: Option[] = [
         key: 'combine',
         label: "👕 Visualiser comment mes vêtements s'associent ensemble.",
     },
-    { key: 'organize', label: '🗂️ Mieux organiser et gérer ma garde-robe.' },
-    { key: 'inspire', label: "🎨 Découvrir mon style et m'inspirer." },
+    {
+        key: 'organize',
+        label: '🗂️ Mieux organiser et gérer ma garde-robe.',
+    },
+    {
+        key: 'inspire',
+        label: "🎨 Découvrir mon style et m'inspirer.",
+    },
     {
         key: 'mixbrands',
         label: '🛍️ Mixer des habits de marques avec ceux que je possède.',
@@ -37,116 +35,34 @@ const options: Option[] = [
 export default function Question2Step({
     onNext,
     onBack,
-    currentStep = 1,
-    totalSteps = 1,
+    currentStep,
+    totalSteps,
 }: OnboardingStepProps) {
-    const onboardAnswers2 = useAppSelector((s) => s.onboarding.answers2 ?? []);
-    const [selected, setSelected] = useState<string[]>(onboardAnswers2);
-    const { colors } = useTheme();
     const dispatch = useAppDispatch();
-    const progress = currentStep / totalSteps;
+    const stored = useAppSelector((s) => s.onboarding.answers2 ?? []);
+    const [selected, setSelected] = useState<string[]>(stored);
+    const { colors } = useTheme();
+    const progress = (currentStep ?? 1) / (totalSteps ?? 1);
 
-    const handlePress = () => {
+    const handleNext = () => {
         dispatch(setAnswers2(selected));
-        onNext();
+        onNext!();
     };
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        <StepLayout
+            title="Que veux-tu faire principalement avec WearIT ?"
+            subtitle="Cela nous permet d'en savoir plus sur toi"
+            progress={progress}
+            onNext={handleNext}
+            onBack={onBack}
+            disableNext={selected.length === 0}
         >
-            <ProgressBar
-                progress={progress}
-                color={colors.primary}
-                style={styles.progressBar}
+            <MultiChoice
+                options={options}
+                selected={selected}
+                onChange={setSelected}
             />
-
-            <View style={styles.content}>
-                <View>
-                    <Title style={styles.title}>
-                        Que veux-tu faire principalement avec WearIT ?
-                    </Title>
-                    <Subheading style={styles.subtitle}>
-                        Cela nous permet d'en savoir plus sur toi
-                    </Subheading>
-                </View>
-
-                <MultiChoice
-                    options={options}
-                    selected={selected}
-                    onChange={setSelected}
-                />
-
-                <View>
-                    <Button
-                        mode="contained"
-                        disabled={selected.length === 0}
-                        onPress={handlePress}
-                        contentStyle={styles.buttonContent}
-                        style={[styles.button]}
-                    >
-                        Suivant
-                    </Button>
-                    <Button
-                        mode="outlined"
-                        onPress={onBack}
-                        contentStyle={styles.buttonContent}
-                        style={[styles.button, styles.buttonMargin]}
-                    >
-                        Retour
-                    </Button>
-                </View>
-            </View>
-        </KeyboardAvoidingView>
+        </StepLayout>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        justifyContent: 'space-between',
-        paddingVertical: 50,
-        paddingHorizontal: 20,
-    },
-    progressBar: {
-        height: 10,
-        marginTop: 20,
-        marginBottom: 50,
-        borderRadius: 5,
-    },
-    content: {
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    title: {
-        textAlign: 'center',
-        fontFamily: 'Poppins-SemiBold',
-        fontSize: 24,
-        marginBottom: 8,
-    },
-    subtitle: {
-        textAlign: 'center',
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 24,
-    },
-    question: {
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 24,
-    },
-    button: {
-        borderRadius: 24,
-        width: '80%',
-        marginInline: 'auto',
-        marginBottom: 8,
-    },
-    buttonMargin: {
-        marginBottom: 50,
-    },
-    buttonContent: {
-        height: 48,
-    },
-});

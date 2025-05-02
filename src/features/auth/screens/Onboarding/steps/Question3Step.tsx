@@ -1,20 +1,11 @@
-// Question1Step.tsx
-import * as React from 'react';
-import { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import {
-    ProgressBar,
-    Title,
-    Subheading,
-    Button,
-    useTheme,
-} from 'react-native-paper';
-
-import { Option } from '../../../../../components/choice_component/MultipleChoice';
+// src/features/auth/screens/Onboarding/steps/Question3Step.tsx
+import React, { useState } from 'react';
+import { useTheme } from 'react-native-paper';
 import UniqueChoice from '../../../../../components/choice_component/UniqueChoice';
-
+import type { Option } from '../../../../../components/choice_component/MultipleChoice';
 import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setAnswers3 } from '../../../slices/onboardingSlice';
+import { StepLayout } from '../StepLayout';
 import type { OnboardingStepProps } from '../types';
 
 const options: Option[] = [
@@ -39,116 +30,34 @@ const options: Option[] = [
 export default function Question3Step({
     onNext,
     onBack,
-    currentStep = 1,
-    totalSteps = 1,
+    currentStep,
+    totalSteps,
 }: OnboardingStepProps) {
-    const onboardAnswers3 = useAppSelector((s) => s.onboarding.answers3 ?? []);
-    const [selected, setSelected] = useState<string[]>(onboardAnswers3);
-    const { colors } = useTheme();
     const dispatch = useAppDispatch();
-    const progress = currentStep / totalSteps;
+    const stored = useAppSelector((s) => s.onboarding.answers3 ?? []);
+    const [selected, setSelected] = useState<string[]>(stored);
+    const { colors } = useTheme();
+    const progress = (currentStep ?? 1) / (totalSteps ?? 1);
 
-    const handlePress = () => {
+    const handleNext = () => {
         dispatch(setAnswers3(selected));
-        onNext();
+        onNext!();
     };
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        <StepLayout
+            title="Comment décrirais-tu ton rapport aux vêtements ?"
+            subtitle="Cela nous permet d'en savoir plus sur toi"
+            progress={progress}
+            onNext={handleNext}
+            onBack={onBack}
+            disableNext={selected.length === 0}
         >
-            <ProgressBar
-                progress={progress}
-                color={colors.primary}
-                style={styles.progressBar}
+            <UniqueChoice
+                options={options}
+                selected={selected[0]}
+                onChange={(key) => setSelected([key])}
             />
-
-            <View style={styles.content}>
-                <View>
-                    <Title style={styles.title}>
-                        Comment décrirais-tu ton rapport aux vêtements ?
-                    </Title>
-                    <Subheading style={styles.subtitle}>
-                        Cela nous permet d'en savoir plus sur toi
-                    </Subheading>
-                </View>
-
-                <UniqueChoice
-                    options={options}
-                    selected={selected[0]}
-                    onChange={(key) => setSelected([key])}
-                />
-
-                <View>
-                    <Button
-                        mode="contained"
-                        disabled={selected.length === 0}
-                        onPress={handlePress}
-                        contentStyle={styles.buttonContent}
-                        style={[styles.button]}
-                    >
-                        Suivant
-                    </Button>
-                    <Button
-                        mode="outlined"
-                        onPress={onBack}
-                        contentStyle={styles.buttonContent}
-                        style={[styles.button, styles.buttonMargin]}
-                    >
-                        Retour
-                    </Button>
-                </View>
-            </View>
-        </KeyboardAvoidingView>
+        </StepLayout>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        justifyContent: 'space-between',
-        paddingVertical: 50,
-        paddingHorizontal: 20,
-    },
-    progressBar: {
-        height: 10,
-        marginTop: 20,
-        marginBottom: 50,
-        borderRadius: 5,
-    },
-    content: {
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    title: {
-        textAlign: 'center',
-        fontFamily: 'Poppins-SemiBold',
-        fontSize: 24,
-        marginBottom: 8,
-    },
-    subtitle: {
-        textAlign: 'center',
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 24,
-    },
-    question: {
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 24,
-    },
-    button: {
-        borderRadius: 24,
-        width: '80%',
-        marginInline: 'auto',
-        marginBottom: 8,
-    },
-    buttonMargin: {
-        marginBottom: 50,
-    },
-    buttonContent: {
-        height: 48,
-    },
-});
