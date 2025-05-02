@@ -145,14 +145,14 @@ export function DressingOutfitDetail({
                                     title={item.name}
                                     subtitle={`Taille ${item.size}`}
                                     price={item.price}
-                                    key={index}
+                                    key={index.toString()}
                                 />
                             ) : (
                                 <ClothDetailDressingItem
                                     image={item.image_cloth}
                                     title={item.name}
                                     subtitle={item.category_place}
-                                    key={index}
+                                    key={index.toString()}
                                 />
                             );
                         })}
