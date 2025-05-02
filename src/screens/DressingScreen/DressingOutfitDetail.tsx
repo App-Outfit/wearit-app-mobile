@@ -115,7 +115,7 @@ export function DressingOutfitDetail({
                 <View style={styles.tagBox}>
                     {listTag.map((itm, idx) => {
                         return (
-                            <View style={styles.chip}>
+                            <View key={idx.toString()} style={styles.chip}>
                                 <Text style={styles.chipText}>{itm}</Text>
                             </View>
                         );
