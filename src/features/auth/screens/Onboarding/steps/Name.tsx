@@ -1,4 +1,4 @@
-// PrenomStep.tsx
+// src/features/auth/screens/Onboarding/steps/NameStep.tsx
 import * as React from 'react';
 import { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
@@ -10,34 +10,25 @@ import {
     Button,
     useTheme,
 } from 'react-native-paper';
+import { useAppDispatch } from '../../../../../utils/hooks';
+import { setName } from '../../../slices/onboardingSlice';
+import type { OnboardingStepProps } from '../types';
+import { buildCreateApi } from '@reduxjs/toolkit/query';
 
-import { useAppDispatch } from '../../../utils/hooks';
-import { setName } from '../../../store/onboardingSlice';
-
-interface NameStepProps {
-    /** Callback appelé quand on passe à l’étape suivante */
-    //   onNext: (prenom: string) => void;
-    /** Étape courante (1 par défaut) */
-    navigation: any;
-    currentStep?: number;
-    /** Nombre total d’étapes (3 par défaut) */
-    totalSteps?: number;
-}
-
-export const NameStep: React.FC<NameStepProps> = ({
-    //   onNext,
-    navigation,
+export default function NameStep({
+    onNext,
+    onBack,
     currentStep = 1,
-    totalSteps = 9,
-}) => {
+    totalSteps = 1,
+}: OnboardingStepProps) {
     const [name, setLocalName] = useState('');
-    const { colors } = useTheme();
-    const progress = currentStep / totalSteps;
     const dispatch = useAppDispatch();
+    const { colors } = useTheme();
+    const progress = (currentStep ?? 1) / (totalSteps ?? 1);
 
     const handlePress = () => {
         dispatch(setName(name));
-        navigation.navigate('GenderStep');
+        onNext();
     };
 
     return (
@@ -45,7 +36,6 @@ export const NameStep: React.FC<NameStepProps> = ({
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            {/* Loader / Progress bar */}
             <ProgressBar
                 progress={progress}
                 color={colors.primary}
@@ -53,7 +43,6 @@ export const NameStep: React.FC<NameStepProps> = ({
             />
 
             <View style={styles.content}>
-                {/* Titre et sous-titre */}
                 <View>
                     <Title style={styles.title}>Inscris ton prénom</Title>
                     <Subheading style={styles.subtitle}>
@@ -61,32 +50,39 @@ export const NameStep: React.FC<NameStepProps> = ({
                     </Subheading>
                 </View>
 
-                {/* Input centrée */}
                 <TextInput
                     mode="flat"
-                    placeholder="          Prénom"
+                    placeholder="            Prénom"
                     value={name}
                     onChangeText={setLocalName}
                     style={styles.input}
                     placeholderTextColor="rgba(128, 128, 128, 0.5)"
                     underlineColor="transparent"
-                    // activeUnderlineColor="transparent"
                 />
 
-                {/* Bouton Suivant */}
-                <Button
-                    mode="contained"
-                    disabled={!name.trim()}
-                    onPress={handlePress}
-                    contentStyle={styles.buttonContent}
-                    style={styles.button}
-                >
-                    Suivant
-                </Button>
+                <View>
+                    <Button
+                        mode="contained"
+                        disabled={!name}
+                        onPress={handlePress}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button]}
+                    >
+                        Suivant
+                    </Button>
+                    <Button
+                        mode="outlined"
+                        onPress={onBack}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button, styles.buttonMargin]}
+                    >
+                        Retour
+                    </Button>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -131,10 +127,12 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         width: '80%',
         marginInline: 'auto',
+        marginBottom: 8,
+    },
+    buttonMargin: {
+        marginBottom: 50,
     },
     buttonContent: {
         height: 48,
     },
 });
-
-export default NameStep;

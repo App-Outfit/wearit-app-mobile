@@ -7,14 +7,14 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
 } from 'react-native';
-import { Header } from '../../../components/core/Typography';
-import { lightTheme } from '../../../styles/theme';
-import { InputField } from '../../../components/core/PlaceHolders';
+import { Header } from '../../../../components/core/Typography';
+import { lightTheme } from '../../../../styles/theme';
+import { InputField } from '../../../../components/core/PlaceHolders';
 import { TextInput } from 'react-native-gesture-handler';
-import { validateEmail } from '../../../utils/validation';
-import { CButton } from '../../../components/core/Buttons';
-import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
-import { forgotPassword, clearStatus } from '../../../store/authSlice';
+import { validateEmail } from '../../../../utils/validation';
+import { CButton } from '../../../../components/core/Buttons';
+import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
+import { forgotPassword, clearStatus } from '../../slices/authSlice';
 
 export const ForgotPassword = ({ navigation }: any) => {
     // 1) État local

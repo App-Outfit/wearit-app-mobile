@@ -1,37 +1,27 @@
 //SuccessStep.tsx
 import * as React from 'react';
-import { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import {
     ProgressBar,
     Title,
     Subheading,
-    TextInput,
     Button,
     useTheme,
     Avatar,
 } from 'react-native-paper';
+import type { OnboardingStepProps } from '../types';
 
-interface SuccessStepProps {
-    /** Callback appelé quand on passe à l’étape suivante */
-    //   onNext: (prenom: string) => void;
-    /** Étape courante (1 par défaut) */
-    navigation: any;
-    currentStep?: number;
-    /** Nombre total d’étapes (3 par défaut) */
-    totalSteps?: number;
-}
-
-export const SuccessStep: React.FC<SuccessStepProps> = ({
-    navigation,
-    currentStep = 9,
-    totalSteps = 9,
-}) => {
+export default function SuccessStep({
+    onNext,
+    onBack,
+    currentStep = 1,
+    totalSteps = 1,
+}: OnboardingStepProps) {
     const { colors } = useTheme();
     const progress = currentStep / totalSteps;
 
     const handlePress = () => {
-        navigation.navigate('MainTabs');
+        onNext();
     };
 
     return (
@@ -39,7 +29,6 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            {/* Loader / Progress bar */}
             <ProgressBar
                 progress={progress}
                 color={colors.primary}
@@ -47,7 +36,6 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({
             />
 
             <View style={styles.content}>
-                {/* Titre et sous-titre */}
                 <View>
                     <Title style={styles.title}>Félicitations</Title>
                     <Subheading style={styles.subtitle}>
@@ -55,12 +43,19 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({
                     </Subheading>
                 </View>
 
-                {/* Succes Element */}
                 <View style={styles.successIconBox}>
-                    <SuccessIcon />
+                    <Avatar.Icon
+                        size={78}
+                        icon="check"
+                        color="#6a0dad"
+                        style={{
+                            backgroundColor: '#e1cfef',
+                            borderWidth: 4,
+                            borderColor: '#6a0dad',
+                        }}
+                    />
                 </View>
 
-                {/* Bouton Suivant */}
                 <Button
                     mode="contained"
                     onPress={handlePress}
@@ -72,20 +67,7 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({
             </View>
         </KeyboardAvoidingView>
     );
-};
-
-const SuccessIcon: React.FC = () => (
-    <Avatar.Icon
-        size={78}
-        icon="check"
-        color="#6a0dad"
-        style={{
-            backgroundColor: '#e1cfef',
-            borderWidth: 4,
-            borderColor: '#6a0dad',
-        }}
-    />
-);
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -132,5 +114,3 @@ const styles = StyleSheet.create({
         height: 48,
     },
 });
-
-export default SuccessStep;

@@ -1,7 +1,13 @@
 // Question1Step.tsx
 import * as React from 'react';
 import { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+    View,
+    StyleSheet,
+    KeyboardAvoidingView,
+    Platform,
+    Text,
+} from 'react-native';
 import {
     ProgressBar,
     Title,
@@ -12,16 +18,10 @@ import {
 
 import MultiChoice, {
     Option,
-} from '../../../components/choice_component/MultipleChoice';
-
-import { useAppDispatch } from '../../../utils/hooks';
-import { setAnswers1 } from '../../../store/onboardingSlice';
-
-interface Question1StepProps {
-    navigation: any;
-    currentStep?: number;
-    totalSteps?: number;
-}
+} from '../../../../../components/choice_component/MultipleChoice';
+import { useAppDispatch } from '../../../../../utils/hooks';
+import { setAnswers1 } from '../../../slices/onboardingSlice';
+import type { OnboardingStepProps } from '../types';
 
 const options: Option[] = [
     {
@@ -46,19 +46,20 @@ const options: Option[] = [
     },
 ];
 
-const Question1Step: React.FC<Question1StepProps> = ({
-    navigation,
-    currentStep = 4,
-    totalSteps = 9,
-}) => {
+export default function Question1Step({
+    onNext,
+    onBack,
+    currentStep = 1,
+    totalSteps = 1,
+}: OnboardingStepProps) {
     const [selected, setSelected] = useState<string[]>([]);
     const { colors } = useTheme();
-    const progress = currentStep / totalSteps;
     const dispatch = useAppDispatch();
+    const progress = currentStep / totalSteps;
 
-    const handleNext = () => {
+    const handlePress = () => {
         dispatch(setAnswers1(selected));
-        navigation.navigate('Question2Step', { answers: selected });
+        onNext();
     };
 
     return (
@@ -66,7 +67,6 @@ const Question1Step: React.FC<Question1StepProps> = ({
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            {/* Loader / Progress bar */}
             <ProgressBar
                 progress={progress}
                 color={colors.primary}
@@ -77,7 +77,7 @@ const Question1Step: React.FC<Question1StepProps> = ({
                 <View>
                     <Title style={styles.title}>
                         Aujourd’hui, quels problèmes rencontres-tu côté
-                        vêtements ?
+                        vêtements ?
                     </Title>
                     <Subheading style={styles.subtitle}>
                         Cela nous permet d'en savoir plus sur toi
@@ -90,19 +90,29 @@ const Question1Step: React.FC<Question1StepProps> = ({
                     onChange={setSelected}
                 />
 
-                <Button
-                    mode="contained"
-                    disabled={selected.length === 0}
-                    onPress={handleNext}
-                    contentStyle={styles.buttonContent}
-                    style={styles.button}
-                >
-                    Suivant
-                </Button>
+                <View>
+                    <Button
+                        mode="contained"
+                        disabled={selected.length === 0}
+                        onPress={handlePress}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button]}
+                    >
+                        Suivant
+                    </Button>
+                    <Button
+                        mode="outlined"
+                        onPress={onBack}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button, styles.buttonMargin]}
+                    >
+                        Retour
+                    </Button>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -142,11 +152,13 @@ const styles = StyleSheet.create({
     button: {
         borderRadius: 24,
         width: '80%',
-        alignSelf: 'center',
+        marginInline: 'auto',
+        marginBottom: 8,
+    },
+    buttonMargin: {
+        marginBottom: 50,
     },
     buttonContent: {
         height: 48,
     },
 });
-
-export default Question1Step;

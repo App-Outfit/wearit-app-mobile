@@ -12,50 +12,42 @@ import {
 
 import MultiChoice, {
     Option,
-} from '../../../components/choice_component/MultipleChoice';
-import UniqueChoice from '../../../components/choice_component/UniqueChoice';
-
-import { useAppDispatch } from '../../../utils/hooks';
-import { setAnswers3 } from '../../../store/onboardingSlice';
-
-interface Question1StepProps {
-    navigation: any;
-    currentStep?: number;
-    totalSteps?: number;
-}
+} from '../../../../../components/choice_component/MultipleChoice';
+import { useAppDispatch } from '../../../../../utils/hooks';
+import { setAnswers2 } from '../../../slices/onboardingSlice';
+import type { OnboardingStepProps } from '../types';
 
 const options: Option[] = [
     {
-        key: 'creative',
-        label: '🌟 Créatif : J’adore m’amuser avec les vêtements et créer de nouveaux looks.',
+        key: 'tryon',
+        label: '🔄 Essayer des vêtements virtuellement avant de les acheter.',
     },
     {
-        key: 'organized',
-        label: '🧹 Organisé : J’aime avoir une garde-robe simple, efficace et bien rangée.',
+        key: 'combine',
+        label: "👕 Visualiser comment mes vêtements s'associent ensemble.",
     },
+    { key: 'organize', label: '🗂️ Mieux organiser et gérer ma garde-robe.' },
+    { key: 'inspire', label: "🎨 Découvrir mon style et m'inspirer." },
     {
-        key: 'curious',
-        label: '💡 Curieux : J’ai envie de découvrir mon style, mais j’ai parfois besoin d’un coup de pouce.',
-    },
-    {
-        key: 'thoughtful',
-        label: '🎯 Réfléchi : Je prends mon temps avant d’acheter et privilégie la qualité à la quantité.',
+        key: 'mixbrands',
+        label: '🛍️ Mixer des habits de marques avec ceux que je possède.',
     },
 ];
 
-const Question3Step: React.FC<Question1StepProps> = ({
-    navigation,
-    currentStep = 5,
-    totalSteps = 9,
-}) => {
+export default function Question2Step({
+    onNext,
+    onBack,
+    currentStep = 1,
+    totalSteps = 1,
+}: OnboardingStepProps) {
     const [selected, setSelected] = useState<string[]>([]);
     const { colors } = useTheme();
-    const progress = currentStep / totalSteps;
     const dispatch = useAppDispatch();
+    const progress = currentStep / totalSteps;
 
-    const handleNext = () => {
-        dispatch(setAnswers3(selected));
-        navigation.navigate('BrandStep', { answers: selected });
+    const handlePress = () => {
+        dispatch(setAnswers2(selected));
+        onNext();
     };
 
     return (
@@ -63,7 +55,6 @@ const Question3Step: React.FC<Question1StepProps> = ({
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            {/* Loader / Progress bar */}
             <ProgressBar
                 progress={progress}
                 color={colors.primary}
@@ -73,32 +64,42 @@ const Question3Step: React.FC<Question1StepProps> = ({
             <View style={styles.content}>
                 <View>
                     <Title style={styles.title}>
-                        Comment décrirais-tu ton rapport aux vêtements ?
+                        Que veux-tu faire principalement avec WearIT ?
                     </Title>
                     <Subheading style={styles.subtitle}>
                         Cela nous permet d'en savoir plus sur toi
                     </Subheading>
                 </View>
 
-                <UniqueChoice
+                <MultiChoice
                     options={options}
-                    selected={selected[0]}
-                    onChange={(key: any) => setSelected([key])}
+                    selected={selected}
+                    onChange={setSelected}
                 />
 
-                <Button
-                    mode="contained"
-                    disabled={selected.length === 0}
-                    onPress={handleNext}
-                    contentStyle={styles.buttonContent}
-                    style={styles.button}
-                >
-                    Suivant
-                </Button>
+                <View>
+                    <Button
+                        mode="contained"
+                        disabled={selected.length === 0}
+                        onPress={handlePress}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button]}
+                    >
+                        Suivant
+                    </Button>
+                    <Button
+                        mode="outlined"
+                        onPress={onBack}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button, styles.buttonMargin]}
+                    >
+                        Retour
+                    </Button>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -138,11 +139,13 @@ const styles = StyleSheet.create({
     button: {
         borderRadius: 24,
         width: '80%',
-        alignSelf: 'center',
+        marginInline: 'auto',
+        marginBottom: 8,
+    },
+    buttonMargin: {
+        marginBottom: 50,
     },
     buttonContent: {
         height: 48,
     },
 });
-
-export default Question3Step;

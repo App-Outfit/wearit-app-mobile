@@ -1,13 +1,26 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './authSlice';
-import onboardingReducer from './onboardingSlice';
+import { persistReducer, persistStore } from 'redux-persist';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import authReducer from '../features/auth/slices/authSlice';
+import onboardingReducer from '../features/auth/slices/onboardingSlice';
+
+const persistConfig = {
+    key: 'auth',
+    storage: AsyncStorage,
+    whitelist: ['token'], // on ne persiste que le token
+};
+
+const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 
 export const store = configureStore({
     reducer: {
-        auth: authReducer,
+        auth: persistedAuthReducer,
         onboarding: onboardingReducer,
     },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({ serializableCheck: false }),
 });
 
+export const persistor = persistStore(store);
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

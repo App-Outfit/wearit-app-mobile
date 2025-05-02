@@ -1,47 +1,40 @@
-// GenderStep.tsx
+// src/features/auth/screens/Onboarding/steps/GenderStep.tsx
 import * as React from 'react';
 import { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import {
     ProgressBar,
     Title,
-    Button,
-    Chip,
-    useTheme,
     Subheading,
+    Chip,
+    Button,
+    useTheme,
 } from 'react-native-paper';
 
-import { useAppDispatch } from '../../../utils/hooks';
-import { setGender } from '../../../store/onboardingSlice';
-
-interface GenderStepProps {
-    /** Callback appelé quand on passe à l’étape suivante */
-    navigation: any;
-    /** Étape courante (2 par défaut) */
-    currentStep?: number;
-    /** Nombre total d’étapes (3 par défaut) */
-    totalSteps?: number;
-}
+import { useAppDispatch } from '../../../../../utils/hooks';
+import { setGender } from '../../../slices/onboardingSlice';
+import type { OnboardingStepProps } from '../types';
 
 const options = [
     { key: 'homme', label: 'Homme' },
     { key: 'femme', label: 'Femme' },
-    { key: 'non-binaire', label: 'Non‑binaire' },
+    { key: 'non-binaire', label: 'Non-binaire' },
 ];
 
-export const GenderStep: React.FC<GenderStepProps> = ({
-    navigation,
-    currentStep = 2,
-    totalSteps = 9,
-}) => {
+export default function GenderStep({
+    onNext,
+    onBack,
+    currentStep = 1,
+    totalSteps = 1,
+}: OnboardingStepProps) {
     const [genre, setGenre] = useState<string>('');
     const { colors } = useTheme();
-    const progress = currentStep / totalSteps;
     const dispatch = useAppDispatch();
+    const progress = currentStep / totalSteps;
 
     const handlePress = () => {
         dispatch(setGender(genre));
-        navigation.navigate('AgeStep');
+        onNext();
     };
 
     return (
@@ -49,7 +42,6 @@ export const GenderStep: React.FC<GenderStepProps> = ({
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            {/* Loader / Progress bar */}
             <ProgressBar
                 progress={progress}
                 color={colors.primary}
@@ -64,7 +56,6 @@ export const GenderStep: React.FC<GenderStepProps> = ({
                     </Subheading>
                 </View>
 
-                {/* Options */}
                 <View style={styles.optionsContainer}>
                     {options.map(({ key, label }) => {
                         const selected = genre === key;
@@ -94,20 +85,29 @@ export const GenderStep: React.FC<GenderStepProps> = ({
                     })}
                 </View>
 
-                {/* Bouton Suivant */}
-                <Button
-                    mode="contained"
-                    disabled={!genre}
-                    onPress={handlePress}
-                    contentStyle={styles.buttonContent}
-                    style={styles.button}
-                >
-                    Suivant
-                </Button>
+                <View>
+                    <Button
+                        mode="contained"
+                        disabled={!genre}
+                        onPress={handlePress}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button]}
+                    >
+                        Suivant
+                    </Button>
+                    <Button
+                        mode="outlined"
+                        onPress={onBack}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button, styles.buttonMargin]}
+                    >
+                        Retour
+                    </Button>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -142,7 +142,6 @@ const styles = StyleSheet.create({
     optionsContainer: {
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        height: 'auto',
         flex: 0.9,
     },
     chip: {
@@ -155,10 +154,12 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         width: '80%',
         alignSelf: 'center',
+        marginBottom: 8,
+    },
+    buttonMargin: {
+        marginBottom: 50,
     },
     buttonContent: {
         height: 48,
     },
 });
-
-export default GenderStep;

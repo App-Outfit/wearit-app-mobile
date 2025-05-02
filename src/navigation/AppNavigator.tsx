@@ -7,7 +7,8 @@ import { LoadingScreen } from '../screens/LoadingScreen/LoadingScreen';
 import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
 import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScreen';
 
-import { AuthNavigator } from './AuthNavigator';
+import AuthNavigator from '../features/auth/navigation/AuthNavigator';
+
 import { DressingNavigator } from './DressingNavigator';
 import MainTabNavigator from './NavigationComponents/MainTabNavigator';
 

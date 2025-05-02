@@ -11,7 +11,8 @@
         "release:start": "./scripts/start_release.sh",
         "release:stop": "./scripts/stop_release.sh",
         "docs:build": "make -C docs html",
-        "prepare": "husky"
+        "prepare": "husky",
+        "gen:types": "openapi-typescript http://127.0.0.1:8000/api/v1/openapi.json --output src/types/api.ts"
     },
     "lint-staged": {
         "*.{js,jsx,ts,tsx}": [
@@ -47,10 +48,12 @@
         "react-native-reanimated": "~3.17.4",
         "react-native-safe-area-context": "5.3.0",
         "react-native-screens": "~4.10.0",
-        "react-redux": "^9.2.0"
+        "react-redux": "^9.2.0",
+        "redux-persist": "^6.0.0"
     },
     "devDependencies": {
         "@types/react": "~19.0.10",
+        "openapi-typescript": "^7.6.1",
         "typescript": "~5.8.3"
     },
     "overrides": {

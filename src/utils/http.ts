@@ -1,6 +1,6 @@
 // src/utils/http.ts
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import api from '../services/api';
+import api from '../api';
 import { parseApiError } from './apiError';
 
 /**

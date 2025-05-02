@@ -8,7 +8,7 @@ import {
     AuthResponse,
     VerifyResponse,
     SignupData,
-} from '../services/authService';
+} from '../features/auth/services/authService';
 import { parseApiError } from '../utils/apiError';
 
 interface AuthState {

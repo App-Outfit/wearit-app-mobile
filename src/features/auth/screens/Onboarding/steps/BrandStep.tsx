@@ -1,13 +1,13 @@
-// BrandStep.tsx
+// src/features/auth/screens/Onboarding/steps/BrandStep.tsx
 import * as React from 'react';
 import { useState } from 'react';
 import {
+    SafeAreaView,
+    ScrollView,
     View,
     StyleSheet,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
-    SafeAreaView,
 } from 'react-native';
 import {
     ProgressBar,
@@ -19,37 +19,32 @@ import {
 
 import BrandChoice, {
     Option,
-} from '../../../components/choice_component/BrandChoice';
-import { BrandIcons } from '../../../assets/index';
+} from '../../../../../components/choice_component/BrandChoice';
+import { BrandIcons } from '../../../../../assets/index';
+import { useAppDispatch } from '../../../../../utils/hooks';
+import { setBrands } from '../../../slices/onboardingSlice';
+import type { OnboardingStepProps } from '../types';
 
-import { useAppDispatch } from '../../../utils/hooks';
-import { setBrands } from '../../../store/onboardingSlice';
-
-// Dynamically build options from BrandIcons keys
+// 1) Reconstruire dynamiquement la liste des options depuis BrandIcons
 const options: Option[] = Object.keys(BrandIcons).map((key) => ({
     key,
     label: key.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
 }));
 
-interface BrandStepProps {
-    navigation: any;
-    currentStep?: number;
-    totalSteps?: number;
-}
-
-const BrandStep: React.FC<BrandStepProps> = ({
-    navigation,
-    currentStep = 7,
+export default function BrandStep({
+    onNext,
+    onBack, // tu peux l’appeler si tu ajoutes un bouton « Précédent »
+    currentStep = 7, // correspond à l’étape 7 dans ton wizard
     totalSteps = 9,
-}) => {
+}: OnboardingStepProps) {
     const [selected, setSelected] = useState<string[]>([]);
     const { colors } = useTheme();
-    const progress = currentStep / totalSteps;
     const dispatch = useAppDispatch();
+    const progress = currentStep / totalSteps;
 
-    const handleNext = () => {
+    const handlePress = () => {
         dispatch(setBrands(selected));
-        navigation.navigate('MailStep', { answers: selected });
+        onNext();
     };
 
     return (
@@ -61,10 +56,10 @@ const BrandStep: React.FC<BrandStepProps> = ({
                 <ScrollView
                     contentContainerStyle={styles.scroll}
                     showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
                     overScrollMode="never"
                     indicatorStyle="black"
                 >
+                    {/* Progression */}
                     <ProgressBar
                         progress={progress}
                         color={colors.primary}
@@ -87,41 +82,50 @@ const BrandStep: React.FC<BrandStepProps> = ({
                             />
                         </View>
 
-                        <Button
-                            mode="contained"
-                            disabled={selected.length === 0}
-                            onPress={handleNext}
-                            contentStyle={styles.buttonContent}
-                            style={styles.button}
-                        >
-                            Suivant
-                        </Button>
+                        <View>
+                            <Button
+                                mode="contained"
+                                disabled={selected.length === 0}
+                                onPress={handlePress}
+                                contentStyle={styles.buttonContent}
+                                style={[styles.button]}
+                            >
+                                Suivant
+                            </Button>
+                            <Button
+                                mode="outlined"
+                                onPress={onBack}
+                                contentStyle={styles.buttonContent}
+                                style={[styles.button, styles.buttonMargin]}
+                            >
+                                Retour
+                            </Button>
+                        </View>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FFFFFF',
-        paddingHorizontal: 20,
-        paddingTop: 20,
     },
     scroll: {
         flexGrow: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
         paddingBottom: 40,
     },
     progressBar: {
         height: 10,
-        marginVertical: 20,
+        marginBottom: 20,
         borderRadius: 5,
     },
     content: {
         flex: 1,
-        alignItems: 'center',
     },
     title: {
         fontSize: 24,
@@ -137,16 +141,19 @@ const styles = StyleSheet.create({
     },
     brandChoiceBox: {
         width: '100%',
-        marginBottom: 40,
-        marginTop: 20,
+        marginBottom: 24,
     },
     button: {
         borderRadius: 24,
         width: '80%',
+        marginInline: 'auto',
+        marginTop: 20,
+        marginBottom: 8,
+    },
+    buttonMargin: {
+        marginBottom: 50,
     },
     buttonContent: {
         height: 48,
     },
 });
-
-export default BrandStep;

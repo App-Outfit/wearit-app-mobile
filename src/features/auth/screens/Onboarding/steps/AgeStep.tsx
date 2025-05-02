@@ -19,33 +19,28 @@ import {
     useTheme,
 } from 'react-native-paper';
 
-interface AgeStepProps {
-    navigation: any;
-    currentStep?: number;
-    totalSteps?: number;
-}
+import { useAppDispatch } from '../../../../../utils/hooks';
+import { setAge } from '../../../slices/onboardingSlice';
+import type { OnboardingStepProps } from '../types';
 
-import { useAppDispatch } from '../../../utils/hooks';
-import { setAge } from '../../../store/onboardingSlice';
-
-const ageRanges = ['-18', '18‑24', '25‑34', '35‑44', '45‑54', '55‑64', '65+'];
-
-const ITEM_HEIGHT = 50; // hauteur de chaque item
-const VISIBLE_ITEMS = 5; // nombre d'items visibles (dont le selected)
+const ageRanges = ['-18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
+const ITEM_HEIGHT = 50;
+const VISIBLE_ITEMS = 5;
 const WHEEL_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 
-export const AgeStep: React.FC<AgeStepProps> = ({
-    navigation,
-    currentStep = 3,
-    totalSteps = 9,
-}) => {
-    const [ageRange, setAgeRange] = useState<string>('18‑24');
+export default function AgeStep({
+    onNext,
+    onBack,
+    currentStep = 1,
+    totalSteps = 1,
+}: OnboardingStepProps) {
+    const [ageRange, setAgeRange] = useState<string>('18-24');
     const { colors } = useTheme();
+    const dispatch = useAppDispatch();
     const wheelRef = useRef<FlatList<string>>(null);
     const progress = currentStep / totalSteps;
-    const dispatch = useAppDispatch();
 
-    // Au montage, on scroll vers la valeur par défaut sans animation
+    // positionne la roue sur la valeur par défaut
     useEffect(() => {
         const idx = ageRanges.indexOf(ageRange);
         setTimeout(() => {
@@ -63,7 +58,6 @@ export const AgeStep: React.FC<AgeStepProps> = ({
         const idx = Math.round(y / ITEM_HEIGHT);
         const clamped = Math.min(Math.max(idx, 0), ageRanges.length - 1);
         setAgeRange(ageRanges[clamped]);
-        // on recentre pile sur l'item
         wheelRef.current?.scrollToOffset({
             offset: clamped * ITEM_HEIGHT,
             animated: true,
@@ -72,10 +66,10 @@ export const AgeStep: React.FC<AgeStepProps> = ({
 
     const handlePress = () => {
         dispatch(setAge(ageRange));
-        navigation.navigate('Question1Step', { ageRange });
+        onNext();
     };
 
-    const renderItem = ({ item, index }: { item: string; index: number }) => {
+    const renderItem = ({ item }: { item: string }) => {
         const selected = item === ageRange;
         return (
             <View style={styles.itemContainer}>
@@ -132,17 +126,15 @@ export const AgeStep: React.FC<AgeStepProps> = ({
                         snapToInterval={ITEM_HEIGHT}
                         decelerationRate="fast"
                         onMomentumScrollEnd={onMomentumScrollEnd}
-                        getItemLayout={(_, index) => ({
+                        getItemLayout={(_, i) => ({
                             length: ITEM_HEIGHT,
-                            offset: ITEM_HEIGHT * index,
-                            index,
+                            offset: ITEM_HEIGHT * i,
+                            index: i,
                         })}
                         contentContainerStyle={{
                             paddingVertical: (WHEEL_HEIGHT - ITEM_HEIGHT) / 2,
                         }}
                     />
-
-                    {/* Lignes de délimitation */}
                     <View
                         style={[
                             styles.wheelLine,
@@ -163,19 +155,29 @@ export const AgeStep: React.FC<AgeStepProps> = ({
                     />
                 </View>
 
-                <Button
-                    mode="contained"
-                    disabled={!ageRange}
-                    onPress={handlePress}
-                    contentStyle={styles.buttonContent}
-                    style={styles.button}
-                >
-                    Suivant
-                </Button>
+                <View>
+                    <Button
+                        mode="contained"
+                        disabled={!ageRange}
+                        onPress={handlePress}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button]}
+                    >
+                        Suivant
+                    </Button>
+                    <Button
+                        mode="outlined"
+                        onPress={onBack}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button, styles.buttonMargin]}
+                    >
+                        Retour
+                    </Button>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -230,10 +232,12 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         width: '80%',
         alignSelf: 'center',
+        marginBottom: 8,
+    },
+    buttonMargin: {
+        marginBottom: 50,
     },
     buttonContent: {
         height: 48,
     },
 });
-
-export default AgeStep;

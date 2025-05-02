@@ -1,4 +1,4 @@
-// src/screens/onboarding/MailStep.tsx
+// src/features/auth/screens/Onboarding/steps/MailStep.tsx
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
@@ -11,83 +11,78 @@ import {
     HelperText,
     useTheme,
 } from 'react-native-paper';
-import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import {
     setEmail as setOnboardEmail,
     setPassword as setOnboardPassword,
     resetOnboarding,
-} from '../../../store/onboardingSlice';
-import { signupUser, clearStatus } from '../../../store/authSlice';
-import { validateEmail, validatePassword } from '../../../utils/validation';
-import type { SignupData } from '../../../services/authService';
+} from '../../../slices/onboardingSlice';
+import { signupUser, clearStatus } from '../../../slices/authSlice';
+import type { OnboardingStepProps } from '../types';
+import {
+    validateEmail,
+    validatePassword,
+} from '../../../../../utils/validation';
 
-interface Props {
-    navigation: any;
-    currentStep?: number;
-    totalSteps?: number;
-}
-
-const MailStep: React.FC<Props> = ({
-    navigation,
+export default function MailStep({
+    onNext,
+    onBack,
     currentStep = 8,
     totalSteps = 9,
-}) => {
+}: OnboardingStepProps) {
     const dispatch = useAppDispatch();
     const { colors } = useTheme();
     const { status, error, token } = useAppSelector((s) => s.auth);
     const onboarding = useAppSelector((s) => s.onboarding);
 
-    // champs contrôlés + touched pour n’afficher l’erreur qu’après le premier blur
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [emailTouched, setEmailTouched] = useState(false);
     const [passwordTouched, setPasswordTouched] = useState(false);
 
-    // validité dérivée
     const emailValid = validateEmail(email);
     const passwordValid = validatePassword(password);
     const isFormValid = emailValid && passwordValid;
 
-    // au montage, on nettoie tout ancien status/erreur
+    // 1️⃣ On monte, on nettoie tout ancien status/erreur
     useEffect(() => {
         dispatch(clearStatus());
     }, [dispatch]);
 
-    // navigation automatique en cas de succès
+    // 2️⃣ Quand le signup est OK, on passe à l’étape suivante
     useEffect(() => {
         if (status === 'succeeded' && token) {
+            // (optionnel) reset du wizard
             dispatch(resetOnboarding());
-            navigation.replace('SuccessStep');
+            onNext();
         }
-    }, [status, token, dispatch, navigation]);
+    }, [status, token, dispatch, onNext]);
 
     const handleContinue = useCallback(() => {
-        // on marque comme touché pour déclencher l’affichage des erreurs
         setEmailTouched(true);
         setPasswordTouched(true);
         if (!isFormValid) return;
 
-        // on enregistre temporairement dans le store onboarding
+        // on stocke dans le slice onboarding
         dispatch(setOnboardEmail(email));
         dispatch(setOnboardPassword(password));
 
         // on construit le payload complet
-        const { name, gender, age, answers1, answers2, answers3, brands } =
-            onboarding;
-        const payload: SignupData = {
-            name: name!,
+        const payload = {
+            name: onboarding.name!,
+            gender: onboarding.gender!,
+            age: Number(onboarding.age!),
+            answers: {
+                q1: onboarding.answers1!.join(','),
+                q2: onboarding.answers2!.join(','),
+                q3: onboarding.answers3!.join(','),
+                brand: onboarding.brands!.join(','),
+            },
             email,
             password,
-            answers: {
-                gender: gender!,
-                age: String(age),
-                q1: answers1!.join(','),
-                q2: answers2!.join(','),
-                q3: answers3!.join(','),
-                brand: brands!.join(','),
-            },
         };
 
+        // on déclenche le thunk signupUser
         dispatch(signupUser(payload));
     }, [dispatch, email, password, isFormValid, onboarding]);
 
@@ -111,7 +106,7 @@ const MailStep: React.FC<Props> = ({
                 <TextInput
                     label="Adresse email"
                     value={email}
-                    onChangeText={(t) => setEmail(t)}
+                    onChangeText={setEmail}
                     onBlur={() => setEmailTouched(true)}
                     error={emailTouched && !emailValid}
                     mode="flat"
@@ -123,7 +118,7 @@ const MailStep: React.FC<Props> = ({
                 <TextInput
                     label="Mot de passe"
                     value={password}
-                    onChangeText={(t) => setPassword(t)}
+                    onChangeText={setPassword}
                     onBlur={() => setPasswordTouched(true)}
                     secureTextEntry
                     error={passwordTouched && !passwordValid}
@@ -144,20 +139,29 @@ const MailStep: React.FC<Props> = ({
                     </HelperText>
                 )}
 
-                <Button
-                    mode="contained"
-                    onPress={handleContinue}
-                    disabled={!isFormValid || status === 'loading'}
-                    loading={status === 'loading'}
-                    contentStyle={styles.buttonContent}
-                    style={styles.button}
-                >
-                    Continuer
-                </Button>
+                <View>
+                    <Button
+                        mode="contained"
+                        disabled={!isFormValid || status === 'loading'}
+                        onPress={handleContinue}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button]}
+                    >
+                        Continuer
+                    </Button>
+                    <Button
+                        mode="outlined"
+                        onPress={onBack}
+                        contentStyle={styles.buttonContent}
+                        style={[styles.button, styles.buttonMargin]}
+                    >
+                        Retour
+                    </Button>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -194,12 +198,15 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     button: {
-        marginTop: 24,
         borderRadius: 24,
+        width: '80%',
+        marginInline: 'auto',
+        marginBottom: 8,
+    },
+    buttonMargin: {
+        marginBottom: 50,
     },
     buttonContent: {
         height: 48,
     },
 });
-
-export default MailStep;

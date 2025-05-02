@@ -7,13 +7,13 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
 } from 'react-native';
-import { Header } from '../../../components/core/Typography';
-import { lightTheme } from '../../../styles/theme';
-import OTPInput from '../../../components/core/OTPInput';
-import { CButton } from '../../../components/core/Buttons';
+import { Header } from '../../../../components/core/Typography';
+import { lightTheme } from '../../../../styles/theme';
+import OTPInput from '../../../../components/core/OTPInput';
+import { CButton } from '../../../../components/core/Buttons';
 
-import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
-import { verifyReset } from '../../../store/authSlice';
+import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
+import { verifyReset } from '../../slices/authSlice';
 
 export const CodeVerification: React.FC<any> = ({ navigation, route }) => {
     const dispatch = useAppDispatch();

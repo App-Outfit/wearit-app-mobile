@@ -1,31 +1,23 @@
+// src/features/auth/screens/Welcome/WelcomeScreen.tsx
+
 import * as React from 'react';
-import { useEffect } from 'react';
-import {
-    View,
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    Button,
-} from 'react-native';
-import { Header } from '../../components/core/Typography';
-import { lightTheme, normalize } from '../../styles/theme';
+import { View, Image, StyleSheet } from 'react-native';
+import { Header } from '../../../../components/core/Typography';
+import { lightTheme, normalize } from '../../../../styles/theme';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CButton } from '../../components/core/Buttons';
+import { CButton } from '../../../../components/core/Buttons';
 import { Text } from '@rneui/themed';
 
-// TODO: Add Image import and replace the require
-
-export function Onboarding({ navigation }: any) {
-    const female_onboarding = require('../../assets/images/auth/female-onboarding.png');
-    const male_onboarding = require('../../assets/images/auth/male-onboarding.png');
-
-    const handlePress = () => {
-        navigation.navigate('SignUp');
+interface WelcomeProps {
+    navigation: {
+        navigate: (screen: 'Onboarding' | 'SignIn') => void;
     };
+}
 
-    const goToSignIn = () => {
-        navigation.navigate('SignIn');
-    };
+export default function WelcomeScreen({ navigation }: WelcomeProps) {
+    // 👉 4 niveaux pour remonter jusqu'à /src, puis assets
+    const femaleOnboarding = require('../../../../assets/images/auth/female-onboarding.png');
+    const maleOnboarding = require('../../../../assets/images/auth/male-onboarding.png');
 
     return (
         <View style={styles.container}>
@@ -36,19 +28,19 @@ export function Onboarding({ navigation }: any) {
                 </Header>
             </View>
 
-            {/* Section image */}
+            {/* Section images */}
             <Image
-                source={male_onboarding}
+                source={maleOnboarding}
                 style={[styles.image, styles.image2]}
                 resizeMode="contain"
             />
             <Image
-                source={female_onboarding}
+                source={femaleOnboarding}
                 style={styles.image}
                 resizeMode="contain"
             />
 
-            {/* Bouton CTA */}
+            {/* Boutons CTA */}
             <View style={styles.bottomContainer}>
                 <LinearGradient
                     colors={['#FFFFFF', 'rgba(255, 255, 255, 0)']}
@@ -65,26 +57,24 @@ export function Onboarding({ navigation }: any) {
                         <CButton
                             variant="primary"
                             size="xlarge"
-                            onPress={handlePress}
+                            onPress={() => navigation.navigate('Onboarding')}
                             style={styles.button}
                         >
                             Commencer
                         </CButton>
 
-                        <View>
-                            <Text style={styles.signinText}>
-                                {`Déjà inscrit ? `}
-                                <Text
-                                    onPress={goToSignIn}
-                                    style={[
-                                        styles.signinText,
-                                        styles.signinTextUnderline,
-                                    ]}
-                                >
-                                    Connectez-vous
-                                </Text>
+                        <Text style={styles.signinText}>
+                            Déjà inscrit ?{' '}
+                            <Text
+                                onPress={() => navigation.navigate('SignIn')}
+                                style={[
+                                    styles.signinText,
+                                    styles.signinTextUnderline,
+                                ]}
+                            >
+                                Connectez-vous
                             </Text>
-                        </View>
+                        </Text>
                     </View>
                 </LinearGradient>
             </View>
@@ -99,7 +89,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingTop: normalize(40),
-        paddingBottom: normalize(0),
         paddingHorizontal: normalize(0),
     },
     textContainer: {
@@ -113,9 +102,8 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         lineHeight: 48,
         letterSpacing: -2.5,
-        color: '#000', // Noir
+        color: '#000',
     },
-
     image: {
         width: '100%',
         height: 700,
@@ -129,7 +117,6 @@ const styles = StyleSheet.create({
         height: 730,
         backgroundColor: 'transparent',
     },
-
     bottomContainer: {
         width: '100%',
         height: 320,
@@ -146,13 +133,11 @@ const styles = StyleSheet.create({
     subtitle: {
         fontFamily: 'Poppins-Medium',
         fontSize: 15,
-        letterSpacing: 0,
         textAlign: 'left',
         margin: 30,
         color: '#1a1a1a',
         width: 256,
         lineHeight: 15,
-        paddingTop: 4,
         transform: [{ translateY: -10 }],
     },
     buttonBottomContainer: {
@@ -160,7 +145,6 @@ const styles = StyleSheet.create({
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-
         transform: [{ translateY: -30 }],
     },
     button: {
@@ -173,10 +157,5 @@ const styles = StyleSheet.create({
     signinTextUnderline: {
         textDecorationLine: 'underline',
         color: lightTheme.colors.primary,
-    },
-    buttonText: {
-        color: '#FFF',
-        fontSize: 18,
-        fontWeight: 'bold',
     },
 });

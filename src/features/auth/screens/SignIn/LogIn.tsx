@@ -8,16 +8,16 @@ import {
     Keyboard,
     Image,
 } from 'react-native';
-import { Header } from '../../../components/core/Typography';
-import { lightTheme } from '../../../styles/theme';
-import { InputField } from '../../../components/core/PlaceHolders';
-import { CButton } from '../../../components/core/Buttons';
-import { validateEmail } from '../../../utils/validation';
-import { DividerText } from '../../../components/core/Divider';
+import { Header } from '../../../../components/core/Typography';
+import { lightTheme } from '../../../../styles/theme';
+import { InputField } from '../../../../components/core/PlaceHolders';
+import { CButton } from '../../../../components/core/Buttons';
+import { validateEmail } from '../../../../utils/validation';
+import { DividerText } from '../../../../components/core/Divider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { loginUser } from '../../../store/authSlice';
-import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import { loginUser } from '../../slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
 
 export const LogIn: React.FC = ({ navigation }: any) => {
     const [showPassword, setShowPassword] = useState(false);

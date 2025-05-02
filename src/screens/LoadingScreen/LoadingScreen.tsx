@@ -9,9 +9,9 @@ import { preloadEssentialImages } from '../../assets/loading_image';
 import styles from './LoadingScreen.styles';
 
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { loadToken } from '../../store/authSlice';
+import { loadToken } from '../../features/auth/slices/authSlice';
 
-import { logout } from '../../store/authSlice';
+import { logout } from '../../features/auth/slices/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function LoadingScreen({ navigation }: any) {

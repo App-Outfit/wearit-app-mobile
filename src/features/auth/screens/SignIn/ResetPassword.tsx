@@ -7,14 +7,14 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
 } from 'react-native';
-import { Header } from '../../../components/core/Typography';
-import { lightTheme } from '../../../styles/theme';
-import { InputField } from '../../../components/core/PlaceHolders';
+import { Header } from '../../../../components/core/Typography';
+import { lightTheme } from '../../../../styles/theme';
+import { InputField } from '../../../../components/core/PlaceHolders';
 import { TextInput } from 'react-native-gesture-handler';
-import { validatePassword } from '../../../utils/validation';
-import { CButton } from '../../../components/core/Buttons';
-import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
-import { resetPassword } from '../../../store/authSlice';
+import { validatePassword } from '../../../../utils/validation';
+import { CButton } from '../../../../components/core/Buttons';
+import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
+import { resetPassword } from '../../slices/authSlice';
 
 export const ResetPassword: React.FC<any> = ({ navigation, route }) => {
     const dispatch = useAppDispatch();
