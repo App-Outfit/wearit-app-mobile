@@ -16,13 +16,7 @@ import {
     StyleSheet,
     ImageSourcePropType,
 } from 'react-native';
-import { lightTheme } from '../../styles/theme';
-import { ScrollView } from 'react-native-gesture-handler';
-import { DressingClothNavigator } from './DressingClothNavigation';
-import {
-    DressingClothGaleryScreen,
-    DressingClothGaleryScreenProps,
-} from '../../screens/DressingScreen/DressingClothsScreen';
+import { DressingClothGaleryScreen } from '../../screens/DressingScreen/DressingClothsScreen';
 import { DressingOutfitScreen } from '../../screens/DressingScreen/DressingOutfit';
 import { DressingOutfitDetail } from '../../screens/DressingScreen/DressingOutfitDetail';
 
