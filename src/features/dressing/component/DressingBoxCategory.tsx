@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { AddCircleButton } from '../core/Buttons';
+import { AddCircleButton } from '../../../components/core/Buttons';
 
 type DressinBoxCategoryProps = {
     name_category: string;
@@ -21,7 +21,7 @@ export const DressingBoxCategory: React.FC<DressinBoxCategoryProps> = ({
     nb_clothes,
     imgs,
 }) => {
-    const defaultImg = require('../../assets/images/exemples/clothing.jpg');
+    const defaultImg = require('../../../assets/images/exemples/clothing.jpg');
 
     const displayImgs: ImageSourcePropType[] = imgs.slice(0, 3);
 

@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import MainTabNavigator from '../../navigation/NavigationComponents/MainTabNavigator';
+import MainTabNavigator from '../../../navigation/NavigationComponents/MainTabNavigator';
 import {
     Searchbar,
     Menu,
@@ -18,13 +18,13 @@ import {
     Modal,
 } from 'react-native-paper';
 
-import { DressingBoxCategory } from '../../components/dressing/DressingBoxCategory';
+import { DressingBoxCategory } from '../component/DressingBoxCategory';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { lightTheme } from '../../styles/theme';
+import { lightTheme } from '../../../styles/theme';
 import { useNavigation } from '@react-navigation/native';
-import DropdownMenu from '../../components/dressing/DropDownMenu';
-import { InputField } from '../../components/core/PlaceHolders';
-import { CButton } from '../../components/core/Buttons';
+import DropdownMenu from '../component/DropDownMenu';
+import { InputField } from '../../../components/core/PlaceHolders';
+import { CButton } from '../../../components/core/Buttons';
 
 type TypeDataPersonalCategory = {
     id: string;
@@ -33,8 +33,8 @@ type TypeDataPersonalCategory = {
     cloths: ImageSourcePropType[];
 };
 
-const img1 = require('../../assets/images/exemples/clothing.jpg');
-const img2 = require('../../assets/images/exemples/clothing2.jpg');
+const img1 = require('../../../assets/images/exemples/clothing.jpg');
+const img2 = require('../../../assets/images/exemples/clothing2.jpg');
 
 const data_personal_category: TypeDataPersonalCategory[] = [
     {

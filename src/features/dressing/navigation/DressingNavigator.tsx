@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { DressingHomeScreen } from '../../screens/DressingScreen/DressingHomeScreen';
-import { screenOptions } from '../../styles/screen';
+import { DressingHomeScreen } from '../screen/DressingHomeScreen';
+import { screenOptions } from '../../../styles/screen';
 
 import {
     MaterialTopTabBarProps,
@@ -16,9 +16,9 @@ import {
     StyleSheet,
     ImageSourcePropType,
 } from 'react-native';
-import { DressingClothGaleryScreen } from '../../screens/DressingScreen/DressingClothsScreen';
-import { DressingOutfitScreen } from '../../screens/DressingScreen/DressingOutfit';
-import { DressingOutfitDetail } from '../../screens/DressingScreen/DressingOutfitDetail';
+import { DressingClothGaleryScreen } from '../screen/DressingClothsScreen';
+import { DressingOutfitScreen } from '../screen/DressingOutfit';
+import { DressingOutfitDetail } from '../screen/DressingOutfitDetail';
 
 type TabParamList = {
     Cloths: undefined;
