@@ -1,16 +1,12 @@
 // src/features/auth/screens/Onboarding/steps/MailStep.tsx
-import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
-    TextInput,
-    Button,
-    ProgressBar,
-    Title,
-    Subheading,
-    HelperText,
-    useTheme,
-} from 'react-native-paper';
+    View,
+    StyleSheet,
+    Keyboard,
+    TouchableWithoutFeedback,
+} from 'react-native';
+import { TextInput, HelperText, useTheme } from 'react-native-paper';
 import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import {
     setEmail as setOnboardEmail,
@@ -18,11 +14,12 @@ import {
     resetOnboarding,
 } from '../../../slices/onboardingSlice';
 import { signupUser, clearStatus } from '../../../slices/authSlice';
-import type { OnboardingStepProps } from '../types';
 import {
     validateEmail,
     validatePassword,
 } from '../../../../../utils/validation';
+import { StepLayout } from '../StepLayout';
+import type { OnboardingStepProps } from '../types';
 
 export default function MailStep({
     onNext,
@@ -31,7 +28,6 @@ export default function MailStep({
     totalSteps = 9,
 }: OnboardingStepProps) {
     const dispatch = useAppDispatch();
-    const { colors } = useTheme();
     const { status, error, token } = useAppSelector((s) => s.auth);
     const onboarding = useAppSelector((s) => s.onboarding);
 
@@ -44,15 +40,14 @@ export default function MailStep({
     const passwordValid = validatePassword(password);
     const isFormValid = emailValid && passwordValid;
 
-    // 1️⃣ On monte, on nettoie tout ancien status/erreur
+    // clear old errors/status on mount
     useEffect(() => {
         dispatch(clearStatus());
     }, [dispatch]);
 
-    // 2️⃣ Quand le signup est OK, on passe à l’étape suivante
+    // on succès signup → next
     useEffect(() => {
         if (status === 'succeeded' && token) {
-            // (optionnel) reset du wizard
             dispatch(resetOnboarding());
             onNext();
         }
@@ -63,150 +58,96 @@ export default function MailStep({
         setPasswordTouched(true);
         if (!isFormValid) return;
 
-        // on stocke dans le slice onboarding
         dispatch(setOnboardEmail(email));
         dispatch(setOnboardPassword(password));
 
-        // on construit le payload complet
-        const payload = {
-            name: onboarding.name!,
-            gender: onboarding.gender!,
-            age: Number(onboarding.age!),
-            answers: {
-                q1: onboarding.answers1!.join(','),
-                q2: onboarding.answers2!.join(','),
-                q3: onboarding.answers3!.join(','),
-                brand: onboarding.brands!.join(','),
-            },
-            email,
-            password,
-        };
-
-        // on déclenche le thunk signupUser
-        dispatch(signupUser(payload));
+        dispatch(
+            signupUser({
+                name: onboarding.name!,
+                answers: {
+                    gender: onboarding.gender!,
+                    age: onboarding.age!,
+                    q1: onboarding.answers1!.join(','),
+                    q2: onboarding.answers2!.join(','),
+                    q3: onboarding.answers3!.join(','),
+                    brand: onboarding.brands!.join(','),
+                },
+                email,
+                password,
+            }),
+        );
     }, [dispatch, email, password, isFormValid, onboarding]);
 
+    const handleBack = () => {
+        dispatch(clearStatus());
+        onBack!();
+    };
+
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={styles.container}
-        >
-            <ProgressBar
-                progress={currentStep / totalSteps}
-                color={colors.primary}
-                style={styles.progressBar}
-            />
-
-            <View style={styles.content}>
-                <Title style={styles.title}>Finalise ton inscription</Title>
-                <Subheading style={styles.subtitle}>
-                    Cela nous permet d'en savoir plus sur toi
-                </Subheading>
-
-                <TextInput
-                    label="Adresse email"
-                    value={email}
-                    onChangeText={setEmail}
-                    onBlur={() => setEmailTouched(true)}
-                    error={emailTouched && !emailValid}
-                    mode="flat"
-                />
-                <HelperText type="error" visible={emailTouched && !emailValid}>
-                    Email invalide
-                </HelperText>
-
-                <TextInput
-                    label="Mot de passe"
-                    value={password}
-                    onChangeText={setPassword}
-                    onBlur={() => setPasswordTouched(true)}
-                    secureTextEntry
-                    error={passwordTouched && !passwordValid}
-                    mode="flat"
-                    style={styles.input}
-                />
-                <HelperText
-                    type="error"
-                    visible={passwordTouched && !passwordValid}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={{ flex: 1 }}>
+                <StepLayout
+                    title="Finalise ton inscription"
+                    subtitle="Cela nous permet d'en savoir plus sur toi"
+                    progress={currentStep / totalSteps}
+                    onNext={handleContinue}
+                    onBack={handleBack}
+                    disableNext={!isFormValid || status === 'loading'}
                 >
-                    Mot de passe invalide (ex: GTH6dk_dk!)
-                </HelperText>
+                    <View>
+                        <TextInput
+                            label="Adresse email"
+                            value={email}
+                            onChangeText={setEmail}
+                            onBlur={() => setEmailTouched(true)}
+                            error={emailTouched && !emailValid}
+                            mode="flat"
+                        />
+                        <HelperText
+                            type="error"
+                            visible={emailTouched && !emailValid}
+                        >
+                            Email invalide
+                        </HelperText>
 
-                {/* Erreur serveur */}
-                {error && (
-                    <HelperText type="error" visible style={styles.serverError}>
-                        {error}
-                    </HelperText>
-                )}
+                        <TextInput
+                            label="Mot de passe"
+                            value={password}
+                            onChangeText={setPassword}
+                            onBlur={() => setPasswordTouched(true)}
+                            secureTextEntry
+                            error={passwordTouched && !passwordValid}
+                            mode="flat"
+                        />
+                        <HelperText
+                            type="error"
+                            visible={passwordTouched && !passwordValid}
+                        >
+                            Mot de passe invalide (ex : GTH6dk_dk!)
+                        </HelperText>
 
-                <View>
-                    <Button
-                        mode="contained"
-                        disabled={!isFormValid || status === 'loading'}
-                        onPress={handleContinue}
-                        contentStyle={styles.buttonContent}
-                        style={[styles.button]}
-                    >
-                        Continuer
-                    </Button>
-                    <Button
-                        mode="outlined"
-                        onPress={onBack}
-                        contentStyle={styles.buttonContent}
-                        style={[styles.button, styles.buttonMargin]}
-                    >
-                        Retour
-                    </Button>
-                </View>
+                        {error && (
+                            <HelperText
+                                type="error"
+                                visible
+                                style={styles.serverError}
+                            >
+                                {error}
+                            </HelperText>
+                        )}
+                    </View>
+                </StepLayout>
             </View>
-        </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        paddingHorizontal: 20,
-        paddingVertical: 50,
-    },
-    progressBar: {
-        height: 10,
-        borderRadius: 5,
-        marginBottom: 24,
-    },
-    content: {
+    inputs: {
         flex: 1,
         justifyContent: 'center',
     },
-    title: {
-        textAlign: 'center',
-        fontSize: 24,
-        marginBottom: 8,
-    },
-    subtitle: {
-        textAlign: 'center',
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 24,
-    },
-    input: {
-        marginTop: 16,
-    },
     serverError: {
         textAlign: 'center',
-        marginBottom: 16,
-    },
-    button: {
-        borderRadius: 24,
-        width: '80%',
-        marginInline: 'auto',
-        marginBottom: 8,
-    },
-    buttonMargin: {
-        marginBottom: 50,
-    },
-    buttonContent: {
-        height: 48,
     },
 });

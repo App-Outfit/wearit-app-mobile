@@ -49,7 +49,6 @@ export function StepLayout({
                 color={colors.primary}
                 style={styles.progressBar}
             />
-
             <View style={styles.inner}>
                 <View style={styles.header}>
                     <Title style={styles.title}>{title}</Title>
@@ -61,7 +60,7 @@ export function StepLayout({
                 </View>
 
                 <Body
-                    style={styles.body}
+                    style={[styles.body, !scrollable && styles.bodyCentered]}
                     contentContainerStyle={
                         scrollable ? styles.scrollContainer : undefined
                     }
@@ -104,7 +103,7 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         height: 10,
-        marginTop: 80,
+        marginTop: 60,
         marginBottom: 40,
         marginHorizontal: 20,
         borderRadius: 5,
@@ -112,7 +111,7 @@ const styles = StyleSheet.create({
     inner: {
         flex: 1,
         paddingHorizontal: 20,
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
     },
     header: {
         alignItems: 'center',
@@ -131,6 +130,8 @@ const styles = StyleSheet.create({
     },
     body: {
         flex: 1,
+    },
+    bodyCentered: {
         justifyContent: 'center',
     },
     scrollContainer: {
@@ -141,6 +142,7 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: 'column',
         alignItems: 'center',
+        marginTop: 24,
     },
     button: {
         borderRadius: 24,
@@ -148,7 +150,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     backButton: {
-        marginBottom: 60,
+        marginBottom: 24,
     },
     buttonContent: {
         height: 48,

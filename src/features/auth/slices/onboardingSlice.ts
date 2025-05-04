@@ -2,18 +2,28 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface OnboardingState {
-    name?: string;
-    gender?: string;
-    age?: string;
-    answers1?: string[];
-    answers2?: string[];
-    answers3?: string[];
-    brands?: string[];
-    email?: string;
-    password?: string;
+    name: string | null;
+    gender: string | null;
+    age: string | null;
+    answers1: string[];
+    answers2: string[];
+    answers3: string[];
+    brands: string[];
+    email: string | null;
+    password: string | null;
 }
 
-const initialState: OnboardingState = {};
+const initialState: OnboardingState = {
+    name: null,
+    gender: null,
+    age: null,
+    answers1: [],
+    answers2: [],
+    answers3: [],
+    brands: [],
+    email: null,
+    password: null,
+};
 
 const onboardingSlice = createSlice({
     name: 'onboarding',

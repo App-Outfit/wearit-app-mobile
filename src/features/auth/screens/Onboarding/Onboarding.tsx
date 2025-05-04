@@ -65,13 +65,6 @@ export default function OnboardingWizard({ navigation }: any) {
                 currentStep={idx + 1}
                 totalSteps={steps.length}
             />
-
-            {/* Affiche les erreurs générales */}
-            {error && (
-                <Text style={{ color: 'red', textAlign: 'center' }}>
-                    {error}
-                </Text>
-            )}
         </View>
     );
 }

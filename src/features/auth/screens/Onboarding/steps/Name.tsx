@@ -1,7 +1,12 @@
 // src/features/auth/screens/Onboarding/steps/NameStep.tsx
-import React, { useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { TextInput, useTheme } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    StyleSheet,
+    Keyboard,
+    TouchableWithoutFeedback,
+} from 'react-native';
+import { TextInput } from 'react-native-paper';
 import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setName } from '../../../slices/onboardingSlice';
 import { StepLayout } from '../StepLayout';
@@ -13,52 +18,50 @@ export default function NameStep({
     currentStep,
     totalSteps,
 }: OnboardingStepProps) {
-    // 1️⃣ Récupère la valeur initiale depuis le store
+    const dispatch = useAppDispatch();
     const onboardName = useAppSelector((s) => s.onboarding.name ?? '');
     const [name, setLocalName] = useState(onboardName);
 
-    const dispatch = useAppDispatch();
-    const { colors } = useTheme();
-    // 2️⃣ Calcule la progression
     const progress = (currentStep ?? 1) / (totalSteps ?? 1);
-
-    // 3️⃣ Lorsqu’on valide, on enregistre dans le store puis onNext()
     const handlePress = () => {
         dispatch(setName(name));
         onNext!();
     };
 
     return (
-        <StepLayout
-            title="Inscris ton prénom"
-            subtitle="Cela nous permet d’en savoir plus sur toi"
-            progress={progress}
-            onNext={handlePress}
-            onBack={onBack}
-            // on désactive tant que le champ est vide (ou ne fait que des espaces)
-            disableNext={!name.trim()}
-        >
-            {/* Ton TextInput inchangé */}
-            <TextInput
-                mode="flat"
-                placeholder="Prénom"
-                value={name}
-                onChangeText={setLocalName}
-                style={styles.input}
-                placeholderTextColor="rgba(128, 128, 128, 0.5)"
-                underlineColor="transparent"
-            />
-        </StepLayout>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={{ flex: 1 }}>
+                <StepLayout
+                    title="Inscris ton prénom"
+                    subtitle="Cela nous permet d’en savoir plus sur toi"
+                    progress={progress}
+                    onNext={handlePress}
+                    onBack={onBack}
+                    disableNext={!name.trim()}
+                >
+                    <TextInput
+                        mode="flat"
+                        placeholder="Prénom"
+                        value={name}
+                        onChangeText={setLocalName}
+                        style={styles.input}
+                        placeholderTextColor="rgba(128, 128, 128, 0.5)"
+                        underlineColor="transparent"
+                    />
+                </StepLayout>
+            </View>
+        </TouchableWithoutFeedback>
     );
 }
 
 const styles = StyleSheet.create({
     input: {
-        marginBottom: 32,
+        marginBottom: 16,
         backgroundColor: 'transparent',
         textAlign: 'left',
         elevation: 0,
         borderBottomWidth: 0,
+        marginTop: 65,
         fontSize: 36,
         transform: [{ translateY: -30 }],
     },
