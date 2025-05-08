@@ -14,9 +14,10 @@ import { View, Text } from 'react-native';
 import { HomeScreen } from '../../screens/HomeScreen/HomeScreen';
 // import MarketplaceScreen from '../../screens/MarketplaceScreen/MarketplaceScreen';
 // import VirtualTryOnScreen from '../screens/VirtualTryOnScreen/VirtualTryOnScreen';
-import { DressingHomeScreen } from '../../screens/DressingScreen/DressingHomeScreen';
-import { DressingNavigator } from '../DressingNavigator';
+import { DressingHomeScreen } from '../../features/dressing/screen/DressingHomeScreen';
+import { DressingNavigator } from '../../features/dressing/navigation/DressingNavigator';
 import { lightTheme } from '../../styles/theme';
+import { VTONavigator } from '../../features/vto/navigation/VTOMainNavigation';
 // import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 
 export type MainTabParamList = {
@@ -32,6 +33,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 const MainTabNavigator: React.FC = () => (
     <PaperProvider>
         <Tab.Navigator
+            initialRouteName="Home"
             screenOptions={{
                 headerShown: false,
             }}
@@ -95,11 +97,7 @@ const MainTabNavigator: React.FC = () => (
             />
             <Tab.Screen
                 name="Marketplace"
-                component={() => (
-                    <View>
-                        <Text>Hello</Text>
-                    </View>
-                )}
+                component={RandomComponent}
                 options={{
                     tabBarLabel: 'Marketplace',
                     tabBarIcon: ({ color, size }) => (
@@ -113,11 +111,7 @@ const MainTabNavigator: React.FC = () => (
             />
             <Tab.Screen
                 name="VirtualTryOn"
-                component={() => (
-                    <View>
-                        <Text>Hello</Text>
-                    </View>
-                )}
+                component={VTONavigator}
                 options={{
                     tabBarLabel: 'Try On',
                     tabBarIcon: ({ color, size }) => (
@@ -145,11 +139,7 @@ const MainTabNavigator: React.FC = () => (
             />
             <Tab.Screen
                 name="Profile"
-                component={() => (
-                    <View>
-                        <Text>Hello</Text>
-                    </View>
-                )}
+                component={RandomComponent}
                 options={{
                     tabBarLabel: 'Profil',
                     tabBarIcon: ({ color, size }) => (
@@ -164,5 +154,13 @@ const MainTabNavigator: React.FC = () => (
         </Tab.Navigator>
     </PaperProvider>
 );
+
+const RandomComponent = () => {
+    return (
+        <View>
+            <Text>Hello</Text>
+        </View>
+    );
+};
 
 export default MainTabNavigator;

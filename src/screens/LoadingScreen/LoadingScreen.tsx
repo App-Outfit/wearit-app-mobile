@@ -14,7 +14,8 @@ import { loadToken } from '../../features/auth/slices/authSlice';
 import { logout } from '../../features/auth/slices/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export function LoadingScreen({ navigation }: any) {
+export function LoadingScreen({ navigation, route }: any) {
+    const { initialRoute } = route.params;
     const font_base_bath = '../../assets/fonts/';
 
     const [fontsLoaded] = useFonts({
@@ -59,7 +60,7 @@ export function LoadingScreen({ navigation }: any) {
             // }
             AsyncStorage.removeItem('token');
             dispatch(logout());
-            navigation.replace('Auth');
+            navigation.replace(initialRoute);
         };
         init();
     }, [fontsLoaded, status, token]);

@@ -8,26 +8,24 @@ import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
 import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScreen';
 
 import AuthNavigator from '../features/auth/navigation/AuthNavigator';
-
-import { DressingNavigator } from './DressingNavigator';
+import { DressingNavigator } from '../features/dressing/navigation/DressingNavigator';
 import MainTabNavigator from './NavigationComponents/MainTabNavigator';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
     const developerMode = true; // Set this to false in production
-    const developerInitialRoute = 'Auth';
-    const initialRouteName = developerMode
-        ? developerInitialRoute
-        : 'LaunchScreen';
+    const developerInitialRoute = 'MainTabs';
+    const initialRoute = developerMode ? developerInitialRoute : 'LaunchScreen';
 
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName={initialRouteName}>
+            <Stack.Navigator initialRouteName={'LaunchScreen'}>
                 <Stack.Screen
                     name="LaunchScreen"
                     component={LoadingScreen}
                     options={{ headerShown: false }}
+                    initialParams={{ initialRoute }}
                 />
 
                 <Stack.Screen

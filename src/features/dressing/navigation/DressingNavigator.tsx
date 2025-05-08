@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { DressingHomeScreen } from '../screens/DressingScreen/DressingHomeScreen';
-import { screenOptions } from '../styles/screen';
+import { DressingHomeScreen } from '../screen/DressingHomeScreen';
+import { screenOptions } from '../../../styles/screen';
 
 import {
     MaterialTopTabBarProps,
@@ -14,18 +14,28 @@ import {
     LayoutChangeEvent,
     TouchableOpacity,
     StyleSheet,
+    ImageSourcePropType,
 } from 'react-native';
-import { lightTheme } from '../styles/theme';
-import { ScrollView } from 'react-native-gesture-handler';
+import { DressingClothGaleryScreen } from '../screen/DressingClothsScreen';
+import { DressingOutfitScreen } from '../screen/DressingOutfit';
+import { DressingOutfitDetail } from '../screen/DressingOutfitDetail';
 
 type TabParamList = {
-    Categories: undefined;
+    Cloths: undefined;
     Outfits: undefined;
 };
 
-// Here all screens refer to Auth Screens
+export type DressingNavigatorParamList = {
+    Dressing: undefined;
+    DressingClothGalery: {
+        title: string;
+        subtitle: string;
+        clothes: ImageSourcePropType[];
+    };
+    DressingOutfitDetail: any;
+};
 
-const DressingStack = createStackNavigator();
+const DressingStack = createStackNavigator<DressingNavigatorParamList>();
 
 export const DressingNavigator = () => {
     return (
@@ -33,12 +43,27 @@ export const DressingNavigator = () => {
             <DressingStack.Screen
                 name="Dressing"
                 component={CategoryOutfitNavigator}
-                options={
-                    {
-                        headerShown: true,
-                        title: 'Dressing',
-                    } && screenOptions
-                }
+                options={{
+                    ...screenOptions,
+                    headerShown: true,
+                    title: 'Dressing',
+                }}
+            />
+            <DressingStack.Screen
+                name="DressingClothGalery"
+                component={DressingClothGaleryScreen}
+                options={{
+                    ...screenOptions,
+                    headerShown: true,
+                    title: 'Dressing',
+                }}
+            />
+            <DressingStack.Screen
+                name="DressingOutfitDetail"
+                component={DressingOutfitDetail}
+                options={{
+                    headerShown: false,
+                }}
             />
         </DressingStack.Navigator>
     );
@@ -51,7 +76,7 @@ export default function CategoryOutfitNavigator() {
 
     return (
         <Tab.Navigator
-            initialRouteName="Categories"
+            initialRouteName="Cloths"
             backBehavior="history"
             tabBar={(props) => <TabBar {...props} />}
             screenOptions={{
@@ -64,7 +89,7 @@ export default function CategoryOutfitNavigator() {
             }}
         >
             <Tab.Screen
-                name="Categories"
+                name="Cloths"
                 component={DressingHomeScreen}
                 options={{
                     tabBarLabel: 'Catégories',
@@ -73,11 +98,7 @@ export default function CategoryOutfitNavigator() {
             />
             <Tab.Screen
                 name="Outfits"
-                component={() => (
-                    <View>
-                        <Text>Hello outfit</Text>
-                    </View>
-                )}
+                component={DressingOutfitScreen}
                 options={{
                     tabBarLabel: 'Outfits',
                     tabBarLabelStyle: { textAlign: 'center' },
