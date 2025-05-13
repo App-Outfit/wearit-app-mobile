@@ -13,7 +13,7 @@ import OTPInput from '../../../../components/core/OTPInput';
 import { CButton } from '../../../../components/core/Buttons';
 
 import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
-import { verifyReset } from '../../slices/authSlice';
+import { clearStatus, verifyReset } from '../../slices/authSlice';
 
 export const CodeVerification: React.FC<any> = ({ navigation, route }) => {
     const dispatch = useAppDispatch();
@@ -25,7 +25,8 @@ export const CodeVerification: React.FC<any> = ({ navigation, route }) => {
     // Dès que la vérification est réussie, on navigue
     useEffect(() => {
         if (status === 'succeeded') {
-            navigation.replace('ResetPassword', { email, code });
+            navigation.push('ResetPassword', { email, code });
+            dispatch(clearStatus());
         }
     }, [status, navigation]);
 

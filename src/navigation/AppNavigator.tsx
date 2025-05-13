@@ -42,7 +42,6 @@ const AppNavigator = () => {
                     options={{ headerShown: false }}
                 />
 
-                {/* AuthNavigator is a stack navigator that contains all the auth screens */}
                 <Stack.Screen
                     name="Auth"
                     component={AuthNavigator}

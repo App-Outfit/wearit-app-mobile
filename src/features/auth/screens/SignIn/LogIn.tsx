@@ -1,6 +1,15 @@
 import * as React from 'react';
 import { useCallback, useState, useEffect } from 'react';
-import { Text, TextInput, View, StyleSheet, Keyboard } from 'react-native';
+import {
+    Text,
+    TextInput,
+    View,
+    StyleSheet,
+    Keyboard,
+    KeyboardAvoidingView,
+    TouchableWithoutFeedback,
+    Platform,
+} from 'react-native';
 import { Header } from '../../../../components/core/Typography';
 import { lightTheme } from '../../../../styles/theme';
 import { InputField } from '../../../../components/core/PlaceHolders';
@@ -77,95 +86,111 @@ export const LogIn: React.FC = ({ navigation }: any) => {
     };
 
     return (
-        <View style={styles.container}>
-            {/* Header */}
-            <Header variant="h2" style={styles.header}>
-                Connectez-vous à votre compte
-            </Header>
-            <Text style={styles.subtitle}>
-                C'est formidable de vous revoir.
-            </Text>
-
-            {/* Formulaire */}
-            <View style={styles.form}>
-                {/* E-mail */}
-                <Text style={styles.label}>E-mail</Text>
-                <InputField
-                    ref={emailRef}
-                    placeholder="Entrez votre adresse email"
-                    keyboardType="email-address"
-                    returnKeyType="next"
-                    onSubmitEditing={() => passwordRef.current!.focus()}
-                    // submitBehavior="submit"
-                    isValid={emailValid}
-                    onChangeText={handleEmailChange}
-                    errorMessage={errorEmail}
-                />
-
-                {/* Mot de passe */}
-                <Text style={styles.label}>Mot de passe</Text>
-                <InputField
-                    ref={passwordRef}
-                    placeholder="Entrez votre mot de passe"
-                    secureTextEntry={!showPassword}
-                    returnKeyType="done"
-                    onSubmitEditing={() => Keyboard.dismiss()}
-                    isValid={passwordValid}
-                    onChangeText={handlePasswordChange}
-                    errorMessage={errorPassword}
-                />
-
-                {/* Mot de passe oublié */}
-                <Text style={styles.conditions}>
-                    Vous avez oublié le mot de passe ?{' '}
-                    <Text style={styles.link} onPress={moveToForgotPassword}>
-                        Reinitialisez
+        <KeyboardAvoidingView
+            style={styles.flex}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+        >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.container}>
+                    {/* Header */}
+                    <Header variant="h2" style={styles.header}>
+                        Connectez-vous à votre compte
+                    </Header>
+                    <Text style={styles.subtitle}>
+                        C'est formidable de vous revoir.
                     </Text>
-                </Text>
-            </View>
 
-            {/* Erreur serveur */}
-            {status === 'failed' && error && (
-                <Text style={styles.serverError}>{error}</Text>
-            )}
+                    {/* Formulaire */}
+                    <View style={styles.form}>
+                        {/* E-mail */}
+                        <Text style={styles.label}>E-mail</Text>
+                        <InputField
+                            ref={emailRef}
+                            placeholder="Entrez votre adresse email"
+                            keyboardType="email-address"
+                            returnKeyType="next"
+                            onSubmitEditing={() => passwordRef.current!.focus()}
+                            // submitBehavior="submit"
+                            isValid={emailValid}
+                            onChangeText={handleEmailChange}
+                            errorMessage={errorEmail}
+                        />
 
-            {/* Bouton Connexion */}
-            <CButton
-                variant="primary"
-                size="xlarge"
-                disabled={!emailValid || !passwordValid || status === 'loading'}
-                onPress={handleSubmit}
-            >
-                Se Connecter
-            </CButton>
+                        {/* Mot de passe */}
+                        <Text style={styles.label}>Mot de passe</Text>
+                        <InputField
+                            ref={passwordRef}
+                            placeholder="Entrez votre mot de passe"
+                            secureTextEntry={!showPassword}
+                            returnKeyType="done"
+                            onSubmitEditing={() => Keyboard.dismiss()}
+                            isValid={passwordValid}
+                            onChangeText={handlePasswordChange}
+                            errorMessage={errorPassword}
+                        />
 
-            {/* <DividerText text="Ou" /> */}
+                        {/* Mot de passe oublié */}
+                        <Text style={styles.conditions}>
+                            Vous avez oublié le mot de passe ?{' '}
+                            <Text
+                                style={styles.link}
+                                onPress={moveToForgotPassword}
+                            >
+                                Reinitialisez
+                            </Text>
+                        </Text>
+                    </View>
 
-            {/* Boutons Google et Facebook */}
-            {/* <TouchableOpacity style={styles.googleButton}>
-                <Image
-                    source={{
-                        uri: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
-                    }}
-                    style={styles.socialIcon}
-                />
-                <Text style={styles.googleButtonText}>
-                    Inscrivez-vous avec Google
-                </Text>
-            </TouchableOpacity> */}
+                    {/* Erreur serveur */}
+                    {status === 'failed' && error && (
+                        <Text style={styles.serverError}>{error}</Text>
+                    )}
 
-            {/* Inscription */}
-            <Text style={styles.loginText}>
-                Vous n'avez pas de compte ?{' '}
-                <Text style={styles.link} onPress={moveToSignInPage}>
-                    Inscription
-                </Text>
-            </Text>
-        </View>
+                    {/* Bouton Connexion */}
+                    <CButton
+                        variant="primary"
+                        size="xlarge"
+                        disabled={
+                            !emailValid ||
+                            !passwordValid ||
+                            status === 'loading'
+                        }
+                        onPress={handleSubmit}
+                    >
+                        Se Connecter
+                    </CButton>
+
+                    {/* <DividerText text="Ou" /> */}
+
+                    {/* Boutons Google et Facebook */}
+                    {/* <TouchableOpacity style={styles.googleButton}>
+                    <Image
+                        source={{
+                            uri: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+                        }}
+                        style={styles.socialIcon}
+                    />
+                    <Text style={styles.googleButtonText}>
+                        Inscrivez-vous avec Google
+                    </Text>
+                </TouchableOpacity> */}
+
+                    {/* Inscription */}
+                    <Text style={styles.loginText}>
+                        Vous n'avez pas de compte ?{' '}
+                        <Text style={styles.link} onPress={moveToSignInPage}>
+                            Inscription
+                        </Text>
+                    </Text>
+                </View>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
+    flex: { flex: 1 },
     container: {
         flex: 1,
         backgroundColor: '#fff',

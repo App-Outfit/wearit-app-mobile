@@ -41,15 +41,14 @@ export const ForgotPassword = ({ navigation }: any) => {
     // 4) Envoi de l’action Redux
     const handleSubmit = () => {
         if (!emailValid) return;
-        dispatch(forgotPassword(emailLocal));
+        dispatch(forgotPassword({ email: emailLocal }));
     };
 
     // 5) Dès que la requête est réussie, on navigue
     useEffect(() => {
         // On passe de loading→succeeded => on navigue
         if (prevStatus.current === 'loading' && status === 'succeeded') {
-            navigation.navigate('CodeVerification', { email: emailLocal });
-            // puis on clear pour ne pas retomber dessus
+            navigation.push('CodeVerification', { email: emailLocal });
             dispatch(clearStatus());
         }
         prevStatus.current = status;

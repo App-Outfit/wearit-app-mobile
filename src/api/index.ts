@@ -6,7 +6,7 @@ import { parseApiError } from '../utils/apiError';
 
 function getHost(): string {
     if (Platform.OS === 'android') return '10.0.2.2';
-    if (Platform.OS === 'ios') return '192.168.1.26'; // votre IP LAN
+    if (Platform.OS === 'ios') return '192.168.1.123'; // votre IP LAN
     return 'localhost';
 }
 

@@ -2,10 +2,10 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 
 import api from '../../../api'; // votre axios instance
 import { parseApiError } from '../../../utils/apiError';
+import { statusMappings } from '../../../utils/errorMappings';
 
 import type {
     SinginData,
@@ -56,7 +56,9 @@ export const signupUser = createAsyncThunk<
         await AsyncStorage.setItem('token', data.token);
         return data;
     } catch (err: unknown) {
-        return rejectWithValue(parseApiError(err));
+        const message = parseApiError(err);
+        const finalMsg = statusMappings[message] ?? message;
+        return rejectWithValue(finalMsg);
     }
 });
 
@@ -73,13 +75,9 @@ export const loginUser = createAsyncThunk<
         await AsyncStorage.setItem('token', data.token);
         return data;
     } catch (err: unknown) {
-        if (
-            axios.isAxiosError(err) &&
-            (err.response?.status === 400 || err.response?.status === 401)
-        ) {
-            return rejectWithValue('E-mail ou mot de passe incorrect');
-        }
-        return rejectWithValue(parseApiError(err));
+        const message = parseApiError(err);
+        const finalMsg = statusMappings[message] ?? message;
+        return rejectWithValue(finalMsg);
     }
 });
 
@@ -95,7 +93,9 @@ export const forgotPassword = createAsyncThunk<
         );
         return data;
     } catch (err: unknown) {
-        return rejectWithValue(parseApiError(err));
+        const message = parseApiError(err);
+        const finalMsg = statusMappings[message] ?? message;
+        return rejectWithValue(finalMsg);
     }
 });
 
@@ -112,7 +112,9 @@ export const verifyReset = createAsyncThunk<
         if (!data.valid) return rejectWithValue('Code invalide');
         return data;
     } catch (err: unknown) {
-        return rejectWithValue(parseApiError(err));
+        const message = parseApiError(err);
+        const finalMsg = statusMappings[message] ?? message;
+        return rejectWithValue(finalMsg);
     }
 });
 
@@ -128,7 +130,9 @@ export const resetPassword = createAsyncThunk<
         );
         return data;
     } catch (err: unknown) {
-        return rejectWithValue(parseApiError(err));
+        const message = parseApiError(err);
+        const finalMsg = statusMappings[message] ?? message;
+        return rejectWithValue(finalMsg);
     }
 });
 

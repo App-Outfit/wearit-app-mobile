@@ -14,7 +14,7 @@ import { TextInput } from 'react-native-gesture-handler';
 import { validatePassword } from '../../../../utils/validation';
 import { CButton } from '../../../../components/core/Buttons';
 import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
-import { resetPassword } from '../../slices/authSlice';
+import { resetPassword, clearStatus } from '../../slices/authSlice';
 
 export const ResetPassword: React.FC<any> = ({ navigation, route }) => {
     const dispatch = useAppDispatch();
@@ -92,7 +92,8 @@ export const ResetPassword: React.FC<any> = ({ navigation, route }) => {
     useEffect(() => {
         if (status === 'succeeded') {
             // une fois réinitialisé, on va à l'écran de connexion
-            navigation.replace('LogIn');
+            navigation.push('SignIn');
+            dispatch(clearStatus());
         }
     }, [status, navigation]);
 
