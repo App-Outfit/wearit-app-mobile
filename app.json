@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Nous avons besoin d’accéder à la caméra pour prendre des photos.",
+        "NSPhotoLibraryUsageDescription": "Nous avons besoin d’accéder à la galerie pour choisir des images."
+      }
     },
     "android": {
       "adaptiveIcon": {
