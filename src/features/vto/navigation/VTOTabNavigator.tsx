@@ -4,6 +4,7 @@ import { screenOptions } from '../../../styles/screen';
 import { VTODressingScreen } from '../screen/VTOHomeScreen';
 import { VTOTabBar } from '../component/VTOTabBar';
 import { lightTheme } from '../../../styles/theme';
+import { VTOMarketPlace } from '../screen/VTOMarketPlace';
 
 const VtoTab = createMaterialTopTabNavigator();
 
@@ -37,7 +38,7 @@ export default function VTOTopTabNavigator() {
             />
             <VtoTab.Screen
                 name="VTOMarketPlace"
-                component={VTODressingScreen}
+                component={VTOMarketPlace}
                 options={{
                     tabBarLabel: 'Market Place',
                 }}
