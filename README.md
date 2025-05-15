@@ -16,8 +16,8 @@
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-org/wearit.git
-cd wearit
+git clone https://github.com/App-Outfit/wearit-app-mobile.git
+cd wearit-app-mobile
 
 # 2. Copy and update env file
 cp .env.example .env
