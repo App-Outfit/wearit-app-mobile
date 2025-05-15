@@ -9,7 +9,7 @@ class BaseAuth(BaseModel):
 class AuthSignup(BaseAuth):
     """Request model for signing up."""
     name: str = Field(..., min_length=2, max_length=50, description="Name of the user")
-    answers: dict[str, str]
+    answers: dict[str, str] = Field(default_factory=dict)
 
 class AuthSignupResponse(BaseModel):
     """Response model after successfully signing up."""

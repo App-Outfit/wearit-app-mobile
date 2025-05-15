@@ -1,15 +1,19 @@
-from datetime import datetime
 from uuid import uuid4, UUID
+from datetime import datetime
 from fastapi import UploadFile
+from typing import List
 
 from app.repositories.wardrobe_repo import WardrobeRepository
 from app.repositories.storage_repo import StorageRepository
 from app.api.schemas.wardrobe_schema import (
     ClothCreate, ClothCreateResponse,
-    ClothResponse, ClothListResponse, ClothDeleteResponse
+    ClothResponse, ClothListResponse, ClothDeleteResponse,
+    OutfitCreate, OutfitCreateResponse,
+    OutfitResponse, OutfitListResponse, OutfitDeleteResponse
 )
 from app.core.errors import NotFoundError, InternalServerError
 from app.core.logging_config import logger
+
 
 class WardrobeService:
     def __init__(
@@ -20,141 +24,194 @@ class WardrobeService:
         self.repo = repository
         self.storage = storage_repo or StorageRepository()
 
-    async def create_cloth(self, cloth: ClothCreate) -> ClothCreateResponse:
-        logger.info("🟡 [Service] Creating cloth for user %s", cloth.user_id)
+    # ----- Cloth -----
+
+    async def create_cloth(
+        self,
+        dto: ClothCreate,
+        file: UploadFile
+    ) -> ClothCreateResponse:
+        logger.info("🟡 [Service] Creating cloth for user %s", dto.user_id)
 
         cloth_id = str(uuid4())
-        # 1) upload to S3
+        created_at = datetime.now()
+        object_key = f"users/{dto.user_id}/clothes/{cloth_id}.jpg"
+
         try:
-            image_url = await self.storage.upload_cloth_image(
-                cloth.user_id, cloth_id, cloth.file
-            )
+            await self.storage.upload_cloth_image(dto.user_id, cloth_id, file)
         except Exception:
             logger.exception("🔴 [Service] S3 upload failed")
-            raise InternalServerError("Failed to upload image to storage")
+            raise InternalServerError("Failed to upload image")
 
-        if not image_url:
-            logger.error("🔴 [Service] No URL from S3")
-            raise InternalServerError("Failed to upload image to storage")
-
-        # 2) insert to MongoDB
-        created_at = datetime.now()
         try:
             record = await self.repo.create_cloth(
                 cloth_id=cloth_id,
-                user_id=cloth.user_id,
-                name=cloth.name,
-                type=cloth.type,
-                image_url=image_url,
-                created_at=created_at,
+                user_id=dto.user_id,
+                name=dto.name,
+                type=dto.type,
+                image_key=object_key,
+                tags=dto.tags,
+                created_at=created_at
             )
         except Exception:
             logger.exception("🔴 [Service] DB insert failed")
-            raise InternalServerError("Failed to create cloth in database")
+            raise InternalServerError("Failed to save cloth")
+        if not record:
+            raise InternalServerError("Failed to save cloth")
 
-        if record is None:
-            logger.error("🔴 [Service] Repository returned None")
-            raise InternalServerError("Failed to create cloth in database")
+        try:
+            signed_url = await self.storage.get_cloth_url(object_key)
+        except Exception:
+            logger.exception("🔴 [Service] Failed to generate presigned URL")
+            raise InternalServerError("Failed to generate image URL")
 
-        logger.debug("🟢 [Service] Cloth %s created", cloth_id)
         return ClothCreateResponse(
             id=UUID(cloth_id),
-            message="Cloth created successfully",
-            image_url=image_url,
+            image_url=signed_url,
+            tags=dto.tags,
             created_at=created_at,
+            message="Cloth created successfully"
         )
 
     async def get_cloth_by_id(self, cloth_id: str) -> ClothResponse:
         logger.info("🟡 [Service] Fetching cloth %s", cloth_id)
-        try:
-            record = await self.repo.get_cloth_by_id(cloth_id)
-        except Exception:
-            logger.exception("🔴 [Service] DB query failed")
-            raise InternalServerError("Failed to fetch cloth")
-
-        if not record:
+        rec = await self.repo.get_cloth_by_id(cloth_id)
+        if not rec:
             logger.warning("🔴 [Service] Cloth %s not found", cloth_id)
             raise NotFoundError(f"Cloth {cloth_id} not found")
 
+        try:
+            url = await self.storage.get_cloth_url(rec.image_key)
+        except Exception:
+            logger.exception("🔴 [Service] Failed to generate presigned URL")
+            raise InternalServerError("Failed to generate image URL")
+
         return ClothResponse(
-            id=UUID(record.id),
-            user_id=record.user_id,
-            name=record.name,
-            type=record.type,
-            image_url=record.image_url,
+            id=UUID(rec.id),
+            user_id=rec.user_id,
+            name=rec.name,
+            type=rec.type,
+            image_url=url,
+            tags=rec.tags
         )
 
     async def get_clothes(self, user_id: str, cloth_type: str) -> ClothListResponse:
-        logger.info(
-            "🟡 [Service] Fetching clothes of type %s for user %s",
-            cloth_type, user_id
-        )
-        try:
-            records = await self.repo.get_clothes(user_id, cloth_type)
-        except Exception:
-            logger.exception("🔴 [Service] DB query failed")
-            raise InternalServerError("Failed to fetch clothes")
+        logger.info("🟡 [Service] Listing clothes of type %s for %s", cloth_type, user_id)
+        recs = await self.repo.get_clothes(user_id, cloth_type)
+        if not recs:
+            logger.warning("🔴 [Service] No clothes for user %s and type %s", user_id, cloth_type)
+            raise NotFoundError(f"No clothes for user {user_id} and type {cloth_type}")
 
-        if not records:
-            logger.warning(
-                "🔴 [Service] No clothes for user %s type %s",
-                user_id, cloth_type
-            )
-            raise NotFoundError(
-                f"No clothes found for user {user_id} and type {cloth_type}"
-            )
+        clothes = []
+        for r in recs:
+            try:
+                url = await self.storage.get_cloth_url(r.image_key)
+            except Exception:
+                logger.exception("🔴 [Service] Failed to generate presigned URL for %s", r.id)
+                raise InternalServerError("Failed to generate image URL")
+            clothes.append(ClothResponse(
+                id=UUID(r.id),
+                user_id=r.user_id,
+                name=r.name,
+                type=r.type,
+                image_url=url,
+                tags=r.tags
+            ))
 
-        return ClothListResponse(
-            clothes=[
-                ClothResponse(
-                    id=UUID(r.id),
-                    user_id=r.user_id,
-                    name=r.name,
-                    type=r.type,
-                    image_url=r.image_url,
-                ) for r in records
-            ]
-        )
+        return ClothListResponse(clothes=clothes)
 
     async def delete_cloth(self, cloth_id: str) -> ClothDeleteResponse:
         logger.info("🟡 [Service] Deleting cloth %s", cloth_id)
-
-        # 1) fetch
-        try:
-            record = await self.repo.get_cloth_by_id(cloth_id)
-        except Exception:
-            logger.exception("🔴 [Service] DB query failed")
-            raise InternalServerError("Failed to fetch cloth")
-
-        if not record:
+        rec = await self.repo.get_cloth_by_id(cloth_id)
+        if not rec:
             logger.warning("🔴 [Service] Cloth %s not found", cloth_id)
             raise NotFoundError(f"Cloth {cloth_id} not found")
 
-        # 2) delete from S3
         try:
-            ok = await self.storage.delete_cloth_image(
-                record.user_id, cloth_id
-            )
+            await self.storage.delete_cloth_image(rec.user_id, cloth_id)
         except Exception:
             logger.exception("🔴 [Service] S3 delete failed")
-            raise InternalServerError("Failed to delete image from storage")
+            raise InternalServerError("Failed to delete image")
 
-        if not ok:
-            logger.error("🔴 [Service] S3 delete returned False")
-            raise InternalServerError("Failed to delete image from storage")
-
-        # 3) delete from DB
-        try:
-            removed = await self.repo.delete_cloth(cloth_id)
-        except Exception:
-            logger.exception("🔴 [Service] DB delete failed")
-            raise InternalServerError("Failed to delete cloth from database")
-
+        removed = await self.repo.delete_cloth(cloth_id)
         if not removed:
-            logger.error("🔴 [Service] Repository delete returned False")
-            raise InternalServerError("Failed to delete cloth from database")
+            raise InternalServerError("Failed to delete cloth")
 
-        logger.debug("🟢 [Service] Cloth %s deleted", cloth_id)
-        return ClothDeleteResponse(
-            message=f"Cloth {cloth_id} deleted successfully"
+        return ClothDeleteResponse(message=f"Cloth {cloth_id} deleted successfully")
+
+    # ----- Outfit -----
+
+    async def create_outfit(
+        self,
+        dto: OutfitCreate
+    ) -> OutfitCreateResponse:
+        logger.info("🟡 [Service] Creating outfit for user %s", dto.user_id)
+        outfit_id = str(uuid4())
+        created_at = datetime.now()
+
+        if not dto.cloth_ids:
+            raise InternalServerError("At least one cloth required for outfit")
+
+        try:
+            record = await self.repo.create_outfit(
+                outfit_id=outfit_id,
+                user_id=dto.user_id,
+                body_id=str(dto.body_id),
+                cloth_ids=[str(cid) for cid in dto.cloth_ids],
+                created_at=created_at
+            )
+        except Exception:
+            logger.exception("🔴 [Service] DB insert failed")
+            raise InternalServerError("Failed to save outfit")
+        if not record:
+            raise InternalServerError("Failed to save outfit")
+
+        return OutfitCreateResponse(
+            id=UUID(outfit_id),
+            body_id=dto.body_id,
+            cloth_ids=dto.cloth_ids,
+            created_at=created_at,
+            message="Outfit saved successfully"
         )
+
+    async def get_outfit_by_id(self, outfit_id: str) -> OutfitResponse:
+        logger.info("🟡 [Service] Fetching outfit %s", outfit_id)
+        rec = await self.repo.get_outfit_by_id(outfit_id)
+        if not rec:
+            raise NotFoundError(f"Outfit {outfit_id} not found")
+
+        return OutfitResponse(
+            id=UUID(rec.id),
+            user_id=rec.user_id,
+            body_id=UUID(rec.body_id),
+            cloth_ids=[UUID(cid) for cid in rec.cloth_ids],
+            created_at=rec.created_at
+        )
+
+    async def get_outfits(self, user_id: str) -> OutfitListResponse:
+        logger.info("🟡 [Service] Listing outfits for user %s", user_id)
+        recs = await self.repo.get_outfits(user_id)
+        if not recs:
+            raise NotFoundError(f"No outfits for user {user_id}")
+
+        outfits = [OutfitResponse(
+            id=UUID(r.id),
+            user_id=r.user_id,
+            body_id=UUID(r.body_id),
+            cloth_ids=[UUID(cid) for cid in r.cloth_ids],
+            created_at=r.created_at
+        ) for r in recs]
+
+        return OutfitListResponse(outfits=outfits)
+
+    async def delete_outfit(self, outfit_id: str) -> OutfitDeleteResponse:
+        logger.info("🟡 [Service] Deleting outfit %s", outfit_id)
+        rec = await self.repo.get_outfit_by_id(outfit_id)
+        if not rec:
+            raise NotFoundError(f"Outfit {outfit_id} not found")
+
+        removed = await self.repo.delete_outfit(outfit_id)
+        if not removed:
+            raise InternalServerError("Failed to delete outfit")
+
+        return OutfitDeleteResponse(message=f"Outfit {outfit_id} deleted successfully")

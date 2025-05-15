@@ -25,8 +25,9 @@ class AuthRepository:
         self.db = db
         self._col = db["users"]
 
-    async def create_user(self, email: str, hashed_password: str, name: str, answers: dict[str, str]) -> UserInDB:
+    async def create_user(self, email: str, hashed_password: str, name: str, answers: dict[str, str] = None) -> UserInDB:
         """Insère un document user et renvoie son DTO."""
+        answers = answers or {}
         doc = {
             "email": email,
             "password": hashed_password,
