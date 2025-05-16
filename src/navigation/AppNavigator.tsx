@@ -9,7 +9,7 @@ import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScree
 
 import AuthNavigator from '../features/auth/navigation/AuthNavigator';
 
-import { DressingNavigator } from './DressingNavigator';
+import { DressingNavigator } from '../features/dressing/navigation/DressingNavigator';
 import MainTabNavigator from './NavigationComponents/MainTabNavigator';
 
 const Stack = createStackNavigator();

@@ -3,6 +3,7 @@ import { persistReducer, persistStore } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import authReducer from '../features/auth/slices/authSlice';
 import onboardingReducer from '../features/auth/slices/onboardingSlice';
+import dressingReducer from '../features/dressing/slices/dressingSlice';
 
 const persistConfig = {
     key: 'auth',
@@ -16,6 +17,7 @@ export const store = configureStore({
     reducer: {
         auth: persistedAuthReducer,
         onboarding: onboardingReducer,
+        dressing: dressingReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({ serializableCheck: false }),

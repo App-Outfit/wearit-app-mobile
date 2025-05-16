@@ -60,7 +60,7 @@ class StorageRepository:
             Params={"Bucket": self._bucket, "Key": object_name},
             ExpiresIn=expires_in
         )
-        logger.info("🟢 [S3] Presigned URL generated for %s", object_name)
+        #logger.info("🟢 [S3] Presigned URL generated for %s", object_name)
         return url
 
     async def _delete_from_s3(self, object_name: str) -> None:

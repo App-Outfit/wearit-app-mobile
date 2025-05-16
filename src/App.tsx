@@ -1,15 +1,21 @@
+// App.tsx
+
 import * as React from 'react';
-import AppNavigator from './navigation/AppNavigator';
-import { Provider as PaperProvider } from 'react-native-paper';
 import { Provider as StoreProvider } from 'react-redux';
-import { store } from './store';
+import { PersistGate } from 'redux-persist/integration/react';
+import { Provider as PaperProvider } from 'react-native-paper';
+
+import AppNavigator from './navigation/AppNavigator';
+import { store, persistor } from './store';
 
 export default function App() {
     return (
         <StoreProvider store={store}>
-            <PaperProvider>
-                <AppNavigator />
-            </PaperProvider>
+            <PersistGate loading={null} persistor={persistor}>
+                <PaperProvider>
+                    <AppNavigator />
+                </PaperProvider>
+            </PersistGate>
         </StoreProvider>
     );
 }

@@ -9,7 +9,8 @@ from app.api.schemas.wardrobe_schema import (
     ClothCreate, ClothCreateResponse,
     ClothResponse, ClothListResponse, ClothDeleteResponse,
     OutfitCreate, OutfitCreateResponse,
-    OutfitResponse, OutfitListResponse, OutfitDeleteResponse
+    OutfitResponse, OutfitListResponse, OutfitDeleteResponse,
+    CategoryResponse, CategoryListResponse
 )
 from app.core.errors import NotFoundError, InternalServerError
 from app.core.logging_config import logger
@@ -33,6 +34,10 @@ class WardrobeService:
     ) -> ClothCreateResponse:
         logger.info("🟡 [Service] Creating cloth for user %s", dto.user_id)
 
+        exists = await self.repo.exists_category(dto.user_id, dto.type)
+        if not exists:
+            raise NotFoundError(f"Category {dto.type} not found")
+
         cloth_id = str(uuid4())
         created_at = datetime.now()
         object_key = f"users/{dto.user_id}/clothes/{cloth_id}.jpg"
@@ -49,7 +54,7 @@ class WardrobeService:
                 user_id=dto.user_id,
                 name=dto.name,
                 type=dto.type,
-                image_key=object_key,
+                image_url=object_key,
                 tags=dto.tags,
                 created_at=created_at
             )
@@ -81,7 +86,7 @@ class WardrobeService:
             raise NotFoundError(f"Cloth {cloth_id} not found")
 
         try:
-            url = await self.storage.get_cloth_url(rec.image_key)
+            url = await self.storage.get_cloth_url(rec.image_url)
         except Exception:
             logger.exception("🔴 [Service] Failed to generate presigned URL")
             raise InternalServerError("Failed to generate image URL")
@@ -98,14 +103,14 @@ class WardrobeService:
     async def get_clothes(self, user_id: str, cloth_type: str) -> ClothListResponse:
         logger.info("🟡 [Service] Listing clothes of type %s for %s", cloth_type, user_id)
         recs = await self.repo.get_clothes(user_id, cloth_type)
+        logger.warning("🟡 [Service] Found %d clothes", len(recs))
         if not recs:
-            logger.warning("🔴 [Service] No clothes for user %s and type %s", user_id, cloth_type)
-            raise NotFoundError(f"No clothes for user {user_id} and type {cloth_type}")
-
+            return ClothListResponse(clothes=[])
+        
         clothes = []
         for r in recs:
             try:
-                url = await self.storage.get_cloth_url(r.image_key)
+                url = await self.storage.get_cloth_url(r.image_url)
             except Exception:
                 logger.exception("🔴 [Service] Failed to generate presigned URL for %s", r.id)
                 raise InternalServerError("Failed to generate image URL")
@@ -138,6 +143,35 @@ class WardrobeService:
             raise InternalServerError("Failed to delete cloth")
 
         return ClothDeleteResponse(message=f"Cloth {cloth_id} deleted successfully")
+    
+    # ----- Category -----
+
+    async def create_category(self, user_id: str, name: str) -> CategoryResponse:
+        exist = await self.repo.exists_category(user_id, name)
+        if exist:
+            raise InternalServerError(f"Category {name} already exists")
+        logger.info("🟡 [Service] Creating category %s for user %s", name, user_id)
+        doc = await self.repo.create_category(user_id, name, id=str(uuid4()))
+        return CategoryResponse(
+            id=doc["_id"],
+            user_id=doc["user_id"],
+            name=doc["name"],
+            created_at=doc["created_at"],
+        )
+
+    async def list_categories(self, user_id: str) -> CategoryListResponse:
+        docs = await self.repo.list_categories(user_id)
+        return CategoryListResponse(
+            categories=[
+                CategoryResponse(
+                    id=d["id"],
+                    user_id=user_id,
+                    name=d["name"],
+                    created_at=d["created_at"],
+                )
+                for d in docs
+            ]
+        )
 
     # ----- Outfit -----
 

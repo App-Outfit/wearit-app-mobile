@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import {
     View,
     Text,
@@ -7,24 +8,21 @@ import {
     ImageSourcePropType,
     TouchableOpacity,
 } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import MainTabNavigator from '../../../navigation/NavigationComponents/MainTabNavigator';
-import {
-    Searchbar,
-    Menu,
-    Button,
-    IconButton,
-    Portal,
-    Modal,
-} from 'react-native-paper';
+
+import { Searchbar, IconButton, Portal, Modal } from 'react-native-paper';
 
 import { DressingBoxCategory } from '../component/DressingBoxCategory';
-import Entypo from 'react-native-vector-icons/Entypo';
 import { lightTheme } from '../../../styles/theme';
-import { useNavigation } from '@react-navigation/native';
 import DropdownMenu from '../component/DropDownMenu';
 import { InputField } from '../../../components/core/PlaceHolders';
 import { CButton } from '../../../components/core/Buttons';
+
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import {
+    createCategory,
+    loadCategories,
+    loadClothesByType,
+} from '../slices/dressingSlice';
 
 type TypeDataPersonalCategory = {
     id: string;
@@ -36,42 +34,109 @@ type TypeDataPersonalCategory = {
 const img1 = require('../../../assets/images/exemples/clothing.jpg');
 const img2 = require('../../../assets/images/exemples/clothing2.jpg');
 
-const data_personal_category: TypeDataPersonalCategory[] = [
-    {
-        id: '1',
-        name: 'Mes T-shirts favoris',
-        nb_clothes: 9,
-        cloths: [img1, img1, img1, img1, img1],
-    },
-    {
-        id: '2',
-        name: 'Mes jeans préférés',
-        nb_clothes: 4,
-        cloths: [img2, img2, img2, img2, img2],
-    },
-    {
-        id: '3',
-        name: 'Mes jeans préférés',
-        nb_clothes: 4,
-        cloths: [img1, img2, img1, img2, img1],
-    },
-    {
-        id: '4',
-        name: 'Mes jeans préférés',
-        nb_clothes: 4,
-        cloths: [],
-    },
-    {
-        id: '5',
-        name: 'Mes jeans préférés',
-        nb_clothes: 4,
-        cloths: [img1, img2],
-    },
-];
+// const data_personal_category: TypeDataPersonalCategory[] = [
+//     {
+//         id: '1',
+//         name: 'Mes T-shirts favoris',
+//         nb_clothes: 9,
+//         cloths: [img1, img1, img1, img1, img1],
+//     },
+//     {
+//         id: '2',
+//         name: 'Mes jeans préférés',
+//         nb_clothes: 4,
+//         cloths: [img2, img2, img2, img2, img2],
+//     },
+//     {
+//         id: '3',
+//         name: 'Mes jeans préférés',
+//         nb_clothes: 4,
+//         cloths: [img1, img2, img1, img2, img1],
+//     },
+//     {
+//         id: '4',
+//         name: 'Mes jeans préférés',
+//         nb_clothes: 4,
+//         cloths: [],
+//     },
+//     {
+//         id: '5',
+//         name: 'Mes jeans préférés',
+//         nb_clothes: 4,
+//         cloths: [img1, img2],
+//     },
+// ];
 
 export function DressingHomeScreen({ navigation }: any) {
     const [searchQuery, setSearchQuery] = React.useState('');
     const [visibleModal, setModalVisible] = React.useState(false);
+
+    const dispatch = useAppDispatch();
+    // categories est un CategoryResponse[] : {id, user_id, name, created_at}[]
+    const categories = useAppSelector((state) => state.dressing.categories);
+
+    const [newCategory, setNewCategory] = React.useState('');
+
+    // état local enrichi pour la FlatList
+    const [categoriesData, setCategoriesData] = React.useState<
+        TypeDataPersonalCategory[]
+    >([]);
+
+    useEffect(() => {
+        dispatch(loadCategories())
+            .unwrap()
+            .then(async (cats) /* cats: CategoryResponse[] */ => {
+                const data = await Promise.all(
+                    cats.map(async (cat) => {
+                        const items = await dispatch(
+                            loadClothesByType(cat.name),
+                        ).unwrap();
+                        return {
+                            id: cat.id,
+                            name: cat.name,
+                            nb_clothes: items.length,
+                            cloths: items
+                                .slice(0, 5)
+                                .map(
+                                    (i) =>
+                                        ({
+                                            uri: i.image_url,
+                                        }) as ImageSourcePropType,
+                                ),
+                        } as TypeDataPersonalCategory;
+                    }),
+                );
+                setCategoriesData([
+                    { id: 'add', name: '', nb_clothes: 0, cloths: [] },
+                    ...data,
+                ]);
+            })
+            .catch((err) => {
+                console.error('Erreur catégories :', err);
+            });
+    }, [dispatch]);
+
+    const handleCreateCategory = () => {
+        if (!newCategory.trim()) return;
+        dispatch(createCategory({ name: newCategory }))
+            .unwrap()
+            .then((newCat) => {
+                setModalVisible(false);
+                setNewCategory('');
+                // 1) on crée l'objet TypeDataPersonalCategory vide pour ce newCat
+                setCategoriesData((prev) => [
+                    prev[0], // conserve le bouton "add"
+                    {
+                        id: newCat.id,
+                        name: newCat.name,
+                        nb_clothes: 0,
+                        cloths: [],
+                    },
+                    ...prev.slice(1),
+                ]);
+            })
+            .catch((err) => console.error('Erreur création catégorie', err));
+    };
 
     const navigateToClothGalery = (
         title: string,
@@ -103,8 +168,12 @@ export function DressingHomeScreen({ navigation }: any) {
                     >
                         Nommez votre catégorie
                     </Text>
-                    <InputField placeholder="Nom de la catégorie" />
-                    <CButton size="xlarge" onPress={() => {}}>
+                    <InputField
+                        placeholder="Nom de la catégorie"
+                        value={newCategory}
+                        onChangeText={setNewCategory}
+                    />
+                    <CButton size="xlarge" onPress={handleCreateCategory}>
                         Créer
                     </CButton>
                 </Modal>
@@ -141,13 +210,14 @@ export function DressingHomeScreen({ navigation }: any) {
 
                 {/* Categories Box */}
                 <FlatList
-                    data={data_personal_category}
-                    keyExtractor={(itm) => itm.id}
+                    data={categoriesData}
+                    keyExtractor={(item) => item.id}
                     numColumns={2}
                     contentContainerStyle={{ padding: 8, paddingBottom: 200 }}
                     columnWrapperStyle={{ justifyContent: 'space-between' }}
-                    renderItem={({ item, index }) => {
-                        if (index === 0) {
+                    renderItem={({ item }) => {
+                        // bouton "Ajouter une nouvelle catégorie"
+                        if (item.id === 'add') {
                             return (
                                 <View style={styles.addCategoryButtonBox}>
                                     <IconButton
@@ -164,22 +234,22 @@ export function DressingHomeScreen({ navigation }: any) {
                             );
                         }
 
-                        const realItem = data_personal_category[index - 1];
+                        // une vraie catégorie
                         return (
                             <TouchableOpacity
                                 style={{ paddingTop: 5 }}
                                 onPress={() =>
                                     navigateToClothGalery(
-                                        realItem.name,
-                                        `${realItem.nb_clothes} vêtements`,
-                                        realItem.cloths,
+                                        item.name,
+                                        `${item.nb_clothes} vêtements`,
+                                        item.cloths,
                                     )
                                 }
                             >
                                 <DressingBoxCategory
-                                    name_category={realItem.name}
-                                    nb_clothes={realItem.nb_clothes}
-                                    imgs={realItem.cloths}
+                                    name_category={item.name}
+                                    nb_clothes={item.nb_clothes}
+                                    imgs={item.cloths}
                                 />
                             </TouchableOpacity>
                         );

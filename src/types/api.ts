@@ -275,6 +275,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/api/v1/wardrobe/categories': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Categories
+         * @description Liste toutes les catégories de l'utilisateur.
+         */
+        get: operations['list_categories_api_v1_wardrobe_categories_get'];
+        put?: never;
+        /**
+         * Create Category
+         * @description Crée une nouvelle catégorie vide pour l'utilisateur.
+         */
+        post: operations['create_category_api_v1_wardrobe_categories_post'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/wardrobe/outfits': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Outfits */
+        get: operations['list_outfits_api_v1_wardrobe_outfits_get'];
+        put?: never;
+        /** Create Outfit */
+        post: operations['create_outfit_api_v1_wardrobe_outfits_post'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/wardrobe/outfits/{outfit_id}': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Outfit */
+        get: operations['get_outfit_api_v1_wardrobe_outfits__outfit_id__get'];
+        put?: never;
+        post?: never;
+        /** Delete Outfit */
+        delete: operations['delete_outfit_api_v1_wardrobe_outfits__outfit_id__delete'];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/api/v1/tryon/{body_id}/{cloth_id}': {
         parameters: {
             query?: never;
@@ -425,7 +485,7 @@ export interface components {
              */
             name: string;
             /** Answers */
-            answers: {
+            answers?: {
                 [key: string]: string;
             };
         };
@@ -524,6 +584,11 @@ export interface components {
              */
             file: string;
         };
+        /** Body_create_category_api_v1_wardrobe_categories_post */
+        Body_create_category_api_v1_wardrobe_categories_post: {
+            /** Name */
+            name: string;
+        };
         /** Body_create_cloth_api_v1_wardrobe__post */
         Body_create_cloth_api_v1_wardrobe__post: {
             /** Name */
@@ -531,92 +596,94 @@ export interface components {
             /** Type */
             type: string;
             /**
+             * Tags
+             * @default []
+             */
+            tags: string[];
+            /**
              * File
              * Format: binary
              */
             file: string;
         };
-        /**
-         * ClothCreateResponse
-         * @description Response model after successfully creating a cloth.
-         */
-        ClothCreateResponse: {
+        /** Body_create_outfit_api_v1_wardrobe_outfits_post */
+        Body_create_outfit_api_v1_wardrobe_outfits_post: {
+            /**
+             * Body Id
+             * Format: uuid
+             */
+            body_id: string;
+            /** Cloth Ids */
+            cloth_ids: string[];
+        };
+        /** CategoryListResponse */
+        CategoryListResponse: {
+            /** Categories */
+            categories: components['schemas']['CategoryResponse'][];
+        };
+        /** CategoryResponse */
+        CategoryResponse: {
             /**
              * Id
              * Format: uuid
-             * @description Unique ID of the cloth
              */
             id: string;
-            /**
-             * Message
-             * @default Cloth created successfully
-             */
-            message: string;
+            /** User Id */
+            user_id: string;
+            /** Name */
+            name: string;
             /**
              * Created At
              * Format: date-time
              */
             created_at: string;
-            /**
-             * Image Url
-             * Format: uri
-             * @description URL of the cloth image
-             */
-            image_url: string;
         };
-        /**
-         * ClothDeleteResponse
-         * @description Response model after deleting a cloth.
-         */
-        ClothDeleteResponse: {
+        /** ClothCreateResponse */
+        ClothCreateResponse: {
             /**
-             * Message
-             * @default Cloth deleted successfully
+             * Id
+             * Format: uuid
              */
+            id: string;
+            /** Image Url */
+            image_url: string;
+            /** Tags */
+            tags: string[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Message */
             message: string;
         };
-        /**
-         * ClothListResponse
-         * @description Response model when fetching multiple clothes.
-         */
+        /** ClothDeleteResponse */
+        ClothDeleteResponse: {
+            /** Message */
+            message: string;
+        };
+        /** ClothListResponse */
         ClothListResponse: {
             /** Clothes */
             clothes: components['schemas']['ClothResponse'][];
         };
-        /**
-         * ClothResponse
-         * @description Response model when fetching a cloth.
-         */
+        /** ClothResponse */
         ClothResponse: {
-            /**
-             * User Id
-             * Format: uuid
-             * @description User ID of the cloth owner
-             */
-            user_id: string;
-            /**
-             * Name
-             * @description Name of the cloth
-             */
-            name: string;
-            /**
-             * Type
-             * @description Type of the cloth
-             * @enum {string}
-             */
-            type: 'upper' | 'lower' | 'dress';
             /**
              * Id
              * Format: uuid
-             * @description Unique ID of the cloth
              */
             id: string;
-            /**
-             * Image Url
-             * Format: uri
-             * @description URL of the cloth image
-             */
+            /** User Id */
+            user_id: string;
+            /** Name */
+            name: string;
+            /** Type */
+            type: string;
+            /** Image Url */
             image_url: string;
+            /** Tags */
+            tags: string[];
         };
         /** ForgotPasswordRequest */
         ForgotPasswordRequest: {
@@ -639,6 +706,60 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components['schemas']['ValidationError'][];
+        };
+        /** OutfitCreateResponse */
+        OutfitCreateResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Body Id
+             * Format: uuid
+             */
+            body_id: string;
+            /** Cloth Ids */
+            cloth_ids: string[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Message */
+            message: string;
+        };
+        /** OutfitDeleteResponse */
+        OutfitDeleteResponse: {
+            /** Message */
+            message: string;
+        };
+        /** OutfitListResponse */
+        OutfitListResponse: {
+            /** Outfits */
+            outfits: components['schemas']['OutfitResponse'][];
+        };
+        /** OutfitResponse */
+        OutfitResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** User Id */
+            user_id: string;
+            /**
+             * Body Id
+             * Format: uuid
+             */
+            body_id: string;
+            /** Cloth Ids */
+            cloth_ids: string[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** ResetPasswordRequest */
         ResetPasswordRequest: {
@@ -1218,6 +1339,174 @@ export interface operations {
                 };
                 content: {
                     'application/json': components['schemas']['ClothDeleteResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    list_categories_api_v1_wardrobe_categories_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['CategoryListResponse'];
+                };
+            };
+        };
+    };
+    create_category_api_v1_wardrobe_categories_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/x-www-form-urlencoded': components['schemas']['Body_create_category_api_v1_wardrobe_categories_post'];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['CategoryResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    list_outfits_api_v1_wardrobe_outfits_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['OutfitListResponse'];
+                };
+            };
+        };
+    };
+    create_outfit_api_v1_wardrobe_outfits_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/x-www-form-urlencoded': components['schemas']['Body_create_outfit_api_v1_wardrobe_outfits_post'];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['OutfitCreateResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    get_outfit_api_v1_wardrobe_outfits__outfit_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                outfit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['OutfitResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    delete_outfit_api_v1_wardrobe_outfits__outfit_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                outfit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['OutfitDeleteResponse'];
                 };
             };
             /** @description Validation Error */

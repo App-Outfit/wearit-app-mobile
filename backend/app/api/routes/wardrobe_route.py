@@ -11,7 +11,8 @@ from app.api.schemas.wardrobe_schema import (
     ClothCreate, ClothCreateResponse,
     ClothResponse, ClothListResponse, ClothDeleteResponse,
     OutfitCreate, OutfitCreateResponse,
-    OutfitResponse, OutfitListResponse, OutfitDeleteResponse
+    OutfitResponse, OutfitListResponse, OutfitDeleteResponse,
+    CategoryResponse, CategoryListResponse
 )
 
 router = APIRouter(prefix="/wardrobe", tags=["Wardrobe"])
@@ -69,6 +70,27 @@ async def delete_cloth(
 ):
     logger.info("🔵 [API] DELETE /wardrobe/%s", cloth_id)
     return await service.delete_cloth(str(cloth_id))
+
+@router.post("/category", response_model=CategoryResponse)
+async def create_category(
+    name: str = Form(...),
+    current_user=Depends(get_current_user),
+    service: WardrobeService = Depends(get_wardrobe_service),
+):
+    """
+    Crée une nouvelle catégorie vide pour l'utilisateur.
+    """
+    return await service.create_category(current_user.id, name)
+
+@router.get("/categories", response_model=CategoryListResponse)
+async def list_categories(
+    current_user=Depends(get_current_user),
+    service: WardrobeService = Depends(get_wardrobe_service),
+):
+    """
+    Liste toutes les catégories de l'utilisateur.
+    """
+    return await service.list_categories(current_user.id)
 
 # --- Outfit Endpoints ---
 

@@ -37,6 +37,23 @@ class ClothDeleteResponse(BaseModel):
     message: str
 
 # -----------------------
+# Category
+# -----------------------
+
+class CategoryCreate(BaseModel):
+    user_id: str
+    name: str
+
+class CategoryResponse(BaseModel):
+    id: str
+    user_id: str
+    name: str
+    created_at: datetime
+
+class CategoryListResponse(BaseModel):
+    categories: List[CategoryResponse]
+
+# -----------------------
 # Outfit
 # -----------------------
 

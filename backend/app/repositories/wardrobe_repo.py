@@ -8,13 +8,12 @@ from pydantic import BaseModel
 from app.core.errors import InternalServerError, NotFoundError
 from app.core.logging_config import logger
 
-
 class ClothInDB(BaseModel):
     id: str
     user_id: str
     name: str
     type: str
-    image_key: str
+    image_url: str       # <— doit correspondre au champ en base
     tags: List[str]
     created_at: datetime
 
@@ -30,6 +29,7 @@ class WardrobeRepository:
     def __init__(self, db: Database):
         self._clothes = db["clothes"]
         self._outfits = db["outfits"]
+        self._categories = db["categories"]
 
     # ----- Cloth CRUD -----
 
@@ -39,7 +39,7 @@ class WardrobeRepository:
         user_id: str,
         name: str,
         type: str,
-        image_key: str,
+        image_url: str,
         tags: List[str],
         created_at: datetime,
     ) -> ClothInDB:
@@ -48,7 +48,7 @@ class WardrobeRepository:
             "user_id": user_id,
             "name": name,
             "type": type,
-            "image_key": image_key,
+            "image_url": image_url,
             "tags": tags,
             "created_at": created_at,
         }
@@ -71,14 +71,35 @@ class WardrobeRepository:
 
     async def get_clothes(self, user_id: str, cloth_type: str) -> List[ClothInDB]:
         try:
-            docs = await self._clothes.find({
-                "user_id": user_id,
-                "type": cloth_type
-            }).to_list(length=None)
+            # On ne charge que les champs dont on a besoin
+            docs = await self._clothes.find(
+                {"user_id": user_id, "type": cloth_type},
+                projection={
+                    "_id": 1,
+                    "user_id": 1,
+                    "name": 1,
+                    "type": 1,
+                    "image_url": 1,
+                    "tags": 1,
+                    "created_at": 1,
+                }
+            ).to_list(length=None)
         except PyMongoError:
             logger.exception("🔴 [Repository] Failed to list clothes")
             raise InternalServerError("Database failure")
-        return [ClothInDB(**{**d, "id": str(d["_id"])}) for d in docs]
+
+        clothes: List[ClothInDB] = []
+        for d in docs:
+            clothes.append(ClothInDB(
+                id=str(d["_id"]),            # transforme ObjectId/UUID en str
+                user_id=d["user_id"],
+                name=d["name"],
+                type=d["type"],
+                image_url=d["image_url"],
+                tags=d.get("tags", []),
+                created_at=d["created_at"],
+            ))
+        return clothes
 
     async def delete_cloth(self, cloth_id: str) -> bool:
         try:
@@ -87,7 +108,35 @@ class WardrobeRepository:
             logger.exception("🔴 [Repository] Failed to delete cloth")
             raise InternalServerError("Database failure")
         return res.deleted_count == 1
+    
+    # ----- Categories CRUD -----
 
+    async def create_category(self, user_id: str, name: str, id: str) -> dict:
+        doc = {
+            "_id": id,
+            "user_id": user_id,
+            "name": name,
+            "created_at": datetime.now(),
+        }
+        res = await self._categories.insert_one(doc)
+        doc["_id"] = str(res.inserted_id)
+        return doc
+    
+    async def list_categories(self, user_id: str) -> List[dict]:
+        cursor = self._categories.find(
+            {"user_id": user_id},
+            projection={"_id": 1, "name": 1, "created_at": 1}
+        )
+        docs = await cursor.to_list(length=None)
+        return [{"id": str(d["_id"]), "name": d["name"], "created_at": d["created_at"]} for d in docs]
+    
+    async def exists_category(self, user_id: str, category_name: str) -> bool:
+        doc = await self._categories.find_one(
+            {"name": category_name, "user_id": user_id},
+            projection={"_id": 1}
+        )
+        return doc is not None
+    
     # ----- Outfit CRUD -----
 
     async def create_outfit(
