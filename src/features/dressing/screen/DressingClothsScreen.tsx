@@ -13,6 +13,7 @@ import { AddButton } from '../../../components/core/Buttons';
 import DropdownMenu from '../component/DropDownMenu';
 import { lightTheme } from '../../../styles/theme';
 import { DressingNavigatorParamList } from '../navigation/DressingNavigator';
+import { InputField } from '../../../components/core/PlaceHolders';
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -22,6 +23,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { ClothItem } from '../component/ClothItem';
 
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import { addCloth, loadClothesByType } from '../slices/dressingSlice';
+import { NewClothPayload } from '../types/dressingTypes';
+
 export type DressingClothGaleryScreenProps = NativeStackScreenProps<
     DressingNavigatorParamList,
     'DressingClothGalery'
@@ -30,9 +35,12 @@ export function DressingClothGaleryScreen({
     route,
 }: DressingClothGaleryScreenProps) {
     const { title, subtitle, clothes } = route.params;
-    const [newImageUri, setNewImageUri] = React.useState(null);
+    const [newImageUri, setNewImageUri] = React.useState<string | null>(null);
 
     const [visibleModal, setModalVisible] = React.useState(false);
+    const [newClothName, setNewClothName] = React.useState('');
+
+    const dispatch = useAppDispatch();
 
     const addCloths = () => {
         setModalVisible(true);
@@ -44,6 +52,34 @@ export function DressingClothGaleryScreen({
 
     const openGalery = () => {
         handleGallery(setNewImageUri);
+    };
+
+    const handleSaveCloth = async () => {
+        if (!newImageUri) return;
+
+        const name = newClothName.trim() || newImageUri.split('/').pop()!;
+        const type = 'image/jpeg';
+
+        const fileForForm = {
+            uri: newImageUri,
+            name: name,
+            type: type,
+        } as any;
+
+        const newCloth: NewClothPayload = {
+            name: newClothName,
+            type: title,
+            tags: [],
+            file: fileForForm,
+        };
+
+        try {
+            await dispatch(addCloth(newCloth)).unwrap();
+            await dispatch(loadClothesByType(title)).unwrap();
+            setModalVisible(false);
+        } catch (err) {
+            console.error('Error adding cloth:', err);
+        }
     };
 
     return (
@@ -98,6 +134,22 @@ export function DressingClothGaleryScreen({
                             <Text>Galerie</Text>
                         </TouchableOpacity>
                     </LinearGradient>
+                    <InputField
+                        placeholder="Nom du vêtement"
+                        value={newClothName}
+                        onChangeText={setNewClothName}
+                        style={{ margin: 12 }}
+                    />
+                    {newImageUri && (
+                        <TouchableOpacity
+                            style={styles.saveButton}
+                            onPress={handleSaveCloth}
+                        >
+                            <Text style={styles.saveButtonText}>
+                                Enregistrer
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </Modal>
             </Portal>
             <View style={styles.dressingScreen}>
@@ -200,5 +252,19 @@ const styles = StyleSheet.create({
         height: 150,
         alignSelf: 'center',
         borderRadius: 15,
+    },
+    saveButton: {
+        backgroundColor: lightTheme.colors.primary,
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 10,
+        alignSelf: 'center',
+    },
+    saveButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        textTransform: 'uppercase',
     },
 });
