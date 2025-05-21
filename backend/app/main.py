@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from app.features.auth import auth_route
 from app.features.user import user_route
 from app.features.body import body_route
+from app.features.clothing import clothing_route
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -134,5 +135,5 @@ API_V1 = settings.API_V1_STR
 app.include_router(auth_route.router, prefix=API_V1, tags=["Auth"])
 app.include_router(user_route.router, prefix=API_V1, tags=["User"])
 app.include_router(body_route.router, prefix=API_V1, tags=["Body"])
-# app.include_router(wardrobe_route.router, prefix=API_V1, tags=["Wardrobe"])
+app.include_router(clothing_route.router, prefix=API_V1, tags=["Clothing"])
 # app.include_router(tryon_route.router, prefix=API_V1, tags=["Try-On"])
