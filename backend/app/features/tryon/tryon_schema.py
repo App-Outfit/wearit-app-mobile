@@ -1,29 +1,39 @@
-from pydantic import BaseModel, HttpUrl, Field, field_validator
-from typing import List
+# app/features/tryon/tryon_schema.py
+
+from pydantic import BaseModel
+from typing import Optional, List, Literal
 from datetime import datetime
-from uuid import UUID
 
+# ---- Create Tryon ----
+class TryonCreateRequest(BaseModel):
+    body_id: str
+    clothing_id: str
 
-class TryonBase(BaseModel):
-    """Base model for Cloth, used as a foundation for other schemas."""
-    body_id: UUID = Field(..., description="ID of the body to try on")
-    cloth_id: UUID = Field(..., description="ID of the cloth to try on")
+class TryonCreateResponse(BaseModel):
+    tryon_id: str
+    status: str
+    message: str
+    version: int
 
-class TryonCreate(TryonBase):
-    """Schema for creating a new cloth (input)."""
-    pass
+# ---- Item ----
+class TryonItem(BaseModel):
+    id: str
+    body_id: str
+    clothing_id: str
+    output_url: Optional[str] = None
+    status: str
+    created_at: datetime
+    version: int
 
-class TryonResponse(TryonBase):
-    """Response model"""
-    id: UUID = Field(..., description="Unique ID of the tryon")
-    image_url: HttpUrl = Field(..., description="URL of the try-on image")
+# ---- Detail ----
+class TryonDetailResponse(TryonItem):
+    updated_at: datetime
+    version: int
 
-    @field_validator("image_url", mode="before")
-    @classmethod
-    def convert_url_to_string(cls, v):
-        """Ensures the image URL is stored as a string."""
-        return str(v)
-    
+# ---- List ----
 class TryonListResponse(BaseModel):
-    """Response model when fetching multiple try-ons."""
-    tryons: List[TryonResponse]
+    tryons: List[TryonItem]
+
+# ---- Delete ----
+class TryonDeleteResponse(BaseModel):
+    message: str

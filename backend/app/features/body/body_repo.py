@@ -25,8 +25,8 @@ class BodyRepository:
             "mask_dress": None,
             "is_default": False,
             "status": "pending",
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
         }
         await self._col.insert_one(doc)
         return BodyModel(**doc)
@@ -37,7 +37,7 @@ class BodyRepository:
             update = {
                 **masks,
                 "status": "ready",
-                "updated_at": datetime.utcnow()
+                "updated_at": datetime.now()
             }
             result = await self._col.update_one(
                 {"_id": ObjectId(body_id)},

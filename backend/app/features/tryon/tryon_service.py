@@ -1,100 +1,121 @@
-from typing import Any
-from uuid import UUID
-from fastapi import UploadFile
-
-from app.core.errors import NotFoundError, InternalServerError
+from bson import ObjectId
+import asyncio
+from datetime import datetime
 from app.core.logging_config import logger
-from app.features.tryon.tryon_schema import TryonResponse, TryonListResponse
 from app.features.tryon.tryon_repo import TryonRepository
 from app.infrastructure.storage.storage_repo import StorageRepository
+from app.infrastructure.storage.storage_path_builder import StoragePathBuilder
+from app.features.tryon.tryon_schema import (
+    TryonCreateRequest, TryonCreateResponse,
+    TryonListResponse, TryonDetailResponse,
+    TryonItem, TryonDeleteResponse
+)
+from app.features.body.body_repo import BodyRepository
+from app.features.clothing.clothing_repo import ClothingRepository
+from app.core.errors import NotFoundError, UnauthorizedError
+
 
 class TryonService:
     def __init__(
         self,
-        repository: TryonRepository,
-        storage_repo: StorageRepository,
+        repo: TryonRepository,
+        storage: StorageRepository,
+        body_repo: BodyRepository,
+        clothing_repo: ClothingRepository
     ):
-        self.repo = repository
-        self.storage = storage_repo
+        self.repo = repo
+        self.storage = storage
+        self.body_repo = body_repo
+        self.clothing_repo = clothing_repo
 
-    async def create_tryon(self, body_id: str, cloth_id: str, user: Any) -> TryonResponse:
-        # 1) fetch body & cloth
-        try:
-            body = await self.repo.get_body(body_id)
-        except Exception:
-            logger.exception("🔴 [Service] DB failure on get_body")
-            raise InternalServerError("Failed to fetch body")
-        if not body:
-            logger.warning("🔴 [Service] Body %s not found", body_id)
-            raise NotFoundError("Body not found")
+    async def create_tryon(self, user, payload: TryonCreateRequest) -> TryonCreateResponse:
+        body_id = payload.body_id
+        clothing_id = payload.clothing_id
 
-        try:
-            cloth = await self.repo.get_cloth(cloth_id)
-        except Exception:
-            logger.exception("🔴 [Service] DB failure on get_cloth")
-            raise InternalServerError("Failed to fetch cloth")
-        if not cloth:
-            logger.warning("🔴 [Service] Cloth %s not found", cloth_id)
-            raise NotFoundError("Cloth not found")
+        body = await self.body_repo.get_body_by_id(body_id)
+        if not body or str(body.user_id) != str(user.id):
+            raise UnauthorizedError("Invalid body")
 
-        # 2) cached?
-        try:
-            existing = await self.repo.get_tryon(user.id, body_id, cloth_id)
-        except Exception:
-            logger.exception("🔴 [Service] DB failure on get_tryon")
-            raise InternalServerError("Failed to fetch previous try‑on")
-        if existing:
-            logger.info("🟢 [Service] Returning cached try‑on %s", existing.tryon_image_url)
-            return TryonResponse(
-                id=UUID(existing.id),
-                body_id=UUID(existing.body_image_id),
-                cloth_id=UUID(existing.cloth_id),
-                image_url=str(existing.tryon_image_url),
-            )
+        cloth = await self.clothing_repo.get_clothing_by_id(clothing_id)
+        if not cloth or str(cloth.user_id) != str(user.id):
+            raise UnauthorizedError("Invalid clothing")
 
-        # 3) masks
-        try:
-            masks = await self.preproc.get_preprocessed_body(body_id)
-        except Exception:
-            logger.exception("🔴 [Service] Preprocessing failure")
-            raise InternalServerError("Failed to get body masks")
-        mask_url = masks.get(cloth.type)
-        if not mask_url:
-            logger.error("🔴 [Service] No mask for type %s", cloth.type)
-            raise InternalServerError("Missing body mask")
+        existing = await self.repo.get_all_by_body_and_clothing(body_id, clothing_id)
+        version = len(existing) + 1
 
-        # 4) generate via AI
-        ai_input = {
-            "user_id": user.id,
-            "body_id": body_id,
-            "cloth_id": cloth_id,
-            "body_image_url": body.image_url,
-            "cloth_image_url": cloth.image_url,
-            "body_mask_url": mask_url,
-        }
-        try:
-            return await self.ai.generate_tryon(ai_input)
-        except Exception:
-            logger.exception("🔴 [Service] AI generation failure")
-            raise InternalServerError("Failed to generate try‑on")
+        tryon_id = ObjectId()
+        now = datetime.now()
 
-    async def get_tryon_history(self, user: Any) -> TryonListResponse:
-        try:
-            records = await self.repo.get_tryon_history(user.id)
-        except Exception:
-            logger.exception("🔴 [Service] DB failure on get_tryon_history")
-            raise InternalServerError("Failed to fetch try‑on history")
-        if not records:
-            logger.warning("🔴 [Service] No try‑on history for user %s", user.id)
-            raise NotFoundError("No try‑on history found")
-        return TryonListResponse(
-            tryons=[
-                TryonResponse(
-                    id=UUID(r.id),
-                    body_id=UUID(r.body_image_id),
-                    cloth_id=UUID(r.cloth_id),
-                    image_url=str(r.tryon_image_url),
-                )
-                for r in records
-            ]
+        record = await self.repo.create_tryon(
+            tryon_id=tryon_id,
+            user_id=user.id,
+            body_id=body_id,
+            clothing_id=clothing_id,
+            version=version,
+            created_at=now
         )
+
+        asyncio.create_task(self._simulate_ia(user.id, body_id, tryon_id, clothing_id))
+
+        return TryonCreateResponse(
+            tryon_id=str(record.id),
+            created_at=record.created_at,
+            message="Tryon created",
+            status=record.status,
+            version=version
+        )
+
+    async def _simulate_ia(self, user_id: str, body_id: str, tryon_id: str, clothing_id: str):
+        logger.info(f"🤖 [IA] Simulating tryon {body_id} x {clothing_id}")
+        await asyncio.sleep(4)
+
+        s3_key = StoragePathBuilder.tryon(user_id, body_id, tryon_id)
+
+        await self.repo.set_tryon(tryon_id, s3_key)
+        logger.info(f"✅ [IA] Fake output stored at {s3_key}")
+
+    async def get_all_tryons(self, user_id: str) -> TryonListResponse:
+        docs = await self.repo.get_all_by_user(user_id)
+        tryons = []
+        for doc in docs:
+            if doc.output_url:
+                url = await self.storage.get_presigned_url(doc.output_url)
+            else:
+                url = None
+            tryons.append(TryonItem(
+                id=str(doc.id),
+                output_url=url,
+                body_id=str(doc.body_id),
+                clothing_id=str(doc.clothing_id),
+                status=doc.status,
+                created_at=doc.created_at,
+                version=doc.version
+            ))
+        return TryonListResponse(tryons=tryons)
+
+    async def get_tryon_by_id(self, tryon_id: str, user) -> TryonDetailResponse:
+        doc = await self.repo.get_tryon_by_id(tryon_id)
+        if not doc or str(doc.user_id) != str(user.id):
+            raise NotFoundError("Tryon not found")
+
+        url = await self.storage.get_presigned_url(doc.output_url)
+        return TryonDetailResponse(
+            id=str(doc.id),
+            output_url=url,
+            body_id=str(doc.body_id),
+            clothing_id=str(doc.clothing_id),
+            status=doc.status,
+            version=doc.version,
+            created_at=doc.created_at,
+            updated_at=doc.updated_at
+        )
+
+    async def delete_tryon(self, tryon_id: str, user) -> TryonDeleteResponse:
+        doc = await self.repo.get_tryon_by_id(tryon_id)
+        if not doc or str(doc.user_id) != str(user.id):
+            raise UnauthorizedError("You do not own this tryon")
+
+        await self.storage.delete_image(doc.output_url)
+        await self.repo.delete_tryon(tryon_id)
+        logger.info(f"🗑️ Deleted tryon {tryon_id}")
+        return TryonDeleteResponse(message="Tryon deleted")

@@ -1,80 +1,114 @@
 from typing import Optional, List
 from pymongo.errors import PyMongoError
 from pymongo.database import Database
-from pydantic import BaseModel
+from bson import ObjectId
 from datetime import datetime
 
-from app.core.errors import InternalServerError
 from app.core.logging_config import logger
+from app.core.errors import InternalServerError, NotFoundError
+from .tryon_model import TryonModel
 
-class TryonRecord(BaseModel):
-    id: str
-    user_id: str
-    body_image_id: str
-    cloth_id: str
-    tryon_image_url: str
-    created_at: datetime
 
 class TryonRepository:
     def __init__(self, db: Database):
         self._col = db["tryons"]
 
-    async def get_body(self, body_id: str) -> Optional[TryonRecord]:
+    async def create_tryon(
+        self,
+        tryon_id: ObjectId,
+        user_id: str,
+        body_id: str,
+        clothing_id: str,
+        version: int,
+        created_at: datetime
+    ) -> TryonModel:
+        doc = {
+            "_id": tryon_id,
+            "user_id": ObjectId(user_id),
+            "body_id": ObjectId(body_id),
+            "clothing_id": ObjectId(clothing_id),
+            "version": version,
+            "status": "pending",
+            "created_at": created_at,
+            "updated_at": created_at,
+        }
         try:
-            doc = await self._col.database["bodies"].find_one({"_id": body_id})
+            await self._col.insert_one(doc)
+            return TryonModel(**doc)
         except PyMongoError:
-            logger.exception("🔴 [Repository] Failed to fetch body")
-            raise InternalServerError("Database failure")
-        if not doc:
-            return None
-        # on ne convertit qu’aux champs utiles
-        return TryonRecord(
-            id=body_id,
-            user_id=doc["user_id"],
-            body_image_id=doc["_id"],
-            cloth_id="",          # pas utilisé ici
-            tryon_image_url="",   # pas utilisé ici
-            created_at=doc["created_at"],
-        )
-
-    async def get_cloth(self, cloth_id: str) -> Optional[TryonRecord]:
+            logger.exception("❌ MongoDB insert error (tryon)")
+            raise InternalServerError("Unable to create tryon")
+        
+    async def set_tryon(self, tryon_id: str, s3_key: str):
         try:
-            doc = await self._col.database["clothes"].find_one({"_id": cloth_id})
+            result = await self._col.update_one(
+                {"_id": ObjectId(tryon_id)},
+                {
+                    "$set": {
+                        "status": "ready",
+                        "output_url": s3_key,
+                        "updated_at": datetime.now()
+                    }
+                }
+            )
+            if result.matched_count == 0:
+                raise NotFoundError("Tryon to update not found")
         except PyMongoError:
-            logger.exception("🔴 [Repository] Failed to fetch cloth")
-            raise InternalServerError("Database failure")
-        if not doc:
-            return None
-        return TryonRecord(
-            id=cloth_id,
-            user_id=doc["user_id"],
-            body_image_id="",     # pas utilisé ici
-            cloth_id=doc["_id"],
-            tryon_image_url="",   # pas utilisé ici
-            created_at=doc["created_at"],
-        )
-
-    async def get_tryon(
-        self, user_id: str, body_id: str, cloth_id: str
-    ) -> Optional[TryonRecord]:
+            logger.exception("❌ MongoDB update error (tryon ready)")
+            raise InternalServerError("Unable to update tryon status")
+        
+    async def get_all_by_user(self, user_id: str) -> List[TryonModel]:
         try:
-            doc = await self._col.find_one({
-                "user_id": user_id,
-                "body_image_id": body_id,
-                "cloth_id": cloth_id,
-            })
-        except PyMongoError:
-            logger.exception("🔴 [Repository] Failed to fetch try‑on")
-            raise InternalServerError("Database failure")
-        if not doc:
-            return None
-        return TryonRecord(**doc)
-
-    async def get_tryon_history(self, user_id: str) -> List[TryonRecord]:
-        try:
-            cursor = self._col.find({"user_id": user_id})
+            cursor = self._col.find({"user_id": ObjectId(user_id)})
             docs = await cursor.to_list(length=None)
+            return [
+                TryonModel(**doc)
+                for doc in docs
+            ]
+
         except PyMongoError:
-            logger.exception("🔴 [Repository] Failed to fetch try‑on history")
-            raise InternalServerError("Database failure")
-        return [TryonRecord(**d) for d in docs]
+            logger.exception("❌ MongoDB fetch error (tryons by user)")
+            raise InternalServerError("Unable to fetch tryons")
+
+    async def get_all_by_body_and_clothing(
+        self,
+        body_id: str,
+        clothing_id: str
+    ) -> List[TryonModel]:
+        """
+        Renvoie la liste de tous les tryons pour une paire (body, clothing),
+        en garantissant que chaque doc a bien un 'version', 'output_url' et 'status'.
+        """
+        try:
+            cursor = self._col.find({
+                "body_id": ObjectId(body_id),
+                "clothing_id": ObjectId(clothing_id)
+            }).sort("created_at", 1)
+            docs = await cursor.to_list(length=None)
+
+            for doc in docs:
+                doc.setdefault("output_url", None)
+
+            return [TryonModel(**doc) for doc in docs]
+
+        except PyMongoError:
+            logger.exception("❌ MongoDB fetch error (tryons by body+clothing)")
+            raise InternalServerError("Unable to fetch tryons for versioning")
+
+
+    async def get_tryon_by_id(self, tryon_id: str) -> Optional[TryonModel]:
+        try:
+            doc = await self._col.find_one({"_id": ObjectId(tryon_id)})
+            return TryonModel(**doc) if doc else None
+        except PyMongoError:
+            logger.exception("❌ MongoDB fetch error (by tryon_id)")
+            raise InternalServerError("Unable to fetch tryon")
+
+    async def delete_tryon(self, tryon_id: str) -> None:
+        try:
+            result = await self._col.delete_one({"_id": ObjectId(tryon_id)})
+            if result.deleted_count == 0:
+                raise NotFoundError("Tryon not found")
+        except PyMongoError:
+            logger.exception("❌ MongoDB delete error (tryon)")
+            raise InternalServerError("Failed to delete tryon")
