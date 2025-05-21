@@ -1,9 +1,9 @@
-# app/services/auth_service.py
 from datetime import datetime, timedelta
 from typing import Any
 from passlib.context import CryptContext
 from jose import jwt
 import random
+import string
 
 from app.core.errors import (
     ConflictError, NotFoundError, InternalServerError,
@@ -11,17 +11,19 @@ from app.core.errors import (
 )
 from app.core.logging_config import logger
 from app.core.config import settings
+from app.features.auth.auth_schema import (
+    AuthSignup, AuthSignupResponse,
+    AuthLogin, AuthLoginResponse,
+    ForgotPasswordRequest, ForgotPasswordResponse,
+    VerifyResetCodeRequest, VerifyResetCodeResponse,
+    ResetPasswordRequest, ResetPasswordResponse,
+    AuthDeleteResponse
+)
 from app.features.auth.email_service import EmailService
 from app.features.auth.auth_repo import AuthRepository
 from app.features.auth.password_reset_repo import PasswordResetRepository
 from app.infrastructure.storage.storage_repo import StorageRepository
-from app.features.auth.auth_schema import (
-    AuthSignup, AuthSignupResponse,
-    AuthLogin, AuthLoginResponse, ResetPasswordRequest,
-    ForgotPasswordRequest, ForgotPasswordResponse,
-    VerifyResetCodeRequest, VerifyResetCodeResponse,
-    ResetPasswordResponse, AuthDeleteResponse
-)
+
 
 class AuthService:
     def __init__(
@@ -51,75 +53,88 @@ class AuthService:
 
     def create_access_token(self, subject: str) -> str:
         data = {"sub": subject}
-        expire = datetime.now() + timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
         data["exp"] = expire
         return jwt.encode(data, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
     async def signup(self, user: AuthSignup) -> AuthSignupResponse:
         email = user.email.lower()
-        logger.info("Signup attempt for %s", email)
+        logger.info(f"📥 Signup attempt for {email}")
 
-        # 1) Vérifier unicité
         if await self.repo.get_user_by_email(email):
-            logger.warning("Email already in use: %s", email)
             raise ConflictError("Email already registered")
 
-        # 2) Hash du mot de passe
-        hashed = self.hash_password(user.password)
+        hashed_pw = self.hash_password(user.password)
 
-        # 3) Création de l'utilisateur avec gestion complète des erreurs
+        # Génére le referral_code (unique à vérifier)
+        referral_code = await self.repo.generate_unique_referral_code()
+
+        # Initialise l'utilisateur
+        user_data = {
+            "email": email,
+            "password": hashed_pw,
+            "first_name": user.first_name,
+            "gender": user.gender,
+            "answers": user.answers or {},
+            "credits": 5,
+            "referral_code": referral_code,
+            "ref_by": None,
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
+        }
+
+        # Vérifie s’il y a un code de parrainage utilisé
+        if user.referral_code:
+            parrain = await self.repo.get_user_by_referral_code(user.referral_code)
+            if parrain:
+                new_credits = 15
+                user_data["credits"] += new_credits
+                user_data["ref_by"] = parrain.id
+                await self.repo.increment_credits(parrain.id, new_credits)
+                logger.info(f"🤝 Referral: {parrain.id} gets +{new_credits}, {email} gets +{new_credits}")
+            else:
+                logger.warning(f"❌ Invalid referral code used: {user.referral_code}")
+                raise ValidationError("Invalid referral code")
+        
         try:
-            new_user = await self.repo.create_user(email, hashed, user.name, user.answers)
+            new_user = await self.repo.create_user(user_data)
         except Exception as e:
-            logger.error("🔴 [Service] Failed to create user: %s", e)
-            raise InternalServerError("Failed to create user")
+            logger.exception("🔴 Failed to create user")
+            raise InternalServerError("User creation failed")
 
-        if new_user is None:
-            logger.error("🔴 [Service] Repository returned None on create_user")
-            raise InternalServerError("Failed to create user")
-
-        # 4) Génération du token
-        token = self.create_access_token({"sub": new_user.email})
-        logger.info("Signup successful for %s", email)
+        token = self.create_access_token(new_user.email)
         return AuthSignupResponse(token=token, message="Signed up successfully")
 
     async def login(self, user: AuthLogin) -> AuthLoginResponse:
         email = user.email.lower()
-        logger.info("Login attempt for %s", email)
+        logger.info(f"🔐 Login attempt for {email}")
 
         existing = await self.repo.get_user_by_email(email)
         if not existing:
-            logger.warning("User not found: %s", email)
             raise NotFoundError("User not found")
 
         if not self.verify_password(user.password, existing.password):
-            logger.warning("Wrong password for %s", email)
             raise UnauthorizedError("Incorrect credentials")
 
         token = self.create_access_token(existing.email)
-        logger.info("Login successful for %s", email)
         return AuthLoginResponse(token=token, message="Logged in successfully")
 
     async def delete_account(self, user: Any) -> AuthDeleteResponse:
-        # 1) delete images
         try:
             await self.storage.delete_account_images(user.id)
         except Exception:
-            logger.exception("Failed to delete S3 images")
-            raise InternalServerError("Could not delete user images")
+            logger.exception("S3 image deletion failed")
+            raise InternalServerError("Failed to delete images")
 
-        # 2) delete user doc
         await self.repo.delete_user_by_id(user.id)
-        logger.info("Account deleted for %s", user.id)
+        logger.info(f"🗑️ User account deleted: {user.id}")
         return AuthDeleteResponse(message="Account deleted successfully")
 
     async def forgot_password(self, request: ForgotPasswordRequest) -> ForgotPasswordResponse:
         email = request.email.lower()
         user = await self.repo.get_user_by_email(email)
-        # pour ne pas révéler l’existence de l’email, on répond toujours OK
         if user:
-            # génère un code aléatoire à 4 chiffres
-            code = f"{random.randint(0,9999):04d}"
+            code = f"{random.randint(0, 9999):04d}"
             await self.reset_repo.upsert_code(email, code, settings.PASSWORD_RESET_EXPIRE_MINUTES)
             await self.email_service.send_reset_code(to_email=email, code=code)
         return ForgotPasswordResponse(message="If the email exists, a reset code has been sent")
@@ -127,19 +142,17 @@ class AuthService:
     async def verify_reset_code(self, request: VerifyResetCodeRequest) -> VerifyResetCodeResponse:
         email = request.email.lower()
         doc = await self.reset_repo.get_code_doc(email)
-        if not doc or doc.get("code") != request.code or doc.get("expires_at") < datetime.now():
+        if not doc or doc.get("code") != request.code or doc.get("expires_at") < datetime.utcnow():
             return VerifyResetCodeResponse(valid=False)
         return VerifyResetCodeResponse(valid=True)
 
     async def reset_password(self, request: ResetPasswordRequest) -> ResetPasswordResponse:
         email = request.email.lower()
-        # 1) vérifier le code
         valid = await self.verify_reset_code(VerifyResetCodeRequest(**request.model_dump()))
         if not valid.valid:
             raise ValidationError("Invalid or expired reset code")
-        # 2) hash + update
-        new_hashed = self.hash_password(request.new_password)
-        await self.repo.update_password(email, new_hashed)
-        # 3) cleanup
+
+        hashed = self.hash_password(request.new_password)
+        await self.repo.update_password(email, hashed)
         await self.reset_repo.delete_code(email)
         return ResetPasswordResponse(message="Password reset successfully")
