@@ -7,7 +7,7 @@ from datetime import datetime
 from app.core.logging_config import logger
 from app.core.errors import InternalServerError, NotFoundError
 
-from app.models.user_model import UserInDB
+from .user_model import UserInDB
 from .user_schema import UserProfileUpdate
 
 

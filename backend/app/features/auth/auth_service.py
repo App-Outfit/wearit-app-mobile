@@ -3,7 +3,6 @@ from typing import Any
 from passlib.context import CryptContext
 from jose import jwt
 import random
-import string
 
 from app.core.errors import (
     ConflictError, NotFoundError, InternalServerError,
@@ -11,7 +10,7 @@ from app.core.errors import (
 )
 from app.core.logging_config import logger
 from app.core.config import settings
-from app.features.auth.auth_schema import (
+from .auth_schema import (
     AuthSignup, AuthSignupResponse,
     AuthLogin, AuthLoginResponse,
     ForgotPasswordRequest, ForgotPasswordResponse,
@@ -19,9 +18,9 @@ from app.features.auth.auth_schema import (
     ResetPasswordRequest, ResetPasswordResponse,
     AuthDeleteResponse
 )
-from app.features.auth.email_service import EmailService
-from app.features.auth.auth_repo import AuthRepository
-from app.features.auth.password_reset_repo import PasswordResetRepository
+from .email_service import EmailService
+from .auth_repo import AuthRepository
+from .password_reset_repo import PasswordResetRepository
 from app.infrastructure.storage.storage_repo import StorageRepository
 
 

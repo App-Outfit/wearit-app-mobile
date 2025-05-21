@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends
 from app.core.logging_config import logger
-from app.features.auth.auth_service import AuthService
-from app.features.auth.auth_repo import AuthRepository
+from .auth_service import AuthService
+from .auth_repo import AuthRepository
 from app.infrastructure.storage.storage_repo import StorageRepository
 from app.infrastructure.database.dependencies import get_current_user, get_db
 from app.core.config import settings
-from app.features.auth.auth_schema import (
+from .auth_schema import (
     AuthSignup, AuthSignupResponse,
     AuthLogin, AuthLoginResponse, AuthLogoutResponse,
     AuthDeleteResponse, ForgotPasswordResponse,

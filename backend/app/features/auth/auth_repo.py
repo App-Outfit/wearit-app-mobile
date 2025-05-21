@@ -8,7 +8,8 @@ import string
 
 from app.core.errors import InternalServerError, NotFoundError
 from app.core.logging_config import logger
-from app.models.user_model import UserInDB, PyObjectId
+from app.features.user.user_model import UserInDB
+from app.core.pyobject import PyObjectId
 
 
 
