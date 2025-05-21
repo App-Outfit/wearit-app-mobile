@@ -4,24 +4,18 @@ from fastapi import UploadFile
 
 from app.core.errors import NotFoundError, InternalServerError
 from app.core.logging_config import logger
-from app.api.schemas.tryon_schema import TryonResponse, TryonListResponse
-from app.repositories.tryon_repo import TryonRepository
-from app.repositories.storage_repo import StorageRepository
-from app.services.preprocessing_service import PreprocessingService
-from app.services.ai_service import AIService
+from app.features.tryon.tryon_schema import TryonResponse, TryonListResponse
+from app.features.tryon.tryon_repo import TryonRepository
+from app.infrastructure.storage.storage_repo import StorageRepository
 
 class TryonService:
     def __init__(
         self,
         repository: TryonRepository,
         storage_repo: StorageRepository,
-        preprocessing_service: PreprocessingService,
-        ai_service: AIService,
     ):
         self.repo = repository
         self.storage = storage_repo
-        self.preproc = preprocessing_service
-        self.ai = ai_service
 
     async def create_tryon(self, body_id: str, cloth_id: str, user: Any) -> TryonResponse:
         # 1) fetch body & cloth

@@ -3,9 +3,9 @@ from datetime import datetime
 from fastapi import UploadFile
 from typing import List
 
-from app.repositories.wardrobe_repo import WardrobeRepository
-from app.repositories.storage_repo import StorageRepository
-from app.api.schemas.wardrobe_schema import (
+from app.features.clothing.wardrobe_repo import WardrobeRepository
+from app.infrastructure.storage.storage_repo import StorageRepository
+from app.features.clothing.wardrobe_schema import (
     ClothCreate, ClothCreateResponse,
     ClothResponse, ClothListResponse, ClothDeleteResponse,
     OutfitCreate, OutfitCreateResponse,

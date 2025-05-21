@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from app.core.config import settings
-from app.repositories.auth_repo import AuthRepository
+from app.features.auth.auth_repo import AuthRepository
 from app.infrastructure.database.mongodb import MongoDB
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

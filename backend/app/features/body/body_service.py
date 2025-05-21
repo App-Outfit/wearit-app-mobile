@@ -5,9 +5,9 @@ from typing import List
 from fastapi import UploadFile
 from app.core.errors import NotFoundError, InternalServerError
 from app.core.logging_config import logger
-from app.repositories.body_repo import BodyRepository
-from app.repositories.storage_repo import StorageRepository
-from app.api.schemas.body_schema import (
+from app.features.body.body_repo import BodyRepository
+from app.infrastructure.storage.storage_repo import StorageRepository
+from app.features.body.body_schema import (
     BodyCreate, BodyCreateResponse,
     BodyResponse, BodyListResponse, BodyDeleteResponse
 )

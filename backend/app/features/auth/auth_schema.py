@@ -24,15 +24,6 @@ class AuthLoginResponse(BaseModel):
     message: str = "Logged in successfully"
     token: str = Field(..., description="JWT token for authentication")
 
-class AuthGoogle(BaseModel):
-    """Request model for logging in with Google."""
-    id_token: str = Field(..., description="Google ID token")
-
-class AuthGoogleResponse(BaseModel):
-    """Response model after successfully logging in with Google."""
-    message: str = "Logged in with Google successfully"
-    token: str = Field(..., description="JWT token for authentication")
-
 class AuthLogoutResponse(BaseModel):
     """Response model after logging out."""
     message: str = Field("Logged out successfully", description="Message after logging out")

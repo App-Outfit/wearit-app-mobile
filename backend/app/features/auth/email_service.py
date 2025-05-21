@@ -10,7 +10,7 @@ from app.core.logging_config import logger
 
 # Template Jinja2 chargé une seule fois
 env = Environment(
-    loader=PackageLoader("app", "templates"),
+    loader=PackageLoader("app", "features/auth/templates"),
     autoescape=select_autoescape(["html", "xml"])
 )
 

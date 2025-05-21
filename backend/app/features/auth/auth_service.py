@@ -3,9 +3,6 @@ from datetime import datetime, timedelta
 from typing import Any
 from passlib.context import CryptContext
 from jose import jwt
-from fastapi import Request
-import httpx
-import secrets
 import random
 
 from app.core.errors import (
@@ -14,14 +11,13 @@ from app.core.errors import (
 )
 from app.core.logging_config import logger
 from app.core.config import settings
-from app.services.email_service import EmailService
-from app.repositories.auth_repo import AuthRepository
-from app.repositories.password_reset_repo import PasswordResetRepository
-from app.repositories.storage_repo import StorageRepository
-from app.api.schemas.auth_schema import (
+from app.features.auth.email_service import EmailService
+from app.features.auth.auth_repo import AuthRepository
+from app.features.auth.password_reset_repo import PasswordResetRepository
+from app.infrastructure.storage.storage_repo import StorageRepository
+from app.features.auth.auth_schema import (
     AuthSignup, AuthSignupResponse,
-    AuthLogin, AuthLoginResponse,
-    AuthGoogleResponse, ResetPasswordRequest,
+    AuthLogin, AuthLoginResponse, ResetPasswordRequest,
     ForgotPasswordRequest, ForgotPasswordResponse,
     VerifyResetCodeRequest, VerifyResetCodeResponse,
     ResetPasswordResponse, AuthDeleteResponse
@@ -103,63 +99,6 @@ class AuthService:
         token = self.create_access_token(existing.email)
         logger.info("Login successful for %s", email)
         return AuthLoginResponse(token=token, message="Logged in successfully")
-
-    async def google_login(self, request: Request) -> AuthGoogleResponse:
-        code = request.query_params.get("code")
-        if not code:
-            raise ValidationError("Missing Google auth code")
-
-        # Exchange code → token
-        try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.post(
-                    "https://oauth2.googleapis.com/token",
-                    data={
-                        "code": code,
-                        "client_id": settings.GOOGLE_CLIENT_ID,
-                        "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
-                        "grant_type": "authorization_code",
-                    },
-                    timeout=10.0
-                )
-                resp.raise_for_status()
-                token_data = resp.json()
-        except httpx.HTTPError as e:
-            logger.exception("HTTP error during Google token exchange")
-            raise InternalServerError("Google authentication failed")
-
-        access_token = token_data.get("access_token")
-        if not access_token:
-            raise InternalServerError("No access token from Google")
-
-        # Fetch user info
-        try:
-            async with httpx.AsyncClient() as client:
-                user_resp = await client.get(
-                    "https://www.googleapis.com/oauth2/v2/userinfo",
-                    headers={"Authorization": f"Bearer {access_token}"},
-                    timeout=10.0
-                )
-                user_resp.raise_for_status()
-                info = user_resp.json()
-        except httpx.HTTPError:
-            logger.exception("HTTP error fetching Google userinfo")
-            raise InternalServerError("Failed to retrieve Google user info")
-
-        email = info.get("email")
-        if not email:
-            raise InternalServerError("No email in Google user info")
-
-        # Upsert user
-        existing = await self.repo.get_user_by_email(email)
-        if not existing:
-            random_pw = secrets.token_urlsafe(32)
-            hashed = self.hash_password(random_pw)
-            existing = await self.repo.create_user(email, hashed, info.get("name", "Google User"))
-
-        token = self.create_access_token(email)
-        return AuthGoogleResponse(token=token, message="Logged in with Google successfully")
 
     async def delete_account(self, user: Any) -> AuthDeleteResponse:
         # 1) delete images

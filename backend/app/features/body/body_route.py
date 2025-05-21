@@ -3,10 +3,10 @@ from uuid import UUID
 
 from app.core.logging_config import logger
 from app.core.config import settings
-from app.api.dependencies import get_current_user, get_db
-from app.services.body_service import BodyService
-from app.repositories.body_repo import BodyRepository
-from app.api.schemas.body_schema import (
+from app.infrastructure.database.dependencies import get_current_user, get_db
+from app.features.body.body_service import BodyService
+from app.features.body.body_repo import BodyRepository
+from app.features.body.body_schema import (
     BodyCreate, BodyCreateResponse,
     BodyResponse, BodyListResponse, BodyDeleteResponse
 )

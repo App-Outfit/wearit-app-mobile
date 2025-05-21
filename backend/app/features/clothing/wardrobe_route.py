@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from uuid import UUID
 
 from app.core.logging_config import logger
-from app.api.dependencies import get_current_user, get_db
-from app.services.wardrobe_service import WardrobeService
-from app.repositories.wardrobe_repo import WardrobeRepository
-from app.repositories.storage_repo import StorageRepository
-from app.api.schemas.wardrobe_schema import (
+from app.infrastructure.database.dependencies import get_current_user, get_db
+from app.features.clothing.wardrobe_service import WardrobeService
+from app.features.clothing.wardrobe_repo import WardrobeRepository
+from app.infrastructure.storage.storage_repo import StorageRepository
+from app.features.clothing.wardrobe_schema import (
     ClothCreate, ClothCreateResponse,
     ClothResponse, ClothListResponse, ClothDeleteResponse,
     OutfitCreate, OutfitCreateResponse,
