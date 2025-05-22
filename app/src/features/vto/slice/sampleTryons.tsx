@@ -76,37 +76,37 @@ export type ClothData = {
 
 export const sampleCloths: ClothData[] = [
     {
-        cloth_type: 'upper',
+        cloth_type: 'dress',
         cloth_url: require(basePath + 'MiniDressing/dress1.png'),
         category: 'dress',
         cloth_id: 'dress1',
     },
     {
-        cloth_type: 'upper',
+        cloth_type: 'dress',
         cloth_url: require(basePath + 'MiniDressing/dress2.png'),
         category: 'dress',
         cloth_id: 'dress2',
     },
     {
-        cloth_type: 'upper',
+        cloth_type: 'dress',
         cloth_url: require(basePath + 'MiniDressing/dress3.png'),
         category: 'dress',
         cloth_id: 'dress3',
     },
     {
-        cloth_type: 'upper',
+        cloth_type: 'dress',
         cloth_url: require(basePath + 'MiniDressing/dress4.png'),
         category: 'dress',
         cloth_id: 'dress4',
     },
     {
-        cloth_type: 'upper',
+        cloth_type: 'dress',
         cloth_url: require(basePath + 'MiniDressing/dress5.png'),
         category: 'dress',
         cloth_id: 'dress5',
     },
     {
-        cloth_type: 'upper',
+        cloth_type: 'dress',
         cloth_url: require(basePath + 'MiniDressing/dress6.png'),
         category: 'dress',
         cloth_id: 'dress6',

@@ -24,7 +24,7 @@ export async function loadAssetBase64(assetModule: any): Promise<string> {
 export type InputMat = string | Mat;
 
 /* Convert a Base64 string or Mat to a Mat.*/
-async function convertToMat(input: InputMat): Promise<Mat> {
+async function convertToMat(input: string | number): Promise<Mat> {
     if (typeof input === 'string') {
         return OpenCV.base64ToMat(input);
     } else if (typeof input === 'number') {
@@ -80,28 +80,19 @@ export function resizeMat(mat: Mat, width: number, height: number): Mat {
  * Copies the masked area from cloth to source.
  */
 export async function inpaintRegion(
-    source: InputMat,
-    cloth: InputMat,
-    mask: InputMat,
+    source: string | number,
+    cloth: string | number,
+    mask: string | number,
 ): Promise<string> {
-    console.log('convertToMat');
-
     let srcMat = await convertToMat(source);
     let clothMat = await convertToMat(cloth);
     let maskMat = await convertToMat(mask);
 
-    console.log(srcMat);
-    console.log(clothMat);
-    console.log(maskMat);
-
-    console.log('resize');
     const { cols, rows } = OpenCV.toJSValue(srcMat);
-    console.log(rows, cols);
 
     srcMat = resizeMat(srcMat, cols, rows);
     clothMat = resizeMat(clothMat, cols, rows);
     maskMat = resizeMat(maskMat, cols, rows);
-    console.log(rows, cols);
 
     // maskMat = binarizeMask(maskMat);
     const dstMat = OpenCV.invoke('clone', srcMat);
@@ -115,18 +106,18 @@ export async function inpaintRegion(
 
 /*Specialized function for upper garments.*/
 export async function inpaintUpper(
-    source: InputMat,
-    upperCloth: InputMat,
-    upperMask: InputMat,
+    source: string | number,
+    upperCloth: string | number,
+    upperMask: string | number,
 ): Promise<string> {
     return inpaintRegion(source, upperCloth, upperMask);
 }
 
 /*Specialized function for lower garments */
 export async function inpaintLower(
-    source: InputMat,
-    lowerCloth: InputMat,
-    lowerMask: InputMat,
+    source: string | number,
+    lowerCloth: string | number,
+    lowerMask: string | number,
 ): Promise<string> {
     return inpaintRegion(source, lowerCloth, lowerMask);
 }
@@ -136,9 +127,9 @@ export async function inpaintLower(
  * Replaces entire region, can ignore upper/lower masks.
  */
 export async function inpaintDress(
-    source: InputMat,
-    dressCloth: InputMat,
-    dressMask: InputMat,
+    source: string | number,
+    dressCloth: string | number,
+    dressMask: string | number,
 ): Promise<string> {
     return inpaintRegion(source, dressCloth, dressMask);
 }

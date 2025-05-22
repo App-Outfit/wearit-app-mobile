@@ -17,7 +17,7 @@ import Feather from 'react-native-vector-icons/Feather';
 
 export function VTODressingScreen() {
     return (
-        <View style={{ flex: 1, position: 'relative' }}>
+        <View style={{ flex: 1, position: 'relative', margin: 14 }}>
             <View style={styles.container}>
                 <View style={styles.vtoDisplayContainer}>
                     <VTODisplay />
