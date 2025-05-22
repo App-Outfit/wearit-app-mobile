@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_serializer
 from typing import Optional, Dict
 from datetime import datetime
 from bson import ObjectId
@@ -24,12 +24,17 @@ class UserModel(BaseModel):
 
     answers: Optional[Dict[str, str]] = None
 
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
-    class Config:
-        validate_by_name = True
-        json_encoders = {ObjectId: str}
+    @field_serializer("id")
+    def serialize_object_ids(self, v: ObjectId, _info):
+        return str(v)
+
+    model_config = {
+        "validate_by_name": True,
+        "arbitrary_types_allowed": True
+    }
 
 class UserInDB(UserModel):
     password: str

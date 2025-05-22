@@ -45,7 +45,7 @@ class ClothingRepository:
 
     async def update_clothing(self, clothing_id: str, payload: ClothingUpdate) -> ClothingModel:
         update_data = {k: v for k, v in payload.model_dump().items() if v is not None}
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now()
         updated = await self._col.find_one_and_update(
             {"_id": ObjectId(clothing_id)},
             {"$set": update_data},

@@ -65,7 +65,7 @@ class TryonRepository:
             "clothing_id": ObjectId(clothing_id)
         }).sort("created_at", 1)
 
-        docs = await cursor.to_list(length=None)
+        docs = cursor.to_list(length=None)
         for doc in docs:
             doc.setdefault("output_url", None)
         return [TryonModel(**doc) for doc in docs]

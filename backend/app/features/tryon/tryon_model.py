@@ -1,5 +1,5 @@
 # tryon_model.py
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from typing import Optional, Literal
 from datetime import datetime
 from bson import ObjectId
@@ -16,9 +16,14 @@ class TryonModel(BaseModel):
     version: int
     status: Optional[Literal["pending", "ready"]] = None
 
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
-    class Config:
-        validate_by_name = True
-        json_encoders = {ObjectId: str}
+    @field_serializer("id", "user_id", "body_id", "clothing_id")
+    def serialize_object_ids(self, v: ObjectId, _info):
+        return str(v)
+
+    model_config = {
+        "validate_by_name": True,
+        "arbitrary_types_allowed": True
+    }

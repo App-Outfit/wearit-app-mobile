@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
+from pydantic import ConfigDict
+
 class Settings:
     """Classe de configuration pour l'application FastAPI"""
     PROJECT_NAME: str = "WearIT API"
@@ -35,7 +37,8 @@ class Settings:
     SMTP_SSL: bool = os.getenv("SMTP_SSL", "false").lower() == "true"
     PASSWORD_RESET_EXPIRE_MINUTES: int = int(os.getenv("PASSWORD_RESET_EXPIRE_MINUTES", 10))
 
-    class Config:
+    model_config = ConfigDict(
         env_file = ".env"
+    )
 
 settings = Settings()

@@ -53,57 +53,6 @@ app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, global_exception_handler)
 app.add_exception_handler(StarletteHTTPException, global_exception_handler)
 
-# # 1) Vos erreurs métier
-# @app.exception_handler(AppError)
-# async def handle_app_error(request: Request, exc: AppError):
-#     return JSONResponse(
-#         status_code=exc.status_code,
-#         content={
-#             "error_code": exc.error_code,
-#             "message": exc.message,
-#         },
-#     )
-
-
-# # 2) Erreurs de validation des requêtes (Pydantic / FastAPI)
-# @app.exception_handler(RequestValidationError)
-# async def handle_validation_error(request: Request, exc: RequestValidationError):
-#     # la liste des messages (ex: "field required", "ensure this value..."), jointe en une seule chaîne
-#     messages = [err["msg"] for err in exc.errors()]
-#     return JSONResponse(
-#         status_code=400,
-#         content={
-#             "error_code": "validation_error",
-#             "message": ", ".join(messages),
-#         },
-#     )
-
-
-# # 3) Erreurs HTTP “classiques” (404, etc.), pour unifier le format
-# @app.exception_handler(StarletteHTTPException)
-# async def handle_http_exception(request: Request, exc: StarletteHTTPException):
-#     return JSONResponse(
-#         status_code=exc.status_code,
-#         content={
-#             "error_code": "http_error",
-#             "message": exc.detail if isinstance(exc.detail, str) else str(exc.detail),
-#         },
-#     )
-
-
-# # 4) (Optionnel) Catch-all pour éviter les traces brutes
-# @app.exception_handler(Exception)
-# async def handle_unexpected_error(request: Request, exc: Exception):
-#     # Vous pouvez logger exc ici
-#     return JSONResponse(
-#         status_code=500,
-#         content={
-#             "error_code": "internal_error",
-#             "message": "Internal server error",
-#         },
-#     )
-
-
 # Personnalisation de l’OpenAPI pour BearerAuth…
 def custom_openapi():
     if app.openapi_schema:

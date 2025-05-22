@@ -52,7 +52,7 @@ class AuthRepository:
     async def increment_credits(self, user_id: PyObjectId, amount: int) -> None:
         result = await self._col.update_one(
             {"_id": user_id},
-            {"$inc": {"credits": amount}, "$set": {"updated_at": datetime.utcnow()}}
+            {"$inc": {"credits": amount}, "$set": {"updated_at": datetime.now()}}
         )
         if result.matched_count == 0:
             raise NotFoundError("User not found")
@@ -91,7 +91,7 @@ class AuthRepository:
             {
                 "$set": {
                     "password": hashed_password,
-                    "updated_at": datetime.utcnow()
+                    "updated_at": datetime.now()
                 },
                 "$unset": {"reset_code": "", "reset_code_expiry": ""}
             }

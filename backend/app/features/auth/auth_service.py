@@ -52,7 +52,7 @@ class AuthService:
 
     def create_access_token(self, subject: str) -> str:
         data = {"sub": subject}
-        expire = datetime.utcnow() + timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
+        expire = datetime.now() + timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
         data["exp"] = expire
         return jwt.encode(data, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
@@ -140,7 +140,7 @@ class AuthService:
     async def verify_reset_code(self, request: VerifyResetCodeRequest) -> VerifyResetCodeResponse:
         email = request.email.lower()
         doc = await self.reset_repo.get_code_doc(email)
-        if not doc or doc.get("code") != request.code or doc.get("expires_at") < datetime.utcnow():
+        if not doc or doc.get("code") != request.code or doc.get("expires_at") < datetime.now():
             return VerifyResetCodeResponse(valid=False)
         return VerifyResetCodeResponse(valid=True)
 

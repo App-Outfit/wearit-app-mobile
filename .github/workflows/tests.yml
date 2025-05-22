@@ -50,4 +50,4 @@ jobs:
           MONGO_URI: "mongodb://localhost:27017/test_wearit"
     
         run: |
-          pytest backend/tests --disable-warnings --asyncio-mode=auto
+          pytest backend/tests -vm "not slow"

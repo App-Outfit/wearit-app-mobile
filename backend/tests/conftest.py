@@ -6,10 +6,18 @@ from unittest.mock import AsyncMock, MagicMock
 
 # On importe notre app et les dépendances à override
 from app.main import app
-from app.api.dependencies import get_db
-from app.api.routes.auth_route import get_auth_service
-from app.api.dependencies import get_current_user
-from app.services.auth_service import AuthService
+from app.infrastructure.database.dependencies import get_db
+from app.features.auth.auth_route import get_auth_service
+from app.infrastructure.database.dependencies import get_current_user
+from app.features.auth.auth_service import AuthService
+
+@pytest.fixture
+def fake_user():
+    user = MagicMock()
+    user.id = "645c8a4e8892e9e4c9b12b33"
+    user.email = "test@example.com"
+    user.first_name = "Test"
+    return user
 
 @pytest.fixture(autouse=True)
 def override_dependencies():
@@ -32,9 +40,7 @@ def override_dependencies():
     app.dependency_overrides[get_auth_service] = lambda: fake_svc
 
     # 3) stub current_user pour DELETE /auth/account
-    dummy_user = MagicMock()
-    dummy_user.id = "dummy-id"
-    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    app.dependency_overrides[get_current_user] = lambda: fake_user()
 
     yield
 

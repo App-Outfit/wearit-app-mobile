@@ -1,6 +1,6 @@
 # app/features/body/body_model.py
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from bson import ObjectId
 from datetime import datetime
 from typing import Optional
@@ -15,9 +15,14 @@ class BodyModel(BaseModel):
     mask_dress: Optional[str] = None
     is_default: bool = False
     status: str = "pending"
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
-    class Config:
-        validate_by_name = True
-        json_encoders = {ObjectId: str}
+    @field_serializer("id", "user_id")
+    def serialize_object_ids(self, v: ObjectId, _info):
+        return str(v)
+
+    model_config = {
+        "validate_by_name": True,
+        "arbitrary_types_allowed": True
+    }
