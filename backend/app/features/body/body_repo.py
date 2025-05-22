@@ -1,12 +1,10 @@
 # app/features/body/body_repo.py
 
-from pymongo.errors import PyMongoError
 from pymongo.database import Database
 from bson import ObjectId
 from datetime import datetime
 from typing import List, Optional
-from app.core.logging_config import logger
-from app.core.errors import InternalServerError, NotFoundError
+from app.core.errors import NotFoundError
 from .body_model import BodyModel
 
 
@@ -33,61 +31,42 @@ class BodyRepository:
 
     # ✅ Met à jour les masques d’un body
     async def set_masks(self, body_id: str, masks: dict):
-        try:
-            update = {
-                **masks,
-                "status": "ready",
-                "updated_at": datetime.now()
-            }
-            result = await self._col.update_one(
-                {"_id": ObjectId(body_id)},
-                {"$set": update}
-            )
-            if result.matched_count == 0:
-                raise NotFoundError("Body not found")
-        except PyMongoError:
-            logger.exception("MongoDB update error")
-            raise InternalServerError("Unable to update body masks")
+        update = {
+            **masks,
+            "status": "ready",
+            "updated_at": datetime.now()
+        }
+        result = await self._col.update_one(
+            {"_id": ObjectId(body_id)},
+            {"$set": update}
+        )
+        if result.matched_count == 0:
+            raise NotFoundError("Body not found")
 
     # ✅ Récupère tous les bodies d’un utilisateur
     async def get_all_bodies(self, user_id: str) -> List[BodyModel]:
-        try:
-            cursor = self._col.find({"user_id": ObjectId(user_id)}).sort("created_at", -1)
-            docs = await cursor.to_list(length=None)
-            return [BodyModel(**doc) for doc in docs]
-        except PyMongoError:
-            logger.exception("MongoDB find error")
-            raise InternalServerError("Unable to fetch bodies")
+        cursor = self._col.find({"user_id": ObjectId(user_id)}).sort("created_at", -1)
+        docs = await cursor.to_list(length=None)
+        return [BodyModel(**doc) for doc in docs]       
 
     # ✅ Récupère le dernier body d’un user
     async def get_latest_body(self, user_id: str) -> Optional[BodyModel]:
-        try:
-            doc = await self._col.find_one(
-                {"user_id": ObjectId(user_id)},
-                sort=[("created_at", -1)]
-            )
-            return BodyModel(**doc) if doc else None
-        except PyMongoError:
-            logger.exception("MongoDB error on get_latest_body")
-            raise InternalServerError("Unable to fetch latest body")
+        doc = await self._col.find_one(
+            {"user_id": ObjectId(user_id)},
+            sort=[("created_at", -1)]
+        )
+        return BodyModel(**doc) if doc else None
 
     # ✅ Récupère un body par ID
     async def get_body_by_id(self, body_id: str) -> BodyModel:
-        try:
-            doc = await self._col.find_one({"_id": ObjectId(body_id)})
-            if not doc:
-                raise NotFoundError("Body not found")
-            return BodyModel(**doc)
-        except PyMongoError:
-            logger.exception("MongoDB error on get_body_by_id")
-            raise InternalServerError("Unable to fetch body")
+        doc = await self._col.find_one({"_id": ObjectId(body_id)})
+        if not doc:
+            raise NotFoundError("Body not found")
+        return BodyModel(**doc)
+       
 
     # ✅ Supprime un body
     async def delete_body(self, body_id: str):
-        try:
-            result = await self._col.delete_one({"_id": ObjectId(body_id)})
-            if result.deleted_count != 1:
-                raise NotFoundError("No body deleted")
-        except PyMongoError:
-            logger.exception("MongoDB delete error")
-            raise InternalServerError("Unable to delete body")
+        result = await self._col.delete_one({"_id": ObjectId(body_id)})
+        if result.deleted_count != 1:
+            raise NotFoundError("No body deleted")

@@ -1,11 +1,9 @@
-from pymongo.errors import PyMongoError
 from pymongo.database import Database
 from bson import ObjectId
 from typing import Optional
 from datetime import datetime
 
-from app.core.logging_config import logger
-from app.core.errors import InternalServerError, NotFoundError
+from app.core.errors import NotFoundError
 
 from .user_model import UserInDB
 from .user_schema import UserProfileUpdate
@@ -20,17 +18,10 @@ class UserRepository:
     # -----------------------
 
     async def get_user_by_id(self, user_id: str) -> Optional[UserInDB]:
-        try:
-            doc = await self._col.find_one({"_id": ObjectId(user_id)})
-            if not doc:
-                raise NotFoundError("User not found")
-            return UserInDB.model_validate(doc)
-        except PyMongoError:
-            logger.exception("MongoDB find error")
-            raise InternalServerError("Database failure")
-        except Exception as e:
-            logger.exception("Validation error on user document")
-            raise InternalServerError("Failed to deserialize user")
+        doc = await self._col.find_one({"_id": ObjectId(user_id)})
+        if not doc:
+            raise NotFoundError("User not found")
+        return UserInDB.model_validate(doc)
 
     # -----------------------
     # Update user profile
@@ -41,17 +32,13 @@ class UserRepository:
             k: v for k, v in payload.model_dump().items() if v is not None
         }
 
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now()
 
-        try:
-            result = await self._col.update_one(
-                {"_id": ObjectId(user_id)},
-                {"$set": update_data}
-            )
-            if result.matched_count == 0:
-                raise NotFoundError("User not found")
-        except PyMongoError:
-            logger.exception("MongoDB update error")
-            raise InternalServerError("Failed to update profile")
+        result = await self._col.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+        if result.matched_count == 0:
+            raise NotFoundError("User not found")
 
         return await self.get_user_by_id(user_id)

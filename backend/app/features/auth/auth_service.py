@@ -85,15 +85,14 @@ class AuthService:
         # Vérifie s’il y a un code de parrainage utilisé
         if user.referral_code:
             parrain = await self.repo.get_user_by_referral_code(user.referral_code)
-            if parrain:
-                new_credits = 15
-                user_data["credits"] += new_credits
-                user_data["ref_by"] = parrain.id
-                await self.repo.increment_credits(parrain.id, new_credits)
-                logger.info(f"🤝 Referral: {parrain.id} gets +{new_credits}, {email} gets +{new_credits}")
-            else:
-                logger.warning(f"❌ Invalid referral code used: {user.referral_code}")
+            if not parrain:
                 raise ValidationError("Invalid referral code")
+  
+            new_credits = 15
+            user_data["credits"] += new_credits
+            user_data["ref_by"] = parrain.id
+            await self.repo.increment_credits(parrain.id, new_credits)
+            logger.info(f"🤝 Referral: {parrain.id} gets +{new_credits}, {email} gets +{new_credits}")
         
         try:
             new_user = await self.repo.create_user(user_data)

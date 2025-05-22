@@ -1,9 +1,18 @@
-class AppError(Exception):
+from .exception_base import BaseCustomException
+
+class AppError(BaseCustomException):
     def __init__(self, message: str, *, status_code: int, error_code: str):
-        super().__init__(message)
-        self.message = message
+        self._message = message
         self.status_code = status_code
         self.error_code = error_code
+
+    @property
+    def message(self) -> str:
+        return self._message
+
+    @property
+    def trace(self) -> str:
+        return f"{self.error_code.upper()}: {self._message}"
 
 class ConflictError(AppError):
     def __init__(self, message: str = "Resource already exists"):
