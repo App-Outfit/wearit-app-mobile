@@ -1,6 +1,10 @@
 # app/main.py
 from contextlib import asynccontextmanager
 
+from app.features.auth import auth_route
+from app.features.body import body_route
+from app.features.clothing import wardrobe_route
+from app.features.tryon import tryon_route
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -13,13 +17,6 @@ from app.core.config import settings
 from app.core.errors import AppError
 from app.infrastructure.database.mongodb import MongoDB
 from app.infrastructure.storage.s3_client import S3Client
-from app.api.routes import (
-    auth_route,
-    body_route,
-    wardrobe_route,
-    tryon_route,
-    health_route,
-)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -138,4 +135,3 @@ app.include_router(auth_route.router, prefix=API_V1, tags=["Auth"])
 app.include_router(body_route.router, prefix=API_V1, tags=["Body"])
 app.include_router(wardrobe_route.router, prefix=API_V1, tags=["Wardrobe"])
 app.include_router(tryon_route.router, prefix=API_V1, tags=["Try-On"])
-app.include_router(health_route.router, prefix=API_V1, tags=["Health"])

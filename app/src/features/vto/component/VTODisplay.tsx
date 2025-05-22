@@ -58,15 +58,11 @@ export default function VTODisplay() {
         selected.dress || selected.upper || selected.lower || null;
 
     const currentType = React.useMemo<
-        'upper' | 'lower' | 'dress' | null
+        'upper' | 'lower' | 'dress' | null | undefined
     >(() => {
         if (!selectedTryon) return null;
-        console.log('current_type');
-        const cloth = sampleCloths.find(
-            (c) => c.cloth_id === selectedTryon.cloth_id,
-        );
-        console.log(cloth);
-        return cloth?.cloth_type;
+        return sampleCloths.find((c) => c.cloth_id === selectedTryon.cloth_id)
+            ?.cloth_type;
     }, [selectedTryon, loadingMasks]);
 
     React.useEffect(() => {
