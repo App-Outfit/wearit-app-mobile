@@ -1,4 +1,4 @@
-package com.wearitappmobile
+package com.wearit.wearitappmobile
 
 import android.os.Build
 import android.os.Bundle

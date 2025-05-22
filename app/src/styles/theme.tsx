@@ -32,27 +32,27 @@ type Colors = {
     card: string;
 };
 
-type Typography = {
-    fontFamily: {
-        regular: string;
-        bold: string;
-        italic: string;
-        light: string;
-    };
-    fontSize: {
-        small: number;
-        medium: number;
-        large: number;
-        xLarge: number;
-        xxLarge: number;
-    };
-    lineHeight: {
-        small: number;
-        medium: number;
-        large: number;
-        xLarge: number;
-    };
-};
+// type Typography = {
+//     fontFamily: {
+//         regular: string;
+//         bold: string;
+//         italic: string;
+//         light: string;
+//     };
+//     fontSize: {
+//         small: number;
+//         medium: number;
+//         large: number;
+//         xLarge: number;
+//         xxLarge: number;
+//     };
+//     lineHeight: {
+//         small: number;
+//         medium: number;
+//         large: number;
+//         xLarge: number;
+//     };
+// };
 
 type Spacing = {
     xSmall: number;
@@ -149,11 +149,17 @@ const darkThemeColors: Colors = {
 };
 
 // Typography styles
-const typography: Typography = {
-    fontFamily: {
+const typography = {
+    roboto: {
         regular: 'Roboto-Regular',
         bold: 'Roboto-Bold',
         italic: 'Roboto-Italic',
+        light: 'Roboto-Light',
+    },
+    poppins: {
+        regular: 'Poppins-Regular',
+        bold: 'Poppins-Bold',
+        italic: 'Poppins-Italic',
         light: 'Roboto-Light',
     },
     fontSize: {
@@ -272,4 +278,4 @@ const darkTheme: Theme = {
     dimensions,
 };
 
-export { lightTheme, darkTheme, normalize };
+export { lightTheme, baseColors, spacing, typography, darkTheme, normalize };
