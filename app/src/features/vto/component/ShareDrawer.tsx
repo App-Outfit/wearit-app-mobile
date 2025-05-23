@@ -11,6 +11,7 @@ export function ShareDrawer({ ref, onChange }) {
 
     return (
         <BottomSheet
+            index={-1}
             ref={ref}
             snapPoints={snapPoints}
             enableDynamicSizing={false}
