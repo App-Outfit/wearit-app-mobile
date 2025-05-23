@@ -1,67 +1,96 @@
 import * as React from 'react';
-import {
-    View,
-    Image,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    TouchableHighlight,
-} from 'react-native';
-import { useDispatch } from 'react-redux';
-import { Portal, Modal } from 'react-native-paper';
-import { setUpper, setLower, setDress } from '../slice/TryonSlice';
-import type { ClothData } from '../slice/sampleTryons';
-import { sampleTryons, sampleCloths } from '../slice/sampleTryons';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import VTODisplay from '../component/VTODisplay';
 
 import Feather from 'react-native-vector-icons/Feather';
-import { baseColors, spacing } from '../../../styles/theme';
-import { ImportChoice } from '../../../components/choice_component/ImportChoice';
-import { ModalAddClothInfo } from '../component/ModalAddClothInfo';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { spacing } from '../../../styles/theme';
+import Toast from 'react-native-toast-message';
+import { ToastAlert } from '../../../components/core/Toast';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BottomSheet from '@gorhom/bottom-sheet';
+import { ShareDrawer } from '../component/ShareDrawer';
+import { MiniDressing } from '../component/ListClothes';
 
 export function VTODressingScreen() {
-    return (
-        <View style={{ flex: 1, position: 'relative', margin: 14 }}>
-            <View style={styles.container}>
-                <View style={styles.vtoDisplayContainer}>
-                    <VTODisplay />
-                </View>
-                <View style={styles.scrollComponent}>
-                    <MiniDressing />
-                </View>
-            </View>
+    const [currentIsSave, setCurrentSave] = React.useState<boolean>(false);
+    const bottomSheetShare = React.useRef<BottomSheet>(null);
 
-            <View style={styles.iconComponent}>
-                <TouchableOpacity style={styles.icon}>
+    const succesSaveOutfitToast = () => {
+        Toast.show({
+            type: 'success',
+            text1: 'Outfit enregistré !',
+            position: 'bottom',
+        });
+    };
+
+    const saveOutfit = () => {
+        setCurrentSave(true);
+        succesSaveOutfitToast();
+    };
+
+    const cancelSaveOutfit = () => setCurrentSave(false);
+
+    const onPressSave = () => {
+        if (!currentIsSave) saveOutfit();
+        else cancelSaveOutfit();
+    };
+
+    const handleSnapPress = React.useCallback(() => {
+        bottomSheetShare.current?.snapToIndex(0);
+    }, []);
+
+    return (
+        <GestureHandlerRootView>
+            <View style={{ flex: 1, position: 'relative', margin: 14 }}>
+                <View style={styles.container}>
+                    <View style={styles.vtoDisplayContainer}>
+                        <VTODisplay />
+                    </View>
+                    <View style={styles.scrollComponent}>
+                        <MiniDressing />
+                    </View>
+                </View>
+
+                <View style={styles.iconComponent}>
+                    {/* <TouchableOpacity style={styles.icon}>
                     <Feather name="filter" size={20} />
                     <Text style={styles.textIcon}>Filtrer</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.icon}>
-                    <Feather name="bookmark" size={20} />
-                    <Text style={styles.textIcon}>Enregistrer</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.icon}>
-                    <Feather name="share-2" size={20} />
-                    <Text style={styles.textIcon}>Partager</Text>
-                </TouchableOpacity>
-            </View>
+                </TouchableOpacity> */}
+                    <TouchableOpacity style={styles.icon} onPress={onPressSave}>
+                        {currentIsSave ? (
+                            <FontAwesome name="bookmark" size={20} />
+                        ) : (
+                            <FontAwesome name="bookmark-o" size={20} />
+                        )}
+                        <Text style={styles.textIcon}>Enregistrer</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.icon}
+                        onPress={handleSnapPress}
+                    >
+                        <Feather name="share-2" size={20} />
+                        <Text style={styles.textIcon}>Partager</Text>
+                    </TouchableOpacity>
+                </View>
 
-            <View style={[styles.iconComponent, styles.iconTopComponent]}>
-                <TouchableOpacity style={[styles.icon, { marginBottom: 5 }]}>
-                    <Feather name="rotate-ccw" size={15} />
-                    <Text style={styles.textIcon}>Filtrer</Text>
-                </TouchableOpacity>
+                <View style={[styles.iconComponent, styles.iconTopComponent]}>
+                    <TouchableOpacity
+                        style={[styles.icon, { marginBottom: 5 }]}
+                    >
+                        <Feather name="rotate-ccw" size={15} />
+                        <Text style={styles.textIcon}>Réessayer</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <ShareDrawer ref={bottomSheetShare} onChange={() => {}} />
+                <ToastAlert />
             </View>
-        </View>
+        </GestureHandlerRootView>
     );
 }
 
 const styles = StyleSheet.create({
-    scrollView: {
-        flex: 1,
-        width: '100%',
-    },
     scrollContent: {
         padding: spacing.medium,
         justifyContent: 'center',
@@ -77,9 +106,6 @@ const styles = StyleSheet.create({
         flex: 3,
         marginRight: 10,
         height: '95%',
-
-        borderBlockColor: '#fff',
-        borderWidth: 1,
     },
     scrollComponent: {
         flex: 1,
@@ -110,151 +136,5 @@ const styles = StyleSheet.create({
         fontSize: 10,
         margin: 0,
         marginTop: spacing.xSmall,
-    },
-});
-
-function MiniDressing() {
-    const dispatch = useDispatch();
-    const [newPictureUri, setNewPictureUri] = React.useState<string | null>(
-        null,
-    );
-    const [importModalOpen, setImportModalOpen] = React.useState(false);
-    const [infoModalOpen, setInfoModalOpen] = React.useState(true);
-    const openModalAddCloth = () => {
-        setImportModalOpen(true);
-    };
-
-    const [customCloths, setCustomCloths] = React.useState<ClothData[]>([]);
-    const allCloths = [...sampleCloths, ...customCloths];
-
-    const handleImagePicked = (uri) => {
-        setImportModalOpen(false);
-        if (uri) {
-            setNewPictureUri(uri);
-            setInfoModalOpen(true);
-        }
-    };
-
-    const handleSaveNewCloth = ({ cloth_type, category, cloth_id }) => {
-        if (newPictureUri) {
-            const newCloth: ClothData = {
-                cloth_type,
-                category,
-                cloth_id,
-                cloth_url: { uri: newPictureUri },
-            };
-            setCustomCloths((prev) => [...prev, newCloth]);
-            setNewPictureUri(null);
-        }
-        setInfoModalOpen(false);
-    };
-
-    const onSelect = (cloth: ClothData) => {
-        const tryon = sampleTryons.find((t) => t.cloth_id === cloth.cloth_id);
-        if (!tryon) return;
-        if (cloth.category === 'dress') {
-            dispatch(setDress(tryon));
-        } else if (cloth.category === 'upper') {
-            dispatch(setUpper(tryon));
-        } else {
-            dispatch(setLower(tryon));
-        }
-    };
-
-    return (
-        <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styleDressing.scrollViewContainer}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-        >
-            {allCloths.map((cloth: ClothData, idx: number) => {
-                if (idx === 0) {
-                    return (
-                        <TouchableOpacity
-                            key={0}
-                            onPress={openModalAddCloth}
-                            style={styleDressing.addButton}
-                        >
-                            <View style={styleDressing.addButtonCircle}>
-                                <Feather
-                                    name="plus"
-                                    color={baseColors.white}
-                                    size={23}
-                                />
-                            </View>
-                            <Text style={styleDressing.addButtonText}>
-                                Ajouter un vêtement
-                            </Text>
-                        </TouchableOpacity>
-                    );
-                }
-
-                return (
-                    <TouchableOpacity
-                        key={idx}
-                        onPress={() => onSelect(cloth)}
-                        style={styleDressing.imgBox}
-                    >
-                        <Image
-                            source={cloth.cloth_url}
-                            style={styleDressing.img}
-                        />
-                    </TouchableOpacity>
-                );
-            })}
-
-            <ImportChoice
-                open={importModalOpen}
-                onClose={() => setImportModalOpen(false)}
-                onPicked={handleImagePicked}
-            />
-            <ModalAddClothInfo
-                open={infoModalOpen}
-                onCancel={() => setInfoModalOpen(false)}
-                onSave={handleSaveNewCloth}
-            />
-        </ScrollView>
-    );
-}
-
-const styleDressing = StyleSheet.create({
-    scrollView: {},
-    scrollViewContainer: {
-        flexDirection: 'column',
-        alignSelf: 'flex-end',
-        width: '100%',
-    },
-    imgBox: {
-        width: 90,
-        height: 140,
-        marginBottom: spacing.small,
-    },
-    img: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    addButton: {
-        width: 90,
-        height: 70,
-        backgroundColor: baseColors.white,
-        marginBottom: spacing.medium,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    addButtonCircle: {
-        width: 30,
-        height: 30,
-        backgroundColor: baseColors.primary,
-        borderRadius: '50%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    addButtonText: {
-        fontSize: 11,
-        textAlign: 'center',
-        margin: 0,
-        marginTop: 5,
     },
 });

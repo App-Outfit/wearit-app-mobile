@@ -18,10 +18,10 @@ import { CButton } from '../../../components/core/Buttons';
 
 export function ModalAddClothInfo({ open, onCancel, onSave }) {
     const [clothType, setClothType] = React.useState<
-        'upper' | 'lower' | 'dress'
+        'upper' | 'lower' | 'dress' | undefined
     >();
-    const [category, setCategory] = React.useState();
-    const [clothId, setClothId] = React.useState();
+    const [category, setCategory] = React.useState<string>();
+    const [clothId, setClothId] = React.useState<string>();
 
     const saveNewCloth = () => {
         onSave(clothType, category, clothId);
@@ -56,7 +56,14 @@ export function ModalAddClothInfo({ open, onCancel, onSave }) {
                             <UniqueChoice
                                 options={clothTypeOption}
                                 selected={clothType}
-                                onChange={setClothType}
+                                onChange={(key) => {
+                                    if (
+                                        key === 'upper' ||
+                                        key === 'lower' ||
+                                        key === 'dress'
+                                    )
+                                        setClothType(key);
+                                }}
                             />
                         </View>
 
