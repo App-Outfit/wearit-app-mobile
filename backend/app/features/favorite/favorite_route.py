@@ -7,10 +7,8 @@ from .favorite_service import FavoriteService
 from .favorite_repo import FavoriteRepository
 from .favorite_schema import (
     FavoriteCreateRequest,
-    FavoriteCheckRequest,
     FavoriteResponse,
     FavoriteListResponse,
-    FavoriteCheckResponse,
     FavoriteDeleteResponse,
 )
 from app.infrastructure.database.dependencies import get_current_user, get_db

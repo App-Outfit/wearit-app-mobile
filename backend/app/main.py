@@ -7,6 +7,7 @@ from app.features.body import body_route
 from app.features.clothing import clothing_route
 from app.features.tryon import tryon_route
 from app.features.favorite import favorite_route
+# from app.features.payment import payment_route
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -97,3 +98,4 @@ app.include_router(body_route.router, prefix=API_V1)
 app.include_router(clothing_route.router, prefix=API_V1)
 app.include_router(tryon_route.router, prefix=API_V1)
 app.include_router(favorite_route.router, prefix=API_V1)
+# app.include_router(payment_route.router, prefix=API_V1)
