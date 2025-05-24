@@ -18,6 +18,8 @@ import { HomeScreen } from '../../screens/HomeScreen/HomeScreen';
 // import { DressingNavigator } from '../../features/dressing/navigation/DressingNavigator';
 import { lightTheme } from '../../styles/theme';
 import { VTONavigator } from '../../features/vto/navigation/VTOMainNavigation';
+import { ProfilScreen } from '../../features/profil/screen/ProfilScreen';
+import { ProfilNavigator } from '../../features/profil/navigation/ProfilNavigator';
 // import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 
 export type MainTabParamList = {
@@ -68,7 +70,10 @@ const MainTabNavigator: React.FC = () => (
                         const color = focused
                             ? lightTheme.colors.primary
                             : '#f7f7ff7';
-                        return options.tabBarIcon?.({ color, size }) ?? null;
+                        return (
+                            options.tabBarIcon?.({ focused, color, size }) ??
+                            null
+                        );
                     }}
                     getLabelText={({ route }) => {
                         const { options } = descriptors[route.key];
@@ -139,7 +144,7 @@ const MainTabNavigator: React.FC = () => (
             /> */}
             <Tab.Screen
                 name="Profile"
-                component={RandomComponent}
+                component={ProfilNavigator}
                 options={{
                     tabBarLabel: 'Profil',
                     tabBarIcon: ({ color, size }) => (

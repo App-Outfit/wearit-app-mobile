@@ -121,6 +121,8 @@ const baseColors = {
     info: '#3498db',
     white: '#ffffff',
     black: '#1a1a1a',
+    yellow: '#FFCC00',
+    yellow_2: 'rgba(255, 204, 0, 0.15)',
     gray: '#333333',
     gray_2: '#4d4d4d',
     gray_3: '#666666',
@@ -160,7 +162,8 @@ const typography = {
         regular: 'Poppins-Regular',
         bold: 'Poppins-Bold',
         italic: 'Poppins-Italic',
-        light: 'Roboto-Light',
+        light: 'Poppins-Light',
+        semiBold: 'Poppins-SemiBold',
     },
     fontSize: {
         small: normalize(12),
