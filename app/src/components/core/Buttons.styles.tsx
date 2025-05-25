@@ -1,4 +1,4 @@
-import { lightTheme, normalize } from '../../styles/theme';
+import { baseColors, lightTheme, normalize } from '../../styles/theme';
 import { StyleSheet, TextStyle } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
 
     // Variant: Danger
     dangerButton: {
-        backgroundColor: '#e74c3c',
+        backgroundColor: baseColors.warning,
     },
     dangerTitle: {
         color: '#ffffff',

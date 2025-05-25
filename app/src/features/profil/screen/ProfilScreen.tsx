@@ -9,8 +9,11 @@ import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { DeconnexionModal } from '../components/DeconnexionModal';
 
 export function ProfilScreen({ navigation }) {
+    const [modalDisconect, setModalDisconnect] = React.useState<boolean>(false);
+
     const styleItem = {
         titleStyle: styles.itemTitle,
         containerStyle: styles.itemContainerStyle,
@@ -34,79 +37,88 @@ export function ProfilScreen({ navigation }) {
     const iconLeftConfig = { size: sizeIcon, color: baseColors.black };
 
     return (
-        <ScrollView>
-            <List.Section>
-                <List.Subheader style={styles.subHeader}>
-                    Utilisateur
-                </List.Subheader>
-                <List.Item
-                    {...styleItem}
-                    title="Mon mannequin"
-                    right={leftArrow}
-                    left={() => (
-                        <Ionicons name="body-outline" {...iconLeftConfig} />
-                    )}
-                    // onPress={}
-                />
-                <List.Item
-                    {...styleItem}
-                    title="Mes données"
-                    right={leftArrow}
-                    left={() => (
-                        <FontAwesome name="id-card-o" {...iconLeftConfig} />
-                    )}
-                    onPress={() => navigation.push('ProfilUserData')}
-                />
-                <List.Item
-                    {...styleItem}
-                    title="Plans et Crédits"
-                    right={leftArrow}
-                    left={() => (
-                        <MaterialCommunityIcons
-                            name="wallet-membership"
-                            {...iconLeftConfig}
-                        />
-                    )}
-                    onPress={() => navigation.push('ProfilSubscription')}
-                />
-            </List.Section>
-            <List.Section>
-                <List.Subheader style={styles.subHeader}>
-                    Essayages
-                </List.Subheader>
-                <List.Item
-                    {...styleItem}
-                    title="Essayages enregistrés"
-                    right={leftArrow}
-                    left={() => (
-                        <FontAwesome name="bookmark-o" {...iconLeftConfig} />
-                    )}
-                    // onPress={}
-                />
-            </List.Section>
-            <List.Section>
-                <List.Subheader style={styles.subHeader}>
-                    Paramètres de Session
-                </List.Subheader>
-                <List.Item
-                    {...styleItem}
-                    titleStyle={{
-                        ...styleItem.titleStyle,
-                        color: baseColors.error,
-                    }}
-                    title="Se déconnecter"
-                    right={leftArrowWarning}
-                    left={() => (
-                        <Feather
-                            name="log-out"
-                            {...iconLeftConfig}
-                            color={baseColors.error}
-                        />
-                    )}
-                    // onPress={}
-                />
-            </List.Section>
-        </ScrollView>
+        <View>
+            <ScrollView>
+                <List.Section>
+                    <List.Subheader style={styles.subHeader}>
+                        Utilisateur
+                    </List.Subheader>
+                    <List.Item
+                        {...styleItem}
+                        title="Mon mannequin"
+                        right={leftArrow}
+                        left={() => (
+                            <Ionicons name="body-outline" {...iconLeftConfig} />
+                        )}
+                        // onPress={}
+                    />
+                    <List.Item
+                        {...styleItem}
+                        title="Mes données"
+                        right={leftArrow}
+                        left={() => (
+                            <FontAwesome name="id-card-o" {...iconLeftConfig} />
+                        )}
+                        onPress={() => navigation.push('ProfilUserData')}
+                    />
+                    <List.Item
+                        {...styleItem}
+                        title="Plans et Crédits"
+                        right={leftArrow}
+                        left={() => (
+                            <MaterialCommunityIcons
+                                name="wallet-membership"
+                                {...iconLeftConfig}
+                            />
+                        )}
+                        onPress={() => navigation.push('ProfilSubscription')}
+                    />
+                </List.Section>
+                <List.Section>
+                    <List.Subheader style={styles.subHeader}>
+                        Essayages
+                    </List.Subheader>
+                    <List.Item
+                        {...styleItem}
+                        title="Essayages enregistrés"
+                        right={leftArrow}
+                        left={() => (
+                            <FontAwesome
+                                name="bookmark-o"
+                                {...iconLeftConfig}
+                            />
+                        )}
+                        // onPress={}
+                    />
+                </List.Section>
+                <List.Section>
+                    <List.Subheader style={styles.subHeader}>
+                        Paramètres de Session
+                    </List.Subheader>
+                    <List.Item
+                        {...styleItem}
+                        titleStyle={{
+                            ...styleItem.titleStyle,
+                            color: baseColors.error,
+                        }}
+                        title="Se déconnecter"
+                        right={leftArrowWarning}
+                        left={() => (
+                            <Feather
+                                name="log-out"
+                                {...iconLeftConfig}
+                                color={baseColors.error}
+                            />
+                        )}
+                        onPress={() => setModalDisconnect(true)}
+                    />
+                </List.Section>
+            </ScrollView>
+            <DeconnexionModal
+                open={modalDisconect}
+                onCancel={() => setModalDisconnect(false)}
+            />
+        </View>
     );
 }
 
