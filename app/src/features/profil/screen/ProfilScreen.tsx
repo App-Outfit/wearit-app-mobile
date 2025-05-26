@@ -88,7 +88,7 @@ export function ProfilScreen({ navigation }) {
                                 {...iconLeftConfig}
                             />
                         )}
-                        // onPress={}
+                        onPress={() => navigation.push('OufitSaved')}
                     />
                 </List.Section>
                 <List.Section>

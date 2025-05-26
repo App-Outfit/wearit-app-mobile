@@ -4,6 +4,9 @@ import { ProfilScreen } from '../screen/ProfilScreen';
 import { screenOptions } from '../../../styles/screen';
 import { UserDataScreen } from '../screen/UserDataScreen';
 import { SubscribtionScreen } from '../screen/SubscriptionScreen';
+import { DressingOutfitScreen } from '../../dressing/screen/DressingOutfit';
+import { spacing } from '../../../styles/theme';
+import { DressingOutfitDetail } from '../../dressing/screen/DressingOutfitDetail';
 
 const ProfilStack = createStackNavigator();
 
@@ -35,6 +38,32 @@ export function ProfilNavigator() {
                     ...screenOptions,
                     headerShown: true,
                     title: 'Mes Crédits',
+                }}
+            />
+            <ProfilStack.Screen
+                name="OufitSaved"
+                component={DressingOutfitScreen}
+                options={{
+                    ...screenOptions,
+                    title: 'Mes Outfits',
+                    headerShown: true,
+                    cardStyle: {
+                        backgroundColor: '#ffffff',
+                        paddingHorizontal: spacing.small,
+                    },
+                }}
+            />
+            <ProfilStack.Screen
+                name="DressingOutfitDetail"
+                component={DressingOutfitDetail}
+                options={{
+                    ...screenOptions,
+                    title: 'Mes Outfits',
+                    headerShown: true,
+                    cardStyle: {
+                        backgroundColor: '#ffffff',
+                        paddingHorizontal: spacing.small,
+                    },
                 }}
             />
         </ProfilStack.Navigator>
