@@ -1,35 +1,23 @@
-from pydantic import BaseModel
-from typing import Optional, Literal
-from datetime import datetime
+from pydantic import BaseModel, Field
+from typing import Literal
 
-# -------------------------
-# Requête pour créer un paiement
-# -------------------------
+# -----------------------------
+# Request: Création de session Stripe
+# -----------------------------
 
-class CreatePaymentSessionRequest(BaseModel):
-    type: Literal["credits", "subscription"]
-    credits: Optional[int] = None
-    subscription_type: Optional[Literal["weekly", "monthly"]] = None
+class CreateCheckoutSessionRequest(BaseModel):
+    pack: Literal["free", "decouverte", "standard", "creatif", "illimite"] = Field(..., description="Nom du pack à acheter")
 
-# -------------------------
-# Réponse après création de la session Stripe
-# -------------------------
+# -----------------------------
+# Response: URL Stripe Checkout
+# -----------------------------
 
-class CreatePaymentSessionResponse(BaseModel):
-    stripe_session_url: str
+class CreateCheckoutSessionResponse(BaseModel):
+    checkout_url: str = Field(..., description="URL Stripe Checkout pour effectuer le paiement")
 
-# -------------------------
-# Historique d’un paiement
-# -------------------------
+# -----------------------------
+# Webhook: Réponse après traitement Stripe
+# -----------------------------
 
-class PaymentHistoryItem(BaseModel):
-    id: str
-    type: str
-    amount: int
-    status: str
-    credits_added: Optional[int]
-    subscription_type: Optional[str]
-    created_at: datetime
-
-class PaymentHistoryResponse(BaseModel):
-    payments: list[PaymentHistoryItem]
+class StripeWebhookResponse(BaseModel):
+    message: str = Field(..., description="Message indiquant le résultat du traitement du webhook")

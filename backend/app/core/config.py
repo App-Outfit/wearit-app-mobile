@@ -37,6 +37,13 @@ class Settings:
     SMTP_SSL: bool = os.getenv("SMTP_SSL", "false").lower() == "true"
     PASSWORD_RESET_EXPIRE_MINUTES: int = int(os.getenv("PASSWORD_RESET_EXPIRE_MINUTES", 10))
 
+    STRIPE_PUBLIC_KEY: str = os.getenv("STRIPE_PUBLIC_KEY")
+    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY")
+
+    STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+    PYTHON_API_BASE_URL: str = os.getenv("PYTHON_API_BASE_URL")
+
     model_config = ConfigDict(
         env_file = ".env"
     )
