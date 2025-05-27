@@ -9,15 +9,21 @@ export const styles = StyleSheet.create({
         paddingHorizontal: normalize(8),
         height: normalize(54),
         overflow: 'hidden',
-        gap: 10,
+        // gap: 10,
         marginBottom: 10,
         marginTop: 10,
+    },
+    center: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        // borderWidth: 1,
     },
     baseTitle: {
         fontSize: normalize(16),
         fontWeight: '600',
         fontFamily: 'Poppins-Medium',
         margin: 'auto',
+        flex: 1,
     },
 
     // Variant: Primary

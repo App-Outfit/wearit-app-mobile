@@ -36,6 +36,7 @@ export const CButton: React.FC<ButtonProps> = ({
         variant === 'primary' && styles.primaryButton,
         variant === 'secondary' && styles.secondaryButton,
         variant === 'danger' && styles.dangerButton,
+        styles.center,
         size === 'small' && styles.smallButton,
         size === 'medium' && styles.mediumButton,
         size === 'large' && styles.largeButton,
@@ -52,6 +53,14 @@ export const CButton: React.FC<ButtonProps> = ({
         disabled && styles.disabledTitle,
     ]);
 
+    const containerStyle = StyleSheet.flatten([
+        styles.center,
+        size === 'small' && styles.smallButton,
+        size === 'medium' && styles.mediumButton,
+        size === 'large' && styles.largeButton,
+        size === 'xlarge' && styles.xlargeButton,
+    ]);
+
     return (
         <Button
             title={children}
@@ -60,6 +69,7 @@ export const CButton: React.FC<ButtonProps> = ({
             onPressIn={onPressIn}
             onPressOut={onPressOut}
             buttonStyle={buttonStyle}
+            // containerStyle={containerStyle}
             titleStyle={titleStyle}
             disabled={disabled}
             disabledStyle={styles.disabledButton}
