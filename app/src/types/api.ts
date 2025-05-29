@@ -38,46 +38,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/api/v1/auth/google': {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Google Auth
-         * @description Redirige l'utilisateur vers Google pour l'authentification OAuth2
-         */
-        get: operations['google_auth_api_v1_auth_google_get'];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    '/api/v1/auth/google/callback': {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Google Callback
-         * @description Récupère le code de Google et authentifie l'utilisateur
-         */
-        get: operations['google_callback_api_v1_auth_google_callback_get'];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     '/api/v1/auth/logout': {
         parameters: {
             query?: never;
@@ -171,18 +131,120 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/api/v1/body/': {
+    '/api/v1/user/profile': {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List all bodies of the current user */
-        get: operations['list_bodies_api_v1_body__get'];
+        /** Get Profile */
+        get: operations['get_profile_api_v1_user_profile_get'];
         put?: never;
-        /** Upload a new body image and create a record */
-        post: operations['create_body_api_v1_body__post'];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Profile */
+        patch: operations['update_profile_api_v1_user_profile_patch'];
+        trace?: never;
+    };
+    '/api/v1/user/credits': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Credits */
+        get: operations['get_credits_api_v1_user_credits_get'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/user/referral/code': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Referral Code */
+        get: operations['get_referral_code_api_v1_user_referral_code_get'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/body/upload': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Body */
+        post: operations['upload_body_api_v1_body_upload_post'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/body/list': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Bodies */
+        get: operations['list_bodies_api_v1_body_list_get'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/body/current': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Current Body */
+        get: operations['get_current_body_api_v1_body_current_get'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/body/{body_id}/masks': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Masks */
+        get: operations['get_masks_api_v1_body__body_id__masks_get'];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -196,18 +258,17 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Retrieve a single body by its ID */
-        get: operations['get_body_api_v1_body__body_id__get'];
+        get?: never;
         put?: never;
         post?: never;
-        /** Delete a body image by its ID */
+        /** Delete Body */
         delete: operations['delete_body_api_v1_body__body_id__delete'];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/api/v1/wardrobe/': {
+    '/api/v1/clothing/upload': {
         parameters: {
             query?: never;
             header?: never;
@@ -216,23 +277,23 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create Cloth */
-        post: operations['create_cloth_api_v1_wardrobe__post'];
+        /** Upload Clothing */
+        post: operations['upload_clothing_api_v1_clothing_upload_post'];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/api/v1/wardrobe/cloth/{cloth_id}': {
+    '/api/v1/clothing': {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get Cloth */
-        get: operations['get_cloth_api_v1_wardrobe_cloth__cloth_id__get'];
+        /** Get Clothes */
+        get: operations['get_clothes_api_v1_clothing_get'];
         put?: never;
         post?: never;
         delete?: never;
@@ -241,15 +302,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/api/v1/wardrobe/clothes/{cloth_type}': {
+    '/api/v1/clothing/categories': {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List Clothes */
-        get: operations['list_clothes_api_v1_wardrobe_clothes__cloth_type__get'];
+        /** Get Categories */
+        get: operations['get_categories_api_v1_clothing_categories_get'];
         put?: never;
         post?: never;
         delete?: never;
@@ -258,68 +319,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/api/v1/wardrobe/{cloth_id}': {
+    '/api/v1/clothing/{clothing_id}': {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get Clothing By Id */
+        get: operations['get_clothing_by_id_api_v1_clothing__clothing_id__get'];
         put?: never;
         post?: never;
-        /** Delete Cloth */
-        delete: operations['delete_cloth_api_v1_wardrobe__cloth_id__delete'];
+        /** Delete Clothing */
+        delete: operations['delete_clothing_api_v1_clothing__clothing_id__delete'];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update Clothing */
+        patch: operations['update_clothing_api_v1_clothing__clothing_id__patch'];
         trace?: never;
     };
-    '/api/v1/tryon/{body_id}/{cloth_id}': {
+    '/api/v1/tryon': {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
+        /** Get All Tryons */
+        get: operations['get_all_tryons_api_v1_tryon_get'];
+        put?: never;
         /** Create Tryon */
-        get: operations['create_tryon_api_v1_tryon__body_id___cloth_id__get'];
-        put?: never;
-        post?: never;
+        post: operations['create_tryon_api_v1_tryon_post'];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/api/v1/tryon/history': {
+    '/api/v1/tryon/{tryon_id}': {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get Tryon History */
-        get: operations['get_tryon_history_api_v1_tryon_history_get'];
+        /** Get Tryon By Id */
+        get: operations['get_tryon_by_id_api_v1_tryon__tryon_id__get'];
         put?: never;
         post?: never;
+        /** Delete Tryon */
+        delete: operations['delete_tryon_api_v1_tryon__tryon_id__delete'];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/favorites': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Favorites */
+        get: operations['list_favorites_api_v1_favorites_get'];
+        put?: never;
+        /** Add Favorite */
+        post: operations['add_favorite_api_v1_favorites_post'];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/api/v1/health': {
+    '/api/v1/favorites/{favorite_id}': {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Health Check */
-        get: operations['health_check_api_v1_health_get'];
+        /** Get Favorite */
+        get: operations['get_favorite_api_v1_favorites__favorite_id__get'];
         put?: never;
         post?: never;
+        /** Delete Favorite */
+        delete: operations['delete_favorite_api_v1_favorites__favorite_id__delete'];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/payment/create-checkout-session': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Checkout Session */
+        post: operations['create_checkout_session_api_v1_payment_create_checkout_session_post'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/api/v1/payment/webhook/stripe': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stripe Webhook */
+        post: operations['stripe_webhook_api_v1_payment_webhook_stripe_post'];
         delete?: never;
         options?: never;
         head?: never;
@@ -337,26 +455,10 @@ export interface components {
         AuthDeleteResponse: {
             /**
              * Message
-             * @description Message after deleting an account
+             * @description Account deletion confirmation
              * @default Account deleted successfully
              */
             message: string;
-        };
-        /**
-         * AuthGoogleResponse
-         * @description Response model after successfully logging in with Google.
-         */
-        AuthGoogleResponse: {
-            /**
-             * Message
-             * @default Logged in with Google successfully
-             */
-            message: string;
-            /**
-             * Token
-             * @description JWT token for authentication
-             */
-            token: string;
         };
         /**
          * AuthLogin
@@ -366,12 +468,12 @@ export interface components {
             /**
              * Email
              * Format: email
-             * @description Email of the user
+             * @description User's email address
              */
             email: string;
             /**
              * Password
-             * @description Password of the user
+             * @description User's password
              */
             password: string;
         };
@@ -382,6 +484,7 @@ export interface components {
         AuthLoginResponse: {
             /**
              * Message
+             * @description Login success message
              * @default Logged in successfully
              */
             message: string;
@@ -398,7 +501,7 @@ export interface components {
         AuthLogoutResponse: {
             /**
              * Message
-             * @description Message after logging out
+             * @description Logout success message
              * @default Logged out successfully
              */
             message: string;
@@ -411,23 +514,36 @@ export interface components {
             /**
              * Email
              * Format: email
-             * @description Email of the user
+             * @description User's email address
              */
             email: string;
             /**
              * Password
-             * @description Password of the user
+             * @description User's password
              */
             password: string;
             /**
-             * Name
-             * @description Name of the user
+             * First Name
+             * @description User's first name
              */
-            name: string;
-            /** Answers */
-            answers: {
+            first_name?: string | null;
+            /**
+             * Gender
+             * @description User's gender (optional)
+             */
+            gender?: string | null;
+            /**
+             * Answers
+             * @description Custom answers to onboarding questions
+             */
+            answers?: {
                 [key: string]: string;
-            };
+            } | null;
+            /**
+             * Referral Code
+             * @description Referral code received from another user
+             */
+            referral_code?: string | null;
         };
         /**
          * AuthSignupResponse
@@ -436,6 +552,7 @@ export interface components {
         AuthSignupResponse: {
             /**
              * Message
+             * @description Signup success message
              * @default Signed up successfully
              */
             message: string;
@@ -445,185 +562,213 @@ export interface components {
              */
             token: string;
         };
-        /**
-         * BodyCreateResponse
-         * @description Response model after successfully creating a body.
-         */
-        BodyCreateResponse: {
-            /**
-             * Id
-             * Format: uuid
-             * @description Unique ID of the body
-             */
+        /** BodyItem */
+        BodyItem: {
+            /** Id */
             id: string;
-            /**
-             * Message
-             * @default Body created successfully
-             */
-            message: string;
+            /** Image Url */
+            image_url: string;
+            /** Status */
+            status: string;
+            /** Is Default */
+            is_default: boolean;
             /**
              * Created At
              * Format: date-time
              */
             created_at: string;
-            /**
-             * Image Url
-             * Format: uri
-             * @description URL of the body image
-             */
-            image_url: string;
         };
-        /**
-         * BodyDeleteResponse
-         * @description Response model after deleting a body.
-         */
-        BodyDeleteResponse: {
-            /**
-             * Message
-             * @default Body deleted successfully
-             */
-            message: string;
-        };
-        /**
-         * BodyListResponse
-         * @description Response model when fetching multiple bodies.
-         */
+        /** BodyListResponse */
         BodyListResponse: {
             /** Bodies */
-            bodies: components['schemas']['BodyResponse'][];
+            bodies: components['schemas']['BodyItem'][];
         };
-        /**
-         * BodyResponse
-         * @description Response model when fetching a body.
-         */
-        BodyResponse: {
-            /**
-             * User Id
-             * Format: uuid
-             * @description User ID of the body owner
-             */
-            user_id: string;
-            /**
-             * Id
-             * Format: uuid
-             * @description Unique ID of the body
-             */
-            id: string;
-            /**
-             * Image Url
-             * Format: uri
-             * @description URL of the body image
-             */
-            image_url: string;
+        /** BodyMasksResponse */
+        BodyMasksResponse: {
+            /** Mask Upper */
+            mask_upper: string | null;
+            /** Mask Lower */
+            mask_lower: string | null;
+            /** Mask Dress */
+            mask_dress: string | null;
         };
-        /** Body_create_body_api_v1_body__post */
-        Body_create_body_api_v1_body__post: {
+        /** BodyUploadResponse */
+        BodyUploadResponse: {
+            /** Body Id */
+            body_id: string;
             /**
-             * File
-             * Format: binary
+             * Status
+             * @default pending
              */
-            file: string;
-        };
-        /** Body_create_cloth_api_v1_wardrobe__post */
-        Body_create_cloth_api_v1_wardrobe__post: {
-            /** Name */
-            name: string;
-            /** Type */
-            type: string;
-            /**
-             * File
-             * Format: binary
-             */
-            file: string;
-        };
-        /**
-         * ClothCreateResponse
-         * @description Response model after successfully creating a cloth.
-         */
-        ClothCreateResponse: {
-            /**
-             * Id
-             * Format: uuid
-             * @description Unique ID of the cloth
-             */
-            id: string;
-            /**
-             * Message
-             * @default Cloth created successfully
-             */
+            status: string;
+            /** Message */
             message: string;
+        };
+        /** Body_upload_body_api_v1_body_upload_post */
+        Body_upload_body_api_v1_body_upload_post: {
+            /**
+             * Image
+             * Format: binary
+             */
+            image: string;
+        };
+        /** Body_upload_clothing_api_v1_clothing_upload_post */
+        Body_upload_clothing_api_v1_clothing_upload_post: {
+            /**
+             * File
+             * Format: binary
+             */
+            file: string;
+        };
+        /** CategoryListResponse */
+        CategoryListResponse: {
+            /** Categories */
+            categories: string[];
+        };
+        /** ClothingDeleteResponse */
+        ClothingDeleteResponse: {
+            /** Message */
+            message: string;
+        };
+        /** ClothingDetailResponse */
+        ClothingDetailResponse: {
+            /** Id */
+            id: string;
+            /** Image Url */
+            image_url: string;
+            /** Resized Url */
+            resized_url: string | null;
+            /** Category */
+            category: string;
+            /** Name */
+            name: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** ClothingItem */
+        ClothingItem: {
+            /** Id */
+            id: string;
+            /** Image Url */
+            image_url: string;
+            /** Resized Url */
+            resized_url: string | null;
+            /** Category */
+            category: string;
+            /** Name */
+            name: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** ClothingListResponse */
+        ClothingListResponse: {
+            /** Clothes */
+            clothes: components['schemas']['ClothingItem'][];
+        };
+        /** ClothingUpdate */
+        ClothingUpdate: {
+            /** Category */
+            category?: string | null;
+            /** Name */
+            name?: string | null;
+        };
+        /** ClothingUploadResponse */
+        ClothingUploadResponse: {
+            /** Clothing Id */
+            clothing_id: string;
+            /** Image Url */
+            image_url: string;
+            /** Resized Url */
+            resized_url?: string | null;
+            /** Category */
+            category: string;
+            /** Name */
+            name: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Message */
+            message: string;
+        };
+        /** CreateCheckoutSessionRequest */
+        CreateCheckoutSessionRequest: {
+            /**
+             * Pack
+             * @description Nom du pack à acheter
+             * @enum {string}
+             */
+            pack: 'free' | 'decouverte' | 'standard' | 'creatif' | 'illimite';
+        };
+        /** CreateCheckoutSessionResponse */
+        CreateCheckoutSessionResponse: {
+            /**
+             * Checkout Url
+             * @description URL Stripe Checkout pour effectuer le paiement
+             */
+            checkout_url: string;
+        };
+        /** CreditsResponse */
+        CreditsResponse: {
+            /** User Id */
+            user_id: string;
+            /** Credits */
+            credits: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** FavoriteCreateRequest */
+        FavoriteCreateRequest: {
+            /** Body Id */
+            body_id: string;
+            /** Clothing Ids */
+            clothing_ids: string[];
+        };
+        /** FavoriteDeleteResponse */
+        FavoriteDeleteResponse: {
+            /** Message */
+            message: string;
+        };
+        /** FavoriteListResponse */
+        FavoriteListResponse: {
+            /** Favorites */
+            favorites: components['schemas']['FavoriteResponse'][];
+        };
+        /** FavoriteResponse */
+        FavoriteResponse: {
+            /** Id */
+            id: string;
+            /** Body Id */
+            body_id: string;
+            /** Clothing Ids */
+            clothing_ids: string[];
             /**
              * Created At
              * Format: date-time
              */
             created_at: string;
             /**
-             * Image Url
-             * Format: uri
-             * @description URL of the cloth image
+             * Updated At
+             * Format: date-time
              */
-            image_url: string;
-        };
-        /**
-         * ClothDeleteResponse
-         * @description Response model after deleting a cloth.
-         */
-        ClothDeleteResponse: {
-            /**
-             * Message
-             * @default Cloth deleted successfully
-             */
-            message: string;
-        };
-        /**
-         * ClothListResponse
-         * @description Response model when fetching multiple clothes.
-         */
-        ClothListResponse: {
-            /** Clothes */
-            clothes: components['schemas']['ClothResponse'][];
-        };
-        /**
-         * ClothResponse
-         * @description Response model when fetching a cloth.
-         */
-        ClothResponse: {
-            /**
-             * User Id
-             * Format: uuid
-             * @description User ID of the cloth owner
-             */
-            user_id: string;
-            /**
-             * Name
-             * @description Name of the cloth
-             */
-            name: string;
-            /**
-             * Type
-             * @description Type of the cloth
-             * @enum {string}
-             */
-            type: 'upper' | 'lower' | 'dress';
-            /**
-             * Id
-             * Format: uuid
-             * @description Unique ID of the cloth
-             */
-            id: string;
-            /**
-             * Image Url
-             * Format: uri
-             * @description URL of the cloth image
-             */
-            image_url: string;
+            updated_at: string;
         };
         /** ForgotPasswordRequest */
         ForgotPasswordRequest: {
             /**
              * Email
              * Format: email
-             * @description The email address where the reset code will be sent
+             * @description Email to send reset code to
              */
             email: string;
         };
@@ -631,7 +776,7 @@ export interface components {
         ForgotPasswordResponse: {
             /**
              * Message
-             * @description Confirmation that a reset code has been sent
+             * @description Message confirming reset code sent
              */
             message: string;
         };
@@ -640,22 +785,27 @@ export interface components {
             /** Detail */
             detail?: components['schemas']['ValidationError'][];
         };
+        /** ReferralCodeResponse */
+        ReferralCodeResponse: {
+            /** Referral Code */
+            referral_code: string;
+        };
         /** ResetPasswordRequest */
         ResetPasswordRequest: {
             /**
              * Email
              * Format: email
-             * @description The email address associated with the account
+             * @description Email address
              */
             email: string;
             /**
              * Code
-             * @description 4‑digit reset code received by email
+             * @description 4-digit reset code
              */
             code: string;
             /**
              * New Password
-             * @description New password (at least 8 characters)
+             * @description New password (min. 8 chars)
              */
             new_password: string;
         };
@@ -663,47 +813,122 @@ export interface components {
         ResetPasswordResponse: {
             /**
              * Message
-             * @description Confirmation that the password has been successfully reset
+             * @description Confirmation message after password reset
              */
             message: string;
         };
-        /**
-         * TryonListResponse
-         * @description Response model when fetching multiple try-ons.
-         */
+        /** StripeWebhookResponse */
+        StripeWebhookResponse: {
+            /**
+             * Message
+             * @description Message indiquant le résultat du traitement du webhook
+             */
+            message: string;
+        };
+        /** TryonCreateRequest */
+        TryonCreateRequest: {
+            /** Body Id */
+            body_id: string;
+            /** Clothing Id */
+            clothing_id: string;
+        };
+        /** TryonCreateResponse */
+        TryonCreateResponse: {
+            /** Tryon Id */
+            tryon_id: string;
+            /** Status */
+            status: string;
+            /** Message */
+            message: string;
+            /** Version */
+            version: number;
+        };
+        /** TryonDeleteResponse */
+        TryonDeleteResponse: {
+            /** Message */
+            message: string;
+        };
+        /** TryonDetailResponse */
+        TryonDetailResponse: {
+            /** Id */
+            id: string;
+            /** Body Id */
+            body_id: string;
+            /** Clothing Id */
+            clothing_id: string;
+            /** Output Url */
+            output_url?: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Version */
+            version: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** TryonItem */
+        TryonItem: {
+            /** Id */
+            id: string;
+            /** Body Id */
+            body_id: string;
+            /** Clothing Id */
+            clothing_id: string;
+            /** Output Url */
+            output_url?: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Version */
+            version: number;
+        };
+        /** TryonListResponse */
         TryonListResponse: {
             /** Tryons */
-            tryons: components['schemas']['TryonResponse'][];
+            tryons: components['schemas']['TryonItem'][];
         };
-        /**
-         * TryonResponse
-         * @description Response model
-         */
-        TryonResponse: {
-            /**
-             * Body Id
-             * Format: uuid
-             * @description ID of the body to try on
-             */
-            body_id: string;
-            /**
-             * Cloth Id
-             * Format: uuid
-             * @description ID of the cloth to try on
-             */
-            cloth_id: string;
-            /**
-             * Id
-             * Format: uuid
-             * @description Unique ID of the tryon
-             */
-            id: string;
-            /**
-             * Image Url
-             * Format: uri
-             * @description URL of the try-on image
-             */
-            image_url: string;
+        /** UserProfileResponse */
+        UserProfileResponse: {
+            /** User Id */
+            user_id: string;
+            /** First Name */
+            first_name: string | null;
+            /** Last Name */
+            last_name: string | null;
+            /** Gender */
+            gender: string | null;
+            /** Credits */
+            credits: number;
+            /** Referral Code */
+            referral_code: string | null;
+            /** Answers */
+            answers?: {
+                [key: string]: string;
+            } | null;
+        };
+        /** UserProfileUpdate */
+        UserProfileUpdate: {
+            /** First Name */
+            first_name?: string | null;
+            /** Last Name */
+            last_name?: string | null;
+            /** Gender */
+            gender?: string | null;
+            /** Answers */
+            answers?: {
+                [key: string]: string;
+            } | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -719,12 +944,12 @@ export interface components {
             /**
              * Email
              * Format: email
-             * @description The email address associated with the account
+             * @description Email associated with the reset code
              */
             email: string;
             /**
              * Code
-             * @description 4‑digit reset code received by email
+             * @description 4-digit reset code
              */
             code: string;
         };
@@ -732,7 +957,7 @@ export interface components {
         VerifyResetCodeResponse: {
             /**
              * Valid
-             * @description Whether the provided reset code is valid
+             * @description Indicates whether the reset code is valid
              */
             valid: boolean;
         };
@@ -807,46 +1032,6 @@ export interface operations {
                 };
                 content: {
                     'application/json': components['schemas']['HTTPValidationError'];
-                };
-            };
-        };
-    };
-    google_auth_api_v1_auth_google_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': unknown;
-                };
-            };
-        };
-    };
-    google_callback_api_v1_auth_google_callback_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['AuthGoogleResponse'];
                 };
             };
         };
@@ -990,7 +1175,133 @@ export interface operations {
             };
         };
     };
-    list_bodies_api_v1_body__get: {
+    get_profile_api_v1_user_profile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['UserProfileResponse'];
+                };
+            };
+        };
+    };
+    update_profile_api_v1_user_profile_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['UserProfileUpdate'];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['UserProfileResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    get_credits_api_v1_user_credits_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['CreditsResponse'];
+                };
+            };
+        };
+    };
+    get_referral_code_api_v1_user_referral_code_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['ReferralCodeResponse'];
+                };
+            };
+        };
+    };
+    upload_body_api_v1_body_upload_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'multipart/form-data': components['schemas']['Body_upload_body_api_v1_body_upload_post'];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['BodyUploadResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    list_bodies_api_v1_body_list_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1010,18 +1321,14 @@ export interface operations {
             };
         };
     };
-    create_body_api_v1_body__post: {
+    get_current_body_api_v1_body_current_get: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                'multipart/form-data': components['schemas']['Body_create_body_api_v1_body__post'];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -1029,21 +1336,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['BodyCreateResponse'];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['HTTPValidationError'];
+                    'application/json': components['schemas']['BodyItem'];
                 };
             };
         };
     };
-    get_body_api_v1_body__body_id__get: {
+    get_masks_api_v1_body__body_id__masks_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1060,7 +1358,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['BodyResponse'];
+                    'application/json': components['schemas']['BodyMasksResponse'];
                 };
             };
             /** @description Validation Error */
@@ -1091,7 +1389,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['BodyDeleteResponse'];
+                    'application/json': unknown;
                 };
             };
             /** @description Validation Error */
@@ -1105,16 +1403,21 @@ export interface operations {
             };
         };
     };
-    create_cloth_api_v1_wardrobe__post: {
+    upload_clothing_api_v1_clothing_upload_post: {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Clothing category (e.g., upper, lower, dress) */
+                category: string;
+                /** @description Optional name */
+                name?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                'multipart/form-data': components['schemas']['Body_create_cloth_api_v1_wardrobe__post'];
+                'multipart/form-data': components['schemas']['Body_upload_clothing_api_v1_clothing_upload_post'];
             };
         };
         responses: {
@@ -1124,7 +1427,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ClothCreateResponse'];
+                    'application/json': components['schemas']['ClothingUploadResponse'];
                 };
             };
             /** @description Validation Error */
@@ -1138,12 +1441,64 @@ export interface operations {
             };
         };
     };
-    get_cloth_api_v1_wardrobe_cloth__cloth_id__get: {
+    get_clothes_api_v1_clothing_get: {
+        parameters: {
+            query?: {
+                /** @description Optional category filter */
+                category?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['ClothingListResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    get_categories_api_v1_clothing_categories_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['CategoryListResponse'];
+                };
+            };
+        };
+    };
+    get_clothing_by_id_api_v1_clothing__clothing_id__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                cloth_id: string;
+                clothing_id: string;
             };
             cookie?: never;
         };
@@ -1155,7 +1510,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ClothResponse'];
+                    'application/json': components['schemas']['ClothingDetailResponse'];
                 };
             };
             /** @description Validation Error */
@@ -1169,12 +1524,12 @@ export interface operations {
             };
         };
     };
-    list_clothes_api_v1_wardrobe_clothes__cloth_type__get: {
+    delete_clothing_api_v1_clothing__clothing_id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                cloth_type: string;
+                clothing_id: string;
             };
             cookie?: never;
         };
@@ -1186,7 +1541,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ClothListResponse'];
+                    'application/json': components['schemas']['ClothingDeleteResponse'];
                 };
             };
             /** @description Validation Error */
@@ -1200,16 +1555,20 @@ export interface operations {
             };
         };
     };
-    delete_cloth_api_v1_wardrobe__cloth_id__delete: {
+    update_clothing_api_v1_clothing__clothing_id__patch: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                cloth_id: string;
+                clothing_id: string;
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['ClothingUpdate'];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -1217,7 +1576,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ClothDeleteResponse'];
+                    'application/json': components['schemas']['ClothingDetailResponse'];
                 };
             };
             /** @description Validation Error */
@@ -1231,39 +1590,7 @@ export interface operations {
             };
         };
     };
-    create_tryon_api_v1_tryon__body_id___cloth_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                body_id: string;
-                cloth_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['TryonResponse'];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['HTTPValidationError'];
-                };
-            };
-        };
-    };
-    get_tryon_history_api_v1_tryon_history_get: {
+    get_all_tryons_api_v1_tryon_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1283,7 +1610,102 @@ export interface operations {
             };
         };
     };
-    health_check_api_v1_health_get: {
+    create_tryon_api_v1_tryon_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['TryonCreateRequest'];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['TryonCreateResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    get_tryon_by_id_api_v1_tryon__tryon_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tryon_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['TryonDetailResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    delete_tryon_api_v1_tryon__tryon_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tryon_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['TryonDeleteResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    list_favorites_api_v1_favorites_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1298,7 +1720,155 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': unknown;
+                    'application/json': components['schemas']['FavoriteListResponse'];
+                };
+            };
+        };
+    };
+    add_favorite_api_v1_favorites_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['FavoriteCreateRequest'];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['FavoriteResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    get_favorite_api_v1_favorites__favorite_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                favorite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['FavoriteResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    delete_favorite_api_v1_favorites__favorite_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                favorite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['FavoriteDeleteResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    create_checkout_session_api_v1_payment_create_checkout_session_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['CreateCheckoutSessionRequest'];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['CreateCheckoutSessionResponse'];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['HTTPValidationError'];
+                };
+            };
+        };
+    };
+    stripe_webhook_api_v1_payment_webhook_stripe_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['StripeWebhookResponse'];
                 };
             };
         };
