@@ -8,6 +8,7 @@ import tryonReducer from '../features/vto/slice/TryonSlice';
 import useReducer from '../features/profil/slices/userSlice';
 import bodyReducer from '../features/body/bodySlice';
 import clothinReducer from '../features/clothing/clothingSlice';
+import favoriteReducer from '../features/favorite/favoriteSlice';
 
 const persistConfig = {
     key: 'auth',
@@ -25,6 +26,7 @@ export const store = configureStore({
         tryon: tryonReducer,
         body: bodyReducer,
         clothing: clothinReducer,
+        favorite: favoriteReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({ serializableCheck: false }),
