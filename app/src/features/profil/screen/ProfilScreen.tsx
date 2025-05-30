@@ -166,7 +166,6 @@ const styles = StyleSheet.create({
     itemContainerStyle: {
         justifyContent: 'center',
         paddingLeft: spacing.medium,
-
         // borderBlockColor: "#000",
         // borderWidth: 1,
     },

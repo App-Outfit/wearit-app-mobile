@@ -7,6 +7,10 @@ import axios from 'axios';
 import api from '../../../api'; // votre axios instance
 import { parseApiError } from '../../../utils/apiError';
 
+import { JwtPayload } from 'jwt-decode';
+import * as jwtDecodeModule from 'jwt-decode';
+const jwtDecode = (jwtDecodeModule as any).default as <T>(token: string) => T;
+
 import type {
     SinginData,
     SignupData,
@@ -42,6 +46,16 @@ export const loadToken = createAsyncThunk<string | null>(
         return AsyncStorage.getItem('token');
     },
 );
+
+export function isTokenExpired(token: string): boolean {
+    try {
+        const { exp } = jwtDecode<JwtPayload>(token);
+        if (!exp) return true; // pas de champ exp → on considère expiré
+        return Date.now() >= exp * 1000;
+    } catch {
+        return true;
+    }
+}
 
 export const signupUser = createAsyncThunk<
     AuthSignupResponse,

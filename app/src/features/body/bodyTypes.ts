@@ -1,6 +1,6 @@
 // src/types/body.types.ts
 
-import { paths } from '../../types/api.ts';
+import { paths } from '../../types/api';
 
 // 1️⃣ Upload Body
 export type BodyUploadPayload =

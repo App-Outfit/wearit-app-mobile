@@ -24,6 +24,8 @@ import Carousel, {
 } from 'react-native-reanimated-carousel';
 import { ImportChoice } from '../../../../components/choice_component/ImportChoice';
 import Feather from 'react-native-vector-icons/Feather';
+import { uploadBody } from '../../../body/bodyThunks';
+import { useAppDispatch } from '../../../../utils/hooks';
 
 const width = Dimensions.get('window').width;
 const data = [
@@ -35,6 +37,7 @@ const data = [
 
 export function AvatarCreationScreen({ navigation }: any) {
     const ref = React.useRef<ICarouselInstance>(null);
+    const dispatch = useAppDispatch();
     const progress = useSharedValue<number>(0);
     const [modalChoice, setModalChoice] = React.useState<boolean>(false);
     const [index, setIndex] = React.useState<number>(0);
@@ -61,15 +64,37 @@ export function AvatarCreationScreen({ navigation }: any) {
         setIndex(idx);
     };
 
-    const handleImagePicked = (uri) => {
+    const createFormData = (uri) => {
+        const formData = {
+            uri,
+            name: 'ImageBody',
+            type: 'image/png',
+        } as any;
+
+        return formData;
+    };
+
+    const handleImagePicked = async (uri) => {
         setModalChoice(false);
         if (uri) {
             setNewPictureUri(uri);
         }
 
         // Send newPictureURI to backend
+        try {
+            const formData = createFormData(uri);
+            console.log('type :', typeof formData);
+            const action = await dispatch(uploadBody(formData));
+
+            if (uploadBody.fulfilled.match(action)) {
+                navigation.push('AvatarWaiting');
+                console.log('succes upload body ');
+            } else console.log('failed upload body');
+        } catch (error) {
+            console.log('ERROR UPLOAD BODY : ', error);
+        }
+
         // Navigate to Screen Waiting Create Avatar
-        navigation.push('AvatarWaiting');
     };
 
     return (

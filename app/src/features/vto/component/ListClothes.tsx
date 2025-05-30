@@ -18,6 +18,7 @@ import { ModalAddClothInfo } from '../component/ModalAddClothInfo';
 import { baseColors, spacing, typography } from '../../../styles/theme';
 
 import Feather from 'react-native-vector-icons/Feather';
+import { AddButtonText } from '../../../components/core/Buttons';
 
 export function MiniDressing() {
     const dispatch = useDispatch();
@@ -77,22 +78,11 @@ export function MiniDressing() {
             {allCloths.map((cloth: ClothData, idx: number) => {
                 if (idx === 0) {
                     return (
-                        <TouchableOpacity
-                            key={0}
+                        <AddButtonText
+                            key="addButton"
                             onPress={openModalAddCloth}
-                            style={styleDressing.addButton}
-                        >
-                            <View style={styleDressing.addButtonCircle}>
-                                <Feather
-                                    name="plus"
-                                    color={baseColors.white}
-                                    size={23}
-                                />
-                            </View>
-                            <Text style={styleDressing.addButtonText}>
-                                Ajouter un vêtement
-                            </Text>
-                        </TouchableOpacity>
+                            text={'Ajouter un vêtement'}
+                        />
                     );
                 }
 
@@ -143,27 +133,5 @@ const styleDressing = StyleSheet.create({
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
-    },
-    addButton: {
-        width: 90,
-        height: 70,
-        backgroundColor: baseColors.white,
-        marginBottom: spacing.medium,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    addButtonCircle: {
-        width: 30,
-        height: 30,
-        backgroundColor: baseColors.primary,
-        borderRadius: '50%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    addButtonText: {
-        fontSize: 11,
-        textAlign: 'center',
-        margin: 0,
-        marginTop: 5,
     },
 });

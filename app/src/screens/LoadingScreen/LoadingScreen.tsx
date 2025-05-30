@@ -9,7 +9,10 @@ import { preloadEssentialImages } from '../../assets/loading_image';
 import styles from './LoadingScreen.styles';
 
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { loadToken } from '../../features/auth/slices/authSlice';
+import {
+    isTokenExpired,
+    loadToken,
+} from '../../features/auth/slices/authSlice';
 
 import { logout } from '../../features/auth/slices/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -52,8 +55,15 @@ export function LoadingScreen({ navigation, route }: any) {
             // n’avance que si nos fonts sont prêtes ET que loadToken est fini
             if (fontsLoaded && status !== 'loading') {
                 // ⑤ on remplace la route selon la présence du token
+                console.log('token : ', token);
                 if (token) {
-                    navigation.replace('MainTabs');
+                    if (isTokenExpired(token)) {
+                        AsyncStorage.removeItem('token');
+                        // TODO : dispatch(removeToken())
+                        navigation.navigate('Auth');
+                    } else {
+                        navigation.replace('MainTabs');
+                    }
                 } else {
                     navigation.replace('Auth');
                 }
