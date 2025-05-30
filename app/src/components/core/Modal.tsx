@@ -6,19 +6,20 @@ import { baseColors, spacing, typography } from '../../styles/theme';
 import { CButton } from '../core/Buttons';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { logout } from '../../features/auth/slices/authSlice';
+import { ActionCreatorWithoutPayload } from '@reduxjs/toolkit';
+import { useDispatch } from 'react-redux';
 
 export function ModalWarning({
     open,
     onCancel,
+    onAccept,
     textHeader,
     textSubHeader,
     textButtonConfirm,
     textButtonCancel,
 }) {
-    const handleDeconnect = () => {
-        //Deconnexion service
-        //Navigate to Login Page
-    };
+    const dispatch = useDispatch();
 
     return (
         <Portal>
@@ -50,7 +51,7 @@ export function ModalWarning({
                         <CButton
                             variant="danger"
                             size="xlarge"
-                            onPress={handleDeconnect}
+                            onPress={onAccept}
                         >
                             {textButtonConfirm}
                         </CButton>
@@ -119,3 +120,6 @@ const styles = StyleSheet.create({
     },
     buttonBox: {},
 });
+function dispatch(logout: ActionCreatorWithoutPayload<'auth/logout'>) {
+    throw new Error('Function not implemented.');
+}

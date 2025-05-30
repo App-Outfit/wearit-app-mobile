@@ -49,8 +49,9 @@ export const selectUserSummary = createSelector(
     (profile, credits, referralCode) => ({
         user_id: profile?.user_id,
         first_name: profile?.first_name,
-        last_name: profile?.last_name,
-        gender: profile?.gender,
+        email: profile?.email,
+        age: profile?.answers?.age,
+        gender: profile?.answers?.gender,
         credits,
         referral_code: referralCode,
         answers: profile?.answers,

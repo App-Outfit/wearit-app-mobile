@@ -13,8 +13,9 @@ pydantic
 pydantic[email]
 python-jose
 httpx
-psycopg2
+psycopg2-binary
 sqlalchemy 
 asyncpg
 fastapi
 uvicorn
+stripe

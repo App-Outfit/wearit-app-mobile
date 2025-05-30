@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { Header } from '../../../../components/core/Typography';
-import { lightTheme, normalize } from '../../../../styles/theme';
+import { baseColors, lightTheme, normalize } from '../../../../styles/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CButton } from '../../../../components/core/Buttons';
 import { Text } from '@rneui/themed';
@@ -68,7 +68,7 @@ export default function WelcomeScreen({ navigation }: WelcomeProps) {
                             <Text
                                 onPress={() => navigation.navigate('SignIn')}
                                 style={[
-                                    styles.signinText,
+                                    // styles.signinText,
                                     styles.signinTextUnderline,
                                 ]}
                             >
@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
     },
     signinTextUnderline: {
         textDecorationLine: 'underline',
-        color: lightTheme.colors.primary,
+        color: baseColors.black,
+        fontSize: 15,
     },
 });

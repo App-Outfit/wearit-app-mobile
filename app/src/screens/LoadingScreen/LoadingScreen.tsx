@@ -50,17 +50,17 @@ export function LoadingScreen({ navigation, route }: any) {
         const init = async () => {
             await preloadEssentialImages();
             // n’avance que si nos fonts sont prêtes ET que loadToken est fini
-            // if (fontsLoaded && status !== 'loading') {
-            //     // ⑤ on remplace la route selon la présence du token
-            //     if (token) {
-            //         navigation.replace('HomeScreen');
-            //     } else {
-            //         navigation.replace('Auth');
-            //     }
-            // }
-            AsyncStorage.removeItem('token');
-            dispatch(logout());
-            navigation.replace(initialRoute);
+            if (fontsLoaded && status !== 'loading') {
+                // ⑤ on remplace la route selon la présence du token
+                if (token) {
+                    navigation.replace('MainTabs');
+                } else {
+                    navigation.replace('Auth');
+                }
+            }
+            // AsyncStorage.removeItem('token');
+            // dispatch(logout());
+            // navigation.replace(initialRoute);
         };
         init();
     }, [fontsLoaded, status, token]);
