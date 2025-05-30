@@ -26,8 +26,8 @@ class UserService:
         return UserProfileResponse(
             user_id=str(doc.id),
             first_name=doc.first_name,
-            last_name=doc.last_name,
-            gender=doc.gender,
+            email=doc.email,
+            gender=doc.answers.gender,
             credits=doc.credits,
             referral_code=doc.referral_code,
             answers=doc.answers,

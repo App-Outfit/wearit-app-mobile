@@ -9,7 +9,7 @@ from datetime import datetime
 class UserProfileResponse(BaseModel):
     user_id: str
     first_name: Optional[str]
-    last_name: Optional[str]
+    email: str
     gender: Optional[str]
     credits: int
     referral_code: Optional[str]
