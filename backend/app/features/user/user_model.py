@@ -16,7 +16,6 @@ class UserModel(BaseModel):
 
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    gender: Optional[str] = None
 
     credits: int = 0
     referral_code: Optional[str] = None

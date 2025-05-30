@@ -27,7 +27,6 @@ class UserService:
             user_id=str(doc.id),
             first_name=doc.first_name,
             email=doc.email,
-            gender=doc.answers.gender,
             credits=doc.credits,
             referral_code=doc.referral_code,
             answers=doc.answers,
@@ -38,8 +37,6 @@ class UserService:
         return UserProfileResponse(
             user_id=str(updated.id),
             first_name=updated.first_name,
-            last_name=updated.last_name,
-            gender=updated.gender,
             credits=updated.credits,
             referral_code=updated.referral_code,
             answers=updated.answers,

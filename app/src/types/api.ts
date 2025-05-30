@@ -904,10 +904,8 @@ export interface components {
             user_id: string;
             /** First Name */
             first_name: string | null;
-            /** Last Name */
-            last_name: string | null;
-            /** Gender */
-            gender: string | null;
+            /** Email */
+            email: string;
             /** Credits */
             credits: number;
             /** Referral Code */
@@ -923,8 +921,6 @@ export interface components {
             first_name?: string | null;
             /** Last Name */
             last_name?: string | null;
-            /** Gender */
-            gender?: string | null;
             /** Answers */
             answers?: {
                 [key: string]: string;

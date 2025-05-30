@@ -10,7 +10,6 @@ class UserProfileResponse(BaseModel):
     user_id: str
     first_name: Optional[str]
     email: str
-    gender: Optional[str]
     credits: int
     referral_code: Optional[str]
     answers: Optional[Dict[str, str]] = None
@@ -18,7 +17,6 @@ class UserProfileResponse(BaseModel):
 class UserProfileUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    gender: Optional[str] = None
     answers: Optional[Dict[str, str]] = None
 
 # -----------------------
