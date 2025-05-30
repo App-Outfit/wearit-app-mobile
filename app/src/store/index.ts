@@ -6,6 +6,8 @@ import authReducer from '../features/auth/slices/authSlice';
 import onboardingReducer from '../features/auth/slices/onboardingSlice';
 import tryonReducer from '../features/vto/slice/TryonSlice';
 import useReducer from '../features/profil/slices/userSlice';
+import bodyReducer from '../features/body/bodySlice';
+import clothinReducer from '../features/clothing/clothingSlice';
 
 const persistConfig = {
     key: 'auth',
@@ -21,6 +23,8 @@ export const store = configureStore({
         onboarding: onboardingReducer,
         user: useReducer,
         tryon: tryonReducer,
+        body: bodyReducer,
+        clothing: clothinReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({ serializableCheck: false }),
