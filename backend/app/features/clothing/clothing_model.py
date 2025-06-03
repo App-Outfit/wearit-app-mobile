@@ -14,6 +14,7 @@ class ClothingModel(BaseModel):
     resized_url: Optional[str] = None
 
     category: str  
+    cloth_type: str
     name: Optional[str] = None
 
     created_at: datetime = Field(default_factory=datetime.now)

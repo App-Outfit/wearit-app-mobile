@@ -21,6 +21,7 @@ class ClothingRepository:
             "image_url": image_url,
             "resized_url": None,
             "category": category,
+            "cloth_type": "dress",
             "name": name,
             "created_at": created_at,
             "updated_at": created_at,

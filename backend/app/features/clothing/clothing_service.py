@@ -19,7 +19,7 @@ class ClothingService:
         self.storage = storage or StorageRepository()
 
     # ✅ Upload clothing
-    async def upload_clothing(self, user, file: UploadFile, category: str, name: str = None) -> ClothingUploadResponse:
+    async def upload_clothing(self, user, file: UploadFile, category: str, cloth_type: str, name: str = None) -> ClothingUploadResponse:
         clothing_id = ObjectId()
 
         # 1. Upload original image
@@ -33,6 +33,7 @@ class ClothingService:
             clothing_id=clothing_id,
             image_url=object_key,
             category=category,
+            cloth_type=cloth_type,
             name=name,
             created_at=created_at
         )
@@ -45,6 +46,7 @@ class ClothingService:
             image_url=signed_url,
             resized_url=None,
             category=clothing.category,
+            cloth_type=clothing.cloth_type,
             name=clothing.name,
             created_at=clothing.created_at,
             message="Clothing uploaded successfully"
@@ -65,6 +67,7 @@ class ClothingService:
                 image_url=signed_url,
                 resized_url=resized_url,
                 category=r.category,
+                cloth_type=r.cloth_type,
                 name=r.name,
                 created_at=r.created_at
             ))
@@ -86,6 +89,7 @@ class ClothingService:
                 if r.resized_url else None
             ),
             category=r.category,
+            cloth_type=r.cloth_type,
             name=r.name,
             created_at=r.created_at
         )
@@ -121,6 +125,7 @@ class ClothingService:
                 if updated.resized_url else None
             ),
             category=updated.category,
+            cloth_type=updated.cloth_type,
             name=updated.name,
             created_at=updated.created_at
         )

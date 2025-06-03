@@ -10,6 +10,7 @@ class ClothingUploadResponse(BaseModel):
     image_url: str
     resized_url: Optional[str] = None
     category: str
+    cloth_type: str
     name: Optional[str]
     created_at: datetime
     message: str
@@ -22,6 +23,7 @@ class ClothingItem(BaseModel):
     image_url: str
     resized_url: Optional[str]
     category: str
+    cloth_type: str
     name: Optional[str]
     created_at: datetime
 
@@ -52,6 +54,7 @@ class ClothingDetailResponse(BaseModel):
     image_url: str
     resized_url: Optional[str]
     category: str
+    cloth_type: str
     name: Optional[str]
     created_at: datetime
 

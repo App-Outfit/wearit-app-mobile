@@ -19,14 +19,15 @@ def get_service(db=Depends(get_db)):
 # ✅ Upload clothing
 @router.post("/upload", response_model=ClothingUploadResponse)
 async def upload_clothing(
-    category: str = Query(..., description="Clothing category (e.g., upper, lower, dress)"),
+    category: str = Query(..., description="Clothing category (e.g., shirt, pants)"),
+    cloth_type: str = Query(..., description="Type of clothing (e.g., upper, lower, dress)"),
     name: Optional[str] = Query(None, description="Optional name"),
     file: UploadFile = ...,
     current_user = Depends(get_current_user),
     service: ClothingService = Depends(get_service)
 ):
     logger.info(f"📤 Upload clothing for user {current_user.id}")
-    return await service.upload_clothing(current_user, file, category, name)
+    return await service.upload_clothing(current_user, file, category, cloth_type, name)
 
 
 # ✅ Get all clothing (with optional category)
