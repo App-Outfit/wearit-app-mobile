@@ -35,7 +35,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 const MainTabNavigator: React.FC = () => (
     <PaperProvider>
         <Tab.Navigator
-            initialRouteName="Home"
+            initialRouteName="VirtualTryOn"
             screenOptions={{
                 headerShown: false,
             }}

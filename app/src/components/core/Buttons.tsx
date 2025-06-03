@@ -1,11 +1,19 @@
 import * as React from 'react';
 import { Button } from 'react-native-elements';
-import { StyleSheet, TextStyle, TouchableOpacity } from 'react-native';
+import {
+    StyleSheet,
+    TextStyle,
+    TouchableOpacity,
+    View,
+    Text,
+} from 'react-native';
 
 import { styles } from './Buttons.styles';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { IconButton } from 'react-native-paper';
-import { lightTheme } from '../../styles/theme';
+import { baseColors, lightTheme, spacing } from '../../styles/theme';
+
+import Feather from 'react-native-vector-icons/Feather';
 
 type ButtonProps = {
     children: string;
@@ -112,5 +120,46 @@ const styles2 = StyleSheet.create({
         width: 50,
         height: 50,
         borderRadius: 8,
+    },
+});
+
+// ---- ADD BUTTON CIRCLE TEXT --- //
+export const AddButtonText = ({ onPress, text }) => {
+    return (
+        <TouchableOpacity
+            key={0}
+            onPress={onPress}
+            style={styleAddButtonText.addButton}
+        >
+            <View style={styleAddButtonText.addButtonCircle}>
+                <Feather name="plus" color={baseColors.white} size={23} />
+            </View>
+            <Text style={styleAddButtonText.addButtonText}>{text}</Text>
+        </TouchableOpacity>
+    );
+};
+
+const styleAddButtonText = StyleSheet.create({
+    addButton: {
+        width: 90,
+        height: 70,
+        backgroundColor: baseColors.white,
+        marginBottom: spacing.medium,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    addButtonCircle: {
+        width: 30,
+        height: 30,
+        backgroundColor: baseColors.primary,
+        borderRadius: '50%',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    addButtonText: {
+        fontSize: 11,
+        textAlign: 'center',
+        margin: 0,
+        marginTop: 5,
     },
 });

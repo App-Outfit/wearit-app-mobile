@@ -11,8 +11,17 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DeconnexionModal } from '../components/DeconnexionModal';
 
+import { useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import { selectUserProfile } from '../selectors/userSelectors';
+import { fetchCredits, fetchProfile } from '../thunks/userThunks';
+import { logout } from '../../auth/slices/authSlice';
+import { CommonActions } from '@react-navigation/native';
+
 export function ProfilScreen({ navigation }) {
     const [modalDisconect, setModalDisconnect] = React.useState<boolean>(false);
+    const userState = useAppSelector(selectUserProfile);
+    const dispatch = useAppDispatch();
 
     const styleItem = {
         titleStyle: styles.itemTitle,
@@ -35,6 +44,29 @@ export function ProfilScreen({ navigation }) {
         />
     );
     const iconLeftConfig = { size: sizeIcon, color: baseColors.black };
+
+    const onDisconnect = React.useCallback(() => {
+        dispatch(logout());
+
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: 'Auth',
+                        state: {
+                            index: 0,
+                            routes: [{ name: 'Welcome' }],
+                        },
+                    },
+                ],
+            }),
+        );
+    }, []);
+
+    React.useEffect(() => {
+        dispatch(fetchProfile());
+    }, [dispatch]);
 
     return (
         <View>
@@ -117,6 +149,7 @@ export function ProfilScreen({ navigation }) {
             <DeconnexionModal
                 open={modalDisconect}
                 onCancel={() => setModalDisconnect(false)}
+                onAccept={onDisconnect}
             />
         </View>
     );
@@ -133,7 +166,6 @@ const styles = StyleSheet.create({
     itemContainerStyle: {
         justifyContent: 'center',
         paddingLeft: spacing.medium,
-
         // borderBlockColor: "#000",
         // borderWidth: 1,
     },

@@ -27,7 +27,7 @@ const Stack = createStackNavigator<AuthStackParamList>();
 
 export default function AuthNavigator() {
     const developerMode = true; // Set this to false in production
-    const developerInitialRoute = 'AvatarCreation';
+    const developerInitialRoute = 'Welcome';
     const initialRoute = developerMode ? developerInitialRoute : 'Welcome';
 
     return (

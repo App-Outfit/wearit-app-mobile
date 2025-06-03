@@ -12,7 +12,7 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import { ShareDrawer } from '../component/ShareDrawer';
 import { MiniDressing } from '../component/ListClothes';
 
-export function VTODressingScreen() {
+export function VTODressingScreen({ navigation }) {
     const [currentIsSave, setCurrentSave] = React.useState<boolean>(false);
     const bottomSheetShare = React.useRef<BottomSheet>(null);
 
@@ -40,12 +40,17 @@ export function VTODressingScreen() {
         bottomSheetShare.current?.snapToIndex(0);
     }, []);
 
+    const toCreateBody = () => {
+        console.log(navigation);
+        navigation.push('AvatarCreation');
+    };
+
     return (
         <GestureHandlerRootView>
             <View style={{ flex: 1, position: 'relative', margin: 14 }}>
                 <View style={styles.container}>
                     <View style={styles.vtoDisplayContainer}>
-                        <VTODisplay />
+                        <VTODisplay onNavigate={toCreateBody} />
                     </View>
                     <View style={styles.scrollComponent}>
                         <MiniDressing />

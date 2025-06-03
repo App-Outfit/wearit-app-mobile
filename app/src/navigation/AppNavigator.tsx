@@ -10,13 +10,29 @@ import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScree
 import AuthNavigator from '../features/auth/navigation/AuthNavigator';
 import { DressingNavigator } from '../features/dressing/navigation/DressingNavigator';
 import MainTabNavigator from './NavigationComponents/MainTabNavigator';
+import { useAppDispatch, useAppSelector } from '../utils/hooks';
+import { loadToken } from '../features/auth/slices/authSlice';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
     const developerMode = true; // Set this to false in production
     const developerInitialRoute = 'Auth';
+    // const [initialRoute, setInitialRoute] = React.useState<string>(developerInitialRoute)
     const initialRoute = developerMode ? developerInitialRoute : 'Auth';
+
+    const { status, token } = useAppSelector((state) => state.auth);
+    const dispatch = useAppDispatch();
+
+    // React.useEffect(() => {
+    //     dispatch(loadToken());
+    //     if (token){
+    //         setInitialRoute("MainTabs")
+    //         console.log(token)
+    //     }
+    // }, [token])
+
+    // console.log(initialRoute)
 
     return (
         <NavigationContainer>
@@ -52,3 +68,6 @@ const AppNavigator = () => {
 };
 
 export default AppNavigator;
+function dispatch(arg0: any) {
+    throw new Error('Function not implemented.');
+}
