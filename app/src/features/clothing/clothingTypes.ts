@@ -3,8 +3,8 @@
 import { paths } from '../../types/api.ts';
 
 // 1️⃣ Upload Clothing (multipart/form-data)
-export type ClothingUploadPayload =
-    paths['/api/v1/clothing/upload']['post']['requestBody']['content']['multipart/form-data'];
+export type ClothingUploadPayload = FormData;
+
 export type ClothingUploadResponse =
     paths['/api/v1/clothing/upload']['post']['responses']['200']['content']['application/json'];
 

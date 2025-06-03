@@ -3,8 +3,8 @@
 import { paths } from '../../types/api.ts';
 
 // 1️⃣ Upload Body
-export type BodyUploadPayload =
-    paths['/api/v1/body/upload']['post']['requestBody']['content']['multipart/form-data'];
+export type BodyUploadPayload = FormData;
+
 export type BodyUploadResponse =
     paths['/api/v1/body/upload']['post']['responses']['200']['content']['application/json'];
 
