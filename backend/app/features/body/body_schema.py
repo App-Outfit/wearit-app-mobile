@@ -20,6 +20,9 @@ class BodyUploadResponse(BaseModel):
 class BodyItem(BaseModel):
     id: str
     image_url: str
+    mask_upper: Optional[str] = None
+    mask_lower: Optional[str] = None
+    mask_dress: Optional[str] = None
     status: str
     is_default: bool
     created_at: datetime

@@ -568,6 +568,12 @@ export interface components {
             id: string;
             /** Image Url */
             image_url: string;
+            /** Mask Upper */
+            mask_upper?: string | null;
+            /** Mask Lower */
+            mask_lower?: string | null;
+            /** Mask Dress */
+            mask_dress?: string | null;
             /** Status */
             status: string;
             /** Is Default */

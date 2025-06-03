@@ -82,10 +82,17 @@ class BodyService:
         if not body:
             raise NotFoundError("No body found.")
 
-        url = await self.storage.get_presigned_url(body.image_url)
+        mask_upper_url = await self.storage.get_presigned_url(body.mask_upper)
+        mask_lower_url = await self.storage.get_presigned_url(body.mask_lower)
+        mask_dress_url = await self.storage.get_presigned_url(body.mask_dress)
+        original_url = await self.storage.get_presigned_url(body.image_url)
+        
         return BodyItem(
             id=str(body.id),
-            image_url=url,
+            image_url=original_url,
+            mask_upper=mask_upper_url,
+            mask_lower=mask_lower_url,
+            mask_dress=mask_dress_url,
             status=body.status,
             is_default=body.is_default,
             created_at=body.created_at
