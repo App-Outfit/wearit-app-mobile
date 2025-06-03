@@ -12,8 +12,17 @@ import {
 
 export const bodyService = {
     /** POST /body/upload */
-    uploadBody: (formData: BodyUploadPayload): Promise<BodyUploadResponse> =>
-        api.post('/body/upload', formData).then((r) => r.data),
+    uploadBody: (formData: BodyUploadPayload): Promise<BodyUploadResponse> => {
+        return api
+            .post('/body/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+            .then((r) => {
+                return r.data;
+            });
+    },
 
     /** GET /body/list */
     getAllBodies: (): Promise<BodyListResponse> =>

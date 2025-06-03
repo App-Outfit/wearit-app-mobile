@@ -19,6 +19,7 @@ export const uploadBody = createAsyncThunk<
     try {
         return await bodyService.uploadBody(formData);
     } catch (err: any) {
+        console.log('error');
         return rejectWithValue(err.response?.data?.message || 'Upload failed');
     }
 });

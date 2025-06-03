@@ -54,18 +54,15 @@ export function LoadingScreen({ navigation, route }: any) {
             await preloadEssentialImages();
             // n’avance que si nos fonts sont prêtes ET que loadToken est fini
             if (fontsLoaded && status !== 'loading') {
-                // ⑤ on remplace la route selon la présence du token
                 console.log('token : ', token);
-                if (token) {
-                    if (isTokenExpired(token)) {
-                        AsyncStorage.removeItem('token');
-                        // TODO : dispatch(removeToken())
-                        navigation.navigate('Auth');
-                    } else {
-                        navigation.replace('MainTabs');
-                    }
+                console.log('token is expired : ', isTokenExpired(token));
+
+                if (token && !isTokenExpired(token)) {
+                    navigation.replace('MainTabs');
                 } else {
                     navigation.replace('Auth');
+                    AsyncStorage.removeItem('token');
+                    // TODO : dispatch(removeToken())
                 }
             }
             // AsyncStorage.removeItem('token');

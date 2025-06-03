@@ -47,10 +47,15 @@ export const loadToken = createAsyncThunk<string | null>(
     },
 );
 
-export function isTokenExpired(token: string): boolean {
+export function isTokenExpired(token: string | null): boolean {
+    if (token == null) return true;
+
     try {
         const { exp } = jwtDecode<JwtPayload>(token);
-        if (!exp) return true; // pas de champ exp → on considère expiré
+        console.log('exp :', exp);
+        if (!exp) return true;
+        console.log('Date.now() >= exp * 1000', Date.now() >= exp * 1000);
+
         return Date.now() >= exp * 1000;
     } catch {
         return true;

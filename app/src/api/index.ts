@@ -32,6 +32,12 @@ api.interceptors.request.use(
                     `Bearer ${token}`;
             }
         }
+
+        // if (config){
+        // console.log("→ REQUEST →", config.method?.toUpperCase(), config.baseURL + config.url);
+        // console.log("   headers =", config.headers);
+        // console.log("   data =", config.data);
+        // }
         return config;
     },
     (error) => Promise.reject(error),
