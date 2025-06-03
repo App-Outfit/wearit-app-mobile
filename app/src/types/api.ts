@@ -646,6 +646,8 @@ export interface components {
             resized_url: string | null;
             /** Category */
             category: string;
+            /** Cloth Type */
+            cloth_type: string;
             /** Name */
             name: string | null;
             /**
@@ -664,6 +666,8 @@ export interface components {
             resized_url: string | null;
             /** Category */
             category: string;
+            /** Cloth Type */
+            cloth_type: string;
             /** Name */
             name: string | null;
             /**
@@ -694,6 +698,8 @@ export interface components {
             resized_url?: string | null;
             /** Category */
             category: string;
+            /** Cloth Type */
+            cloth_type: string;
             /** Name */
             name: string | null;
             /**
@@ -1408,8 +1414,10 @@ export interface operations {
     upload_clothing_api_v1_clothing_upload_post: {
         parameters: {
             query: {
-                /** @description Clothing category (e.g., upper, lower, dress) */
+                /** @description Clothing category (e.g., shirt, pants) */
                 category: string;
+                /** @description Type of clothing (e.g., upper, lower, dress) */
+                cloth_type: string;
                 /** @description Optional name */
                 name?: string | null;
             };
