@@ -1,9 +1,14 @@
 // src/types/body.types.ts
 
-import { paths } from '../../types/api.ts';
+import { paths } from '../../types/api';
 
 // 1️⃣ Upload Clothing (multipart/form-data)
-export type ClothingUploadPayload = FormData;
+export type ClothingUploadPayload = {
+    category: string; // e.g., 'tops', 'bottoms', etc.
+    cloth_type: string; // e.g., 'shirt', 'pants', etc.
+    name?: string; // Optional clothing name
+    file: FormData;
+};
 
 export type ClothingUploadResponse =
     paths['/api/v1/clothing/upload']['post']['responses']['200']['content']['application/json'];

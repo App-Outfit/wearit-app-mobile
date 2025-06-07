@@ -116,19 +116,17 @@ export default function VTODisplay({ onNavigate }) {
         if (
             !selectedTryon ||
             !originalBase64 ||
-            // loadingMasks ||
+            loadingMasks ||
             (currentType === 'upper' && !upperMaskBase64) ||
             (currentType === 'lower' && !lowerMaskBase64) ||
             (currentType === 'dress' && !dressMaskBase64)
         ) {
-            console.log('fallback');
             return;
         }
 
         (async () => {
             let newDisplay: string | undefined;
             const tryon64 = await loadAssetBase64(selectedTryon.output_url);
-            console.log(currentType);
 
             if (currentType === 'upper') {
                 newDisplay = await inpaintUpper(
@@ -137,7 +135,6 @@ export default function VTODisplay({ onNavigate }) {
                     upperMaskBase64 || '',
                 );
             } else if (currentType === 'lower') {
-                console.log('lower');
                 newDisplay = await inpaintLower(
                     originalBase64,
                     tryon64,
