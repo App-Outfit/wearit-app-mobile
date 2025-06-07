@@ -2,30 +2,41 @@ import asyncio
 from functools import partial
 from fastapi import UploadFile
 from botocore.exceptions import NoCredentialsError, BotoCoreError
+from typing import Union
 
 from app.core.logging_config import logger
 from app.core.errors import InternalServerError
 from app.infrastructure.storage.s3_client import S3Client
-
+from io import BytesIO
 
 class StorageRepository:
     def __init__(self, bucket_name: str = None, s3_client=None):
         self._bucket = bucket_name or S3Client.get_bucket_name()
         self._client = s3_client or S3Client.get_client()
 
-    async def upload_image(self, object_key: str, file: UploadFile) -> str:
+    async def upload_image(self, object_key: str, file: Union[UploadFile, bytes, bytearray]) -> str:
         """
         Upload a file to S3 at the specified object_key. Returns the key (not URL).
         """
         loop = asyncio.get_running_loop()
         try:
-            file.file.seek(0)
+            # Prépare le stream et le content type
+            if isinstance(file, (bytes, bytearray)):
+                stream = BytesIO(file)
+                content_type = "image/png"
+            else:
+                # fichier FastAPI UploadFile
+                await file.seek(0)
+                stream = file.file
+                content_type = file.content_type or "application/octet-stream"
+
+            # Lance l'upload en thread pool pour ne pas bloquer l'event loop
             upload_fn = partial(
                 self._client.upload_fileobj,
-                file.file,
+                stream,
                 self._bucket,
                 object_key,
-                {"ContentType": file.content_type},
+                {"ContentType": content_type},
             )
             await loop.run_in_executor(None, upload_fn)
         except (FileNotFoundError, NoCredentialsError, BotoCoreError) as e:

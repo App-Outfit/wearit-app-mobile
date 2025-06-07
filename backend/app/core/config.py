@@ -44,6 +44,10 @@ class Settings:
 
     PYTHON_API_BASE_URL: str = os.getenv("PYTHON_API_BASE_URL")
 
+    REPLICATE_API_TOKEN: str = os.getenv("REPLICATE_API_TOKEN")
+
+    REPLICATE_MODEL_REF: str = os.getenv("REPLICATE_MODEL_REF")
+
     model_config = ConfigDict(
         env_file = ".env"
     )

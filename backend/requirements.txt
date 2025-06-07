@@ -19,3 +19,5 @@ asyncpg
 fastapi
 uvicorn
 stripe
+replicate
+aiohttp
