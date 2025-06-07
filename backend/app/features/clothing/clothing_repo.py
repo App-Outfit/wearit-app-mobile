@@ -14,14 +14,14 @@ class ClothingRepository:
     def __init__(self, db: Database):
         self._col = db["clothing"]
 
-    async def create_clothing(self, user_id: str, clothing_id: str, image_url: str, category: str, name: Optional[str], created_at: datetime) -> ClothingModel:
+    async def create_clothing(self, user_id: str, clothing_id: str, image_url: str, category: str, cloth_type: str, name: Optional[str], created_at: datetime) -> ClothingModel:
         doc = {
             "_id": ObjectId(clothing_id),
             "user_id": ObjectId(user_id),
             "image_url": image_url,
             "resized_url": None,
             "category": category,
-            "cloth_type": "dress",
+            "cloth_type": cloth_type,
             "name": name,
             "created_at": created_at,
             "updated_at": created_at,
