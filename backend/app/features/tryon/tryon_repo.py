@@ -48,12 +48,32 @@ class TryonRepository:
             raise NotFoundError("Tryon to update not found")
         
     async def get_all_by_user(self, user_id: str) -> List[TryonModel]:
-        cursor = self._col.find({"user_id": ObjectId(user_id)})
-        docs = await cursor.to_list(length=None)
-        return [
-            TryonModel(**doc)
-            for doc in docs
+        """
+        Renvoie, pour chaque paire (body_id, clothing_id), 
+        uniquement le document ayant la version la plus élevée.
+        """
+        pipeline = [
+            # 1) Ne garder que l'user
+            {"$match": {"user_id": ObjectId(user_id)}},
+            # 2) Trier version décroissante, fallback created_at
+            {"$sort": {"version": -1, "created_at": -1}},
+            # 3) Grouper par body+clothing et prendre le premier (max version)
+            {"$group": {
+                "_id": {
+                    "body_id":     "$body_id",
+                    "clothing_id": "$clothing_id",
+                },
+                "doc": {"$first": "$$ROOT"}
+            }},
+            # 4) Remplacer la racine par le document complet
+            {"$replaceRoot": {"newRoot": "$doc"}}
         ]
+
+        docs = await self._col.aggregate(pipeline).to_list(length=None)
+        # Si ton TryonModel attend un champ output_url, assure son existence
+        for doc in docs:
+            doc.setdefault("output_url", None)
+        return [TryonModel(**doc) for doc in docs]
 
     async def get_all_by_body_and_clothing(
         self,
