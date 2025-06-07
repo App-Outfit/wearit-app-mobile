@@ -47,6 +47,20 @@ const tryonSlice = createSlice({
             state.selectedTryon.upper = null;
             state.selectedTryon.lower = null;
         },
+        updateTryon(
+            state,
+            action: PayloadAction<Partial<TryonItem> & { id: string }>,
+        ) {
+            const idx = state.tryons.findIndex(
+                (t) => t.id === action.payload.id,
+            );
+
+            if (idx >= 0) {
+                state.tryons[idx] = { ...state.tryons[idx], ...action.payload };
+            } else {
+                state.tryons.push(action.payload as TryonItem);
+            }
+        },
     },
     extraReducers: (builder) => {
         // on recharge la liste après fetchTryons
@@ -112,4 +126,4 @@ const tryonSlice = createSlice({
 });
 
 export default tryonSlice.reducer;
-export const { setUpper, setLower, setDress } = tryonSlice.actions;
+export const { setUpper, setLower, setDress, updateTryon } = tryonSlice.actions;

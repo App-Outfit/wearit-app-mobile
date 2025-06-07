@@ -31,6 +31,9 @@ import { fetchTryons } from '../tryonThunks';
 import { TryonItem } from '../tryonTypes';
 import { selectAllTryons } from '../tryonSelectors';
 import { uploadBody } from '../../body/bodyThunks';
+import { ClothItem } from '../../clothing/components/ClothItem';
+import { useTryonSSE } from '../hooks/useTryonSSE';
+import { jwtDecode } from 'jwt-decode';
 
 export function MiniDressing() {
     const dispatch = useAppDispatch();
@@ -47,6 +50,8 @@ export function MiniDressing() {
     const allCloths = [...userCloth];
 
     const userTryon = useAppSelector(selectAllTryons);
+    const jwtToken = useAppSelector((state) => state.auth.token);
+    useTryonSSE(jwtToken);
 
     React.useEffect(() => {
         dispatch(fetchClothes());
@@ -101,20 +106,6 @@ export function MiniDressing() {
         setInfoModalOpen(false);
     };
 
-    const onSelect = (cloth: ClothingItem) => {
-        const tryon = userTryon.find(
-            (t: TryonItem) => t.clothing_id === cloth.id,
-        );
-        if (!tryon) return;
-        if (cloth.cloth_type === 'dress') {
-            dispatch(setDress(tryon));
-        } else if (cloth.cloth_type === 'upper') {
-            dispatch(setUpper(tryon));
-        } else {
-            dispatch(setLower(tryon));
-        }
-    };
-
     return (
         <ScrollView
             style={styleDressing.scrollView}
@@ -134,16 +125,8 @@ export function MiniDressing() {
                         ) : (
                             <Text> </Text>
                         )}
-                        <TouchableOpacity
-                            key={idx}
-                            onPress={() => onSelect(cloth)}
-                            style={styleDressing.imgBox}
-                        >
-                            <Image
-                                source={{ uri: cloth.image_url }}
-                                style={styleDressing.img}
-                            />
-                        </TouchableOpacity>
+
+                        <ClothItem key={cloth.id} cloth={cloth} />
                     </>
                 );
             })}
@@ -171,15 +154,5 @@ const styleDressing = StyleSheet.create({
         flexDirection: 'column',
         alignSelf: 'flex-end',
         width: '100%',
-    },
-    imgBox: {
-        width: 90,
-        height: 140,
-        marginBottom: spacing.small,
-    },
-    img: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
     },
 });

@@ -10,6 +10,56 @@ import { logout } from '../../features/auth/slices/authSlice';
 import { ActionCreatorWithoutPayload } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
+export function ModalChoice({
+    open,
+    onCancel,
+    onAccept,
+    textHeader,
+    textSubHeader,
+    textButtonConfirm,
+    textButtonCancel,
+}) {
+    return (
+        <Portal>
+            <Modal
+                visible={open}
+                onDismiss={onCancel}
+                contentContainerStyle={styles.modalContentContainer}
+                theme={{ colors: { backdrop: 'rgba(0, 0, 0, 0.3)' } }}
+            >
+                <View style={styles.modalContent}>
+                    <View style={styles.textInfoBox}>
+                        <Text style={styles.textInfoHeader}>{textHeader}</Text>
+                        <Text style={styles.textInfoSubHeader}>
+                            {textSubHeader}
+                        </Text>
+                    </View>
+
+                    <View style={styles.simpleButtonBox}>
+                        <CButton
+                            variant="secondary"
+                            size="small"
+                            onPress={onCancel}
+                            style={{ marginRight: spacing.small }}
+                        >
+                            {textButtonCancel}
+                        </CButton>
+
+                        <CButton
+                            variant="primary"
+                            size="small"
+                            onPress={onAccept}
+                            style={{ marginLeft: spacing.small }}
+                        >
+                            {textButtonConfirm}
+                        </CButton>
+                    </View>
+                </View>
+            </Modal>
+        </Portal>
+    );
+}
+
 export function ModalWarning({
     open,
     onCancel,
@@ -19,8 +69,6 @@ export function ModalWarning({
     textButtonConfirm,
     textButtonCancel,
 }) {
-    const dispatch = useDispatch();
-
     return (
         <Portal>
             <Modal
@@ -119,6 +167,11 @@ const styles = StyleSheet.create({
         color: baseColors.gray_5,
     },
     buttonBox: {},
+    simpleButtonBox: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        width: '100%',
+    },
 });
 function dispatch(logout: ActionCreatorWithoutPayload<'auth/logout'>) {
     throw new Error('Function not implemented.');

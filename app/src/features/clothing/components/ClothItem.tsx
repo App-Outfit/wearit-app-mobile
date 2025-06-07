@@ -1,0 +1,127 @@
+import * as React from 'react';
+
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { baseColors, spacing } from '../../../styles/theme';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import { selectTryonByClothID } from '../../vto/tryonSelectors';
+import { ClothingItem } from '../clothingTypes';
+import { TryonCreatePayload, TryonItem } from '../../vto/tryonTypes';
+import { setDress, setLower, setUpper } from '../../vto/tryonSlice';
+import { ModalChoice, ModalWarning } from '../../../components/core/Modal';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import { createTryon } from '../../vto/tryonThunks';
+import { selectCurrentBody } from '../../body/bodySelectors';
+import { BodyItem } from '../../body/bodyTypes';
+
+export function ClothItem({ cloth }) {
+    const [status, setStatus] = React.useState<
+        'loading' | 'success' | 'undefined'
+    >('undefined');
+    const [modal, setModal] = React.useState(false);
+
+    const dispatch = useAppDispatch();
+    const associatedTryon: TryonItem | null = useAppSelector(
+        selectTryonByClothID(cloth.id),
+    );
+    const body: BodyItem | null = useAppSelector(selectCurrentBody);
+
+    React.useEffect(() => {
+        if (!associatedTryon) {
+            setStatus('undefined');
+        } else if (associatedTryon.status === 'pending') {
+            setStatus('loading');
+        } else if (associatedTryon.status === 'ready') {
+            setStatus('success');
+        }
+    }, [associatedTryon?.status]);
+
+    const onPress = (cloth: ClothingItem) => {
+        if (status === 'success' && associatedTryon) {
+            if (cloth.cloth_type === 'dress') {
+                dispatch(setDress(associatedTryon));
+            } else if (cloth.cloth_type === 'upper') {
+                dispatch(setUpper(associatedTryon));
+            } else {
+                dispatch(setLower(associatedTryon));
+            }
+        } else if (status === 'undefined') {
+            setModal(true);
+        }
+    };
+
+    const getTryon = async () => {
+        if (status != 'undefined') return null;
+
+        try {
+            await dispatch(
+                createTryon({ body_id: body!.id, clothing_id: cloth.id }),
+            );
+
+            setStatus('loading');
+        } catch (errorMessage) {
+            setStatus('undefined');
+        }
+
+        setModal(false);
+    };
+
+    return (
+        <>
+            <TouchableOpacity
+                onPress={() => onPress(cloth)}
+                style={styleClothing.imgBox}
+            >
+                <Image
+                    source={{ uri: cloth.image_url }}
+                    style={styleClothing.img}
+                />
+
+                <View
+                    style={[
+                        styleClothing.status,
+                        {
+                            backgroundColor:
+                                status === 'loading'
+                                    ? baseColors.yellow
+                                    : status === 'success'
+                                      ? baseColors.success
+                                      : baseColors.primary,
+                        },
+                    ]}
+                ></View>
+            </TouchableOpacity>
+
+            <ModalChoice
+                open={modal}
+                onCancel={() => setModal(false)}
+                onAccept={getTryon}
+                textHeader="Essayer un vêtement"
+                textSubHeader="Cette opération vous coutera X crédits."
+                textButtonConfirm="Essayer"
+                textButtonCancel="Annuler"
+            />
+        </>
+    );
+}
+
+const styleClothing = StyleSheet.create({
+    imgBox: {
+        width: 90,
+        height: 140,
+        marginBottom: spacing.small,
+        position: 'relative',
+    },
+    img: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    status: {
+        position: 'absolute',
+        bottom: 5,
+        right: 5,
+        width: 10,
+        height: 10,
+        borderRadius: '50%',
+    },
+});

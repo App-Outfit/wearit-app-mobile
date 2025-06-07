@@ -38,3 +38,10 @@ export const selectSelectedTryon = createSelector(
     selectTryonState,
     (state) => state.selectedTryon,
 );
+
+export const selectTryonByClothID = (clothId: string) =>
+    createSelector(selectTryonState, (state) => {
+        return (
+            state.tryons.find((tryon) => tryon.clothing_id === clothId) || null
+        );
+    });
