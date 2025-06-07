@@ -14,12 +14,13 @@ import {
 
 export const uploadClothing = createAsyncThunk<
     ClothingUploadResponse,
-    ClothingUploadPayload
->('clothing/upload', async (formData, { rejectWithValue }) => {
+    ClothingUploadPayload,
+    { rejectValue: string }
+>('clothing/upload', async (payload, { rejectWithValue }) => {
     try {
-        return await clothingService.uploadClothing(formData);
+        return await clothingService.uploadClothing(payload);
     } catch (err: any) {
-        return rejectWithValue(err.response?.data?.message || 'Upload failed');
+        return rejectWithValue(err.response?.data?.message ?? 'Upload failed');
     }
 });
 

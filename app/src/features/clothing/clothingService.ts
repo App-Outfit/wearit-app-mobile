@@ -13,10 +13,25 @@ import {
 
 export const clothingService = {
     /** POST /clothing/upload */
-    uploadClothing: (
-        formData: ClothingUploadPayload,
-    ): Promise<ClothingUploadResponse> =>
-        api.post('/clothing/upload', formData).then((r) => r.data),
+    uploadClothing: ({
+        category,
+        cloth_type,
+        name,
+        file,
+    }: ClothingUploadPayload): Promise<ClothingUploadResponse> => {
+        return api
+            .post<ClothingUploadResponse>('/clothing/upload', file, {
+                params: {
+                    category,
+                    cloth_type,
+                    ...(name != null ? { name } : {}),
+                },
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+            .then((r) => r.data);
+    },
 
     /** GET /clothing */
     getClothes: (): Promise<ClothingListResponse> =>

@@ -22,11 +22,15 @@ import { AddButtonText } from '../../../components/core/Buttons';
 import { createFormData } from '../../../utils/form';
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
 import { selectAllClothes } from '../../clothing/clothingSelectors';
-import { fetchClothes } from '../../clothing/clothingThunks';
-import { ClothingItem } from '../../clothing/clothingTypes';
+import { fetchClothes, uploadClothing } from '../../clothing/clothingThunks';
+import {
+    ClothingItem,
+    ClothingUploadPayload,
+} from '../../clothing/clothingTypes';
 import { fetchTryons } from '../tryonThunks';
 import { TryonItem } from '../tryonTypes';
 import { selectAllTryons } from '../tryonSelectors';
+import { uploadBody } from '../../body/bodyThunks';
 
 export function MiniDressing() {
     const dispatch = useAppDispatch();
@@ -57,27 +61,43 @@ export function MiniDressing() {
             setNewPictureUri(uri);
             setInfoModalOpen(true);
         }
-
-        // try {
-        //     const formData = createFormData(uri);
-        //     const action = await dispatch()
-
-        //     );
-
-        //     if (uploadBody.fulfilled.match(action)) {
-        //         navigation.push('AvatarWaiting');
-        //     }
-        // } catch (error) {
-        //     console.log('ERROR UPLOAD BODY : ', error);
-        // }
     };
 
-    const handleSaveNewCloth = ({ cloth_type, category, cloth_id }) => {
-        if (newPictureUri) {
-            // const newCloth: ClothingItem;
-            // setCustomCloths((prev) => [...prev, newCloth]);
-            setNewPictureUri(null);
+    const createF = (uri: string): FormData => {
+        const uriParts = uri.split('/');
+        const fileName = uriParts[uriParts.length - 1];
+        const fileType = fileName.split('.').pop() || 'jpeg';
+
+        const formData = new FormData();
+
+        formData.append('file', {
+            uri,
+            name: fileName,
+            type: `image/${fileType}`,
+        } as any);
+
+        return formData;
+    };
+
+    const handleSaveNewCloth = async ({ cloth_type, category, cloth_id }) => {
+        if (!newPictureUri) return null;
+
+        try {
+            const formData = createF(newPictureUri);
+            const payload: ClothingUploadPayload = {
+                category,
+                cloth_type,
+                name: cloth_id,
+                file: formData,
+            };
+
+            const action = await dispatch(uploadClothing(payload));
+            console.log('ACTION UPLOAD CLOTHING :', action);
+        } catch (error) {
+            console.error('ERROR UPLOAD CLOTHING :', error);
         }
+
+        setNewPictureUri(null);
         setInfoModalOpen(false);
     };
 
@@ -105,7 +125,6 @@ export function MiniDressing() {
             {allCloths.map((cloth: ClothingItem, idx: number) => {
                 return (
                     <>
-                        {' '}
                         {idx === 0 ? (
                             <AddButtonText
                                 key="addButton"
@@ -113,7 +132,7 @@ export function MiniDressing() {
                                 text={'Ajouter un vêtement'}
                             />
                         ) : (
-                            <Text></Text>
+                            <Text> </Text>
                         )}
                         <TouchableOpacity
                             key={idx}

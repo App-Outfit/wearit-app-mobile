@@ -24,7 +24,14 @@ export function ModalAddClothInfo({ open, onCancel, onSave }) {
     const [clothId, setClothId] = React.useState<string>();
 
     const saveNewCloth = () => {
-        onSave(clothType, category, clothId);
+        console.log(
+            `Saving new cloth with type: ${clothType}, category: ${category}, id: ${clothId}`,
+        );
+        onSave({
+            cloth_type: clothType,
+            category,
+            cloth_id: clothId,
+        });
         setClothType(undefined);
         setCategory(undefined);
         setClothId(undefined);

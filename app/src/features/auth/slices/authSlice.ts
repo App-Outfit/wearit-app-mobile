@@ -7,9 +7,8 @@ import axios from 'axios';
 import api from '../../../api'; // votre axios instance
 import { parseApiError } from '../../../utils/apiError';
 
-import { JwtPayload } from 'jwt-decode';
 import * as jwtDecodeModule from 'jwt-decode';
-const jwtDecode = (jwtDecodeModule as any).default as <T>(token: string) => T;
+import { JwtPayload } from 'jwt-decode';
 
 import type {
     SinginData,
@@ -51,13 +50,20 @@ export function isTokenExpired(token: string | null): boolean {
     if (token == null) return true;
 
     try {
-        const { exp } = jwtDecode<JwtPayload>(token);
-        console.log('exp :', exp);
-        if (!exp) return true;
-        console.log('Date.now() >= exp * 1000', Date.now() >= exp * 1000);
+        // On déstructure exp à partir du payload
+        //   const { exp } = jwtDecode(token);
+        const { exp } = jwtDecodeModule.jwtDecode<JwtPayload>(token);
 
-        return Date.now() >= exp * 1000;
-    } catch {
+        if (!exp) {
+            console.log('Token sans date d’expiration, considéré comme expiré');
+            return true;
+        }
+
+        const isExpired = Date.now() >= exp * 1000;
+        console.log('exp:', exp, '→ expired ?', isExpired);
+        return isExpired;
+    } catch (e) {
+        console.error('Erreur lors du décodage du token', e);
         return true;
     }
 }

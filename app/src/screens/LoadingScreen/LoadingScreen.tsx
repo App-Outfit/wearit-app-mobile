@@ -52,7 +52,7 @@ export function LoadingScreen({ navigation, route }: any) {
     useEffect(() => {
         const init = async () => {
             await preloadEssentialImages();
-            // n’avance que si nos fonts sont prêtes ET que loadToken est fini
+
             if (fontsLoaded && status !== 'loading') {
                 console.log('token : ', token);
                 console.log('token is expired : ', isTokenExpired(token));

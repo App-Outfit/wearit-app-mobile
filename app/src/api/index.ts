@@ -33,11 +33,15 @@ api.interceptors.request.use(
             }
         }
 
-        // if (config){
-        // console.log("→ REQUEST →", config.method?.toUpperCase(), config.baseURL + config.url);
-        // console.log("   headers =", config.headers);
-        // console.log("   data =", config.data);
-        // }
+        if (config) {
+            console.log(
+                '→ REQUEST →',
+                config.method?.toUpperCase(),
+                config.baseURL + config.url,
+            );
+            console.log('   headers =', config.headers);
+            console.log('   data =', config.data);
+        }
         return config;
     },
     (error) => Promise.reject(error),
