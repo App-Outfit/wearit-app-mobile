@@ -26,6 +26,7 @@ import { ImportChoice } from '../../../../components/choice_component/ImportChoi
 import Feather from 'react-native-vector-icons/Feather';
 import { uploadBody } from '../../../body/bodyThunks';
 import { useAppDispatch } from '../../../../utils/hooks';
+import { createFormData } from '../../../../utils/form';
 
 const width = Dimensions.get('window').width;
 const data = [
@@ -64,16 +65,6 @@ export function AvatarCreationScreen({ navigation }: any) {
         setIndex(idx);
     };
 
-    const createFormData = (uri) => {
-        const formData = {
-            uri,
-            name: 'ImageBody',
-            type: 'image/png',
-        } as any;
-
-        return formData;
-    };
-
     const handleImagePicked = async (uri) => {
         setModalChoice(false);
         if (uri) {
@@ -83,13 +74,11 @@ export function AvatarCreationScreen({ navigation }: any) {
         // Send newPictureURI to backend
         try {
             const formData = createFormData(uri);
-            console.log('type :', typeof formData);
             const action = await dispatch(uploadBody(formData));
 
             if (uploadBody.fulfilled.match(action)) {
                 navigation.push('AvatarWaiting');
-                console.log('succes upload body ');
-            } else console.log('failed upload body');
+            }
         } catch (error) {
             console.log('ERROR UPLOAD BODY : ', error);
         }

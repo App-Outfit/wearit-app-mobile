@@ -9,7 +9,7 @@ const selectTryonState = (state: RootState) => state.tryon;
 // 2️⃣ Liste complète des Tryons
 export const selectAllTryons = createSelector(
     selectTryonState,
-    (ts) => ts.ids.map((id) => ts.entities[id]!), // reconstruit un array depuis ids + entities
+    (ts) => ts.tryons, // reconstruit un array depuis ids + entities
 );
 
 // // 3️⃣ Tryon sélectionné (détail)
@@ -21,7 +21,7 @@ export const selectAllTryons = createSelector(
 // 4️⃣ État de chargement
 export const selectTryonStatus = createSelector(
     selectTryonState,
-    (ts) => ts.status,
+    (ts) => ts.loading,
 );
 
 // 5️⃣ Erreur éventuelle
@@ -32,4 +32,9 @@ export const selectTryonError = createSelector(
 
 // 6️⃣ Finder pour un tryon par ID
 export const makeSelectTryonById = (id: string) =>
-    createSelector(selectTryonState, (ts) => ts.entities[id] ?? null);
+    createSelector(selectTryonState, (ts) => ts.tryons[id] ?? null);
+
+export const selectSelectedTryon = createSelector(
+    selectTryonState,
+    (state) => state.selectedTryon,
+);

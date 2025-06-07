@@ -21,19 +21,6 @@ const AppNavigator = () => {
     // const [initialRoute, setInitialRoute] = React.useState<string>(developerInitialRoute)
     const initialRoute = developerMode ? developerInitialRoute : 'Auth';
 
-    const { status, token } = useAppSelector((state) => state.auth);
-    const dispatch = useAppDispatch();
-
-    // React.useEffect(() => {
-    //     dispatch(loadToken());
-    //     if (token){
-    //         setInitialRoute("MainTabs")
-    //         console.log(token)
-    //     }
-    // }, [token])
-
-    // console.log(initialRoute)
-
     return (
         <NavigationContainer>
             <Stack.Navigator initialRouteName={'LaunchScreen'}>

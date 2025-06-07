@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import authReducer from '../features/auth/slices/authSlice';
 import onboardingReducer from '../features/auth/slices/onboardingSlice';
-import tryonReducer from '../features/vto/slice/TryonSlice';
+import tryonReducer from '../features/vto/tryonSlice';
 import useReducer from '../features/profil/slices/userSlice';
 import bodyReducer from '../features/body/bodySlice';
 import clothinReducer from '../features/clothing/clothingSlice';

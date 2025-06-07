@@ -7,6 +7,7 @@ import {
     inpaintRegion,
     inpaintUpper,
     inpaintLower,
+    inpaintDress,
 } from '../service/InpaintingService';
 import {
     loadTryonsSuccess,
@@ -15,11 +16,21 @@ import {
     setDress,
 } from '../slice/TryonSlice';
 import { sampleTryons, sampleCloths } from '../slice/sampleTryons';
-import { fetchBodies } from '../../body/bodyThunks';
+import {
+    fetchBodies,
+    fetchBodyMasks,
+    fetchCurrentBody,
+} from '../../body/bodyThunks';
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
-import { selectCurrentBody } from '../../body/bodySelectors';
+import { selectBodyMasks, selectCurrentBody } from '../../body/bodySelectors';
 import { AddButtonText } from '../../../components/core/Buttons';
 import { baseColors, spacing } from '../../../styles/theme';
+import { getActionFromState } from '@react-navigation/native';
+import { TryonItem } from '../tryonTypes';
+import { selectSelectedTryon } from '../tryonSelectors';
+import { current } from '@reduxjs/toolkit';
+import { ClothingItem } from '../../clothing/clothingTypes';
+import { selectAllClothes } from '../../clothing/clothingSelectors';
 
 const mannequin_user_base = require('../../../assets/images/exemples/vto/original.png');
 const uppermask_user_base = require('../../../assets/images/exemples/vto/upper_mask.png');
@@ -33,63 +44,91 @@ export default function VTODisplay({ onNavigate }) {
     const [lowerMaskBase64, setLowerMaskBase64] = React.useState<string>();
     const [dressMaskBase64, setDressMaskBase64] = React.useState<string>();
     const [loadingMasks, setLoadingMasks] = React.useState(true);
+
     const current_body = useAppSelector(selectCurrentBody);
 
     React.useEffect(() => {
         dispatch(loadTryonsSuccess(sampleTryons));
-        dispatch(fetchBodies());
+        if (!current_body) dispatch(fetchCurrentBody());
     }, [dispatch]);
 
     React.useEffect(() => {
         (async () => {
             try {
-                let ori = await loadAssetBase64(mannequin_user_base);
-                if (current_body != null)
-                    ori = await loadAssetBase64(current_body);
+                console.log('test cbody', current_body);
 
-                const upperMask = await loadAssetBase64(uppermask_user_base);
-                const lowerMask = await loadAssetBase64(lowermask_user_base);
-                const dressMask = await loadAssetBase64(dressmask_user_base);
+                const sources =
+                    current_body !== null
+                        ? {
+                              original: current_body.image_url,
+                              upperMask: current_body.mask_upper,
+                              lowerMask: current_body.mask_lower,
+                              dressMask: current_body.mask_dress,
+                          }
+                        : {
+                              original: mannequin_user_base,
+                              upperMask: uppermask_user_base,
+                              lowerMask: lowermask_user_base,
+                              dressMask: dressmask_user_base,
+                          };
 
-                setOriginalBase64(ori);
-                setUpperMaskBase64(upperMask);
-                setLowerMaskBase64(lowerMask);
-                setDressMaskBase64(dressMask);
+                const [
+                    oriBase64,
+                    upperMaskBase64,
+                    lowerMaskBase64,
+                    dressMaskBase64,
+                ] = await Promise.all([
+                    loadAssetBase64(sources.original),
+                    loadAssetBase64(sources.upperMask),
+                    loadAssetBase64(sources.lowerMask),
+                    loadAssetBase64(sources.dressMask),
+                ]);
+
+                setOriginalBase64(oriBase64);
+                setUpperMaskBase64(upperMaskBase64);
+                setLowerMaskBase64(lowerMaskBase64);
+                setDressMaskBase64(dressMaskBase64);
             } catch (e) {
                 console.error('Erreur chargement assets:', e);
             } finally {
                 setLoadingMasks(false);
             }
         })();
-    }, []);
+    }, [current_body]);
 
-    const selected = useSelector((state: any) => state.tryon.selected);
-    const selectedTryon: TryonData | null =
+    const selected = useAppSelector(selectSelectedTryon);
+    const selectedTryon: TryonItem | null =
         selected.dress || selected.upper || selected.lower || null;
 
-    const currentType = React.useMemo<
-        'upper' | 'lower' | 'dress' | null | undefined
-    >(() => {
+    const userCloth = useAppSelector(selectAllClothes);
+
+    const currentType = React.useMemo<string | null | undefined>(() => {
+        console.log('1');
         if (!selectedTryon) return null;
-        return sampleCloths.find((c) => c.cloth_id === selectedTryon.cloth_id)
-            ?.cloth_type;
+        const cloths = userCloth.find(
+            (c: ClothingItem) => c.id === selectedTryon.clothing_id,
+        );
+        console.log('cloths ', cloths);
+        return cloths?.cloth_type;
     }, [selectedTryon, loadingMasks]);
 
     React.useEffect(() => {
         if (
             !selectedTryon ||
             !originalBase64 ||
-            loadingMasks ||
+            // loadingMasks ||
             (currentType === 'upper' && !upperMaskBase64) ||
             (currentType === 'lower' && !lowerMaskBase64) ||
             (currentType === 'dress' && !dressMaskBase64)
         ) {
+            console.log('fallback');
             return;
         }
 
         (async () => {
             let newDisplay: string | undefined;
-            const tryon64 = await loadAssetBase64(selectedTryon.tryon_url);
+            const tryon64 = await loadAssetBase64(selectedTryon.output_url);
+            console.log(currentType);
 
             if (currentType === 'upper') {
                 newDisplay = await inpaintUpper(
@@ -98,13 +137,14 @@ export default function VTODisplay({ onNavigate }) {
                     upperMaskBase64 || '',
                 );
             } else if (currentType === 'lower') {
+                console.log('lower');
                 newDisplay = await inpaintLower(
                     originalBase64,
                     tryon64,
                     lowerMaskBase64 || '',
                 );
             } else {
-                newDisplay = await inpaintLower(
+                newDisplay = await inpaintDress(
                     originalBase64,
                     tryon64,
                     dressMaskBase64 || '',
@@ -119,7 +159,7 @@ export default function VTODisplay({ onNavigate }) {
 
     return (
         <View style={styles.boxImg}>
-            {current_body != null ? (
+            {current_body !== null ? (
                 <Image
                     style={styles.image}
                     source={{ uri: `data:image/png;base64,${originalBase64}` }}
