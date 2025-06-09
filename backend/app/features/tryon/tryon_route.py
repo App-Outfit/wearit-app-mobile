@@ -2,9 +2,7 @@
 
 from fastapi import APIRouter, Depends, WebSocket
 from app.core.logging_config import logger
-from fastapi.responses import StreamingResponse
-from fastapi import Request
-from app.infrastructure.database.dependencies import get_current_user, get_db
+from app.infrastructure.database.dependencies import get_current_user, get_db, get_user_from_token
 from app.features.tryon.tryon_schema import (
     TryonCreateRequest, TryonCreateResponse,
     TryonListResponse, TryonDetailResponse,
@@ -28,18 +26,17 @@ def get_service(db=Depends(get_db)):
 @router.websocket("/ws")
 async def tryon_ws(
     websocket: WebSocket,
-    current_user=Depends(get_current_user),
+    user = Depends(get_user_from_token),
     service: TryonService = Depends(get_service),
 ):
     """
-    WebSocket endpoint → /api/v1/tryon/events?authorization=Bearer+...
     Permet au front de recevoir en push les mises à jour de try-on.
     """
     # 1) Accepter la connexion WS (handshake)
     await websocket.accept()
 
     # 2) Délègue au service le loop d'envoi
-    await service.stream_tryon_ws(websocket, current_user.id)
+    await service.stream_tryon_ws(websocket, user.id)
 
 # ✅ Créer un tryon (body + vêtement)
 @router.post("", response_model=TryonCreateResponse)
