@@ -154,6 +154,10 @@ class TryonService:
             {
                 "type":       "tryon_update",
                 "tryon_id":   str(tryon_id),
+                "body_id":    str(body.id),
+                "clothing_id": str(clothing.id),
+                "created_at": datetime.now().isoformat(),
+                "version":    1,  # TODO: gérer les versions
                 "output_url": "public_url",
                 "status":     "ready",
             }
