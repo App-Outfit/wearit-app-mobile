@@ -16,9 +16,9 @@ from app.features.body.body_repo import BodyRepository
 from app.features.clothing.clothing_repo import ClothingRepository
 from app.core.errors import NotFoundError, UnauthorizedError, InternalServerError
 import aiohttp
-from app.core.sse_manager import sse_manager
+from app.core.pubsub_manager import pubsub_manager
 from starlette.responses import StreamingResponse
-from fastapi import Request
+from fastapi import WebSocket, WebSocketDisconnect
 
 class TryonService:
     def __init__(
@@ -71,7 +71,7 @@ class TryonService:
         )
 
     async def _publish_error(self, user_id: str, tryon_id: str, msg: str):
-        await sse_manager.publish(
+        await pubsub_manager.publish(
             user_id,
             {
                 "type":     "tryon_update",
@@ -146,7 +146,7 @@ class TryonService:
         logger.info(f"✅ [IA] Output stored at {s3_key}")
         
         public_url = await self.storage.get_presigned_url(s3_key)
-        await sse_manager.publish(
+        await pubsub_manager.publish(
             user_id,
             {
                 "type":       "tryon_update",
@@ -208,25 +208,21 @@ class TryonService:
         logger.info(f"🗑️ Deleted tryon {tryon_id}")
         return TryonDeleteResponse(message="Tryon deleted")
     
-    def stream_tryon_events(self, request: Request, user_id: str) -> StreamingResponse:
+    async def stream_tryon_ws(self, websocket: WebSocket, user_id: str):
         """
-        Retourne un StreamingResponse SSE pour tous les événements tryon de cet user.
+        Prend en charge une connexion WebSocket et push chaque événement
+        try-on pour l'utilisateur donné.
         """
-        queue = sse_manager.subscribe(user_id)
-
-        async def event_generator():
-            try:
-                while True:
-                    # si le client ferme la connexion, on sort
-                    if await request.is_disconnected():
-                        break
-                    data = await queue.get()
-                    yield f"data: {data}\n\n"
-            finally:
-                sse_manager.unsubscribe(user_id, queue)
-
-        return StreamingResponse(
-            event_generator(),
-            media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache"},
-        )
+        # 1) Abonne l'utilisateur à son canal
+        queue = pubsub_manager.subscribe(user_id)
+        try:
+            # 2) Tant que le client est connecté, on envoie les messages
+            while True:
+                data = await queue.get()           # ceci renvoie déjà une JSON string
+                await websocket.send_text(data)    # on pousse texte pur
+        except WebSocketDisconnect:
+            # 3) Le client a fermé la connexion
+            pass
+        finally:
+            # 4) Désabonnement propre
+            pubsub_manager.unsubscribe(user_id, queue)

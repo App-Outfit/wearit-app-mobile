@@ -1,6 +1,6 @@
 # app/features/tryon/tryon_route.py
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, WebSocket
 from app.core.logging_config import logger
 from fastapi.responses import StreamingResponse
 from fastapi import Request
@@ -25,26 +25,21 @@ def get_service(db=Depends(get_db)):
         body_repo=BodyRepository(db),
         clothing_repo=ClothingRepository(db)
     )
-
-@router.get(
-    "/events",
-    response_class=StreamingResponse,
-    summary="Server-Sent Events pour les mises à jour de try-on",
-)
-async def tryon_events(
-    request: Request,
+@router.websocket("/ws")
+async def tryon_ws(
+    websocket: WebSocket,
     current_user=Depends(get_current_user),
-    service: TryonService = Depends(
-        lambda db=Depends(get_db): TryonService(
-            repo=TryonRepository(db),
-            storage=StorageRepository(),
-            body_repo=BodyRepository(db),
-            clothing_repo=ClothingRepository(db),
-        )
-    ),
+    service: TryonService = Depends(get_service),
 ):
-    # délègue tout au service
-    return service.stream_tryon_events(request, current_user.id)
+    """
+    WebSocket endpoint → /api/v1/tryon/events?authorization=Bearer+...
+    Permet au front de recevoir en push les mises à jour de try-on.
+    """
+    # 1) Accepter la connexion WS (handshake)
+    await websocket.accept()
+
+    # 2) Délègue au service le loop d'envoi
+    await service.stream_tryon_ws(websocket, current_user.id)
 
 # ✅ Créer un tryon (body + vêtement)
 @router.post("", response_model=TryonCreateResponse)
