@@ -31,6 +31,11 @@ class TryonRepository:
             "updated_at": created_at,
         }
         await self._col.insert_one(doc)
+        
+        res = await self._users.update_one(
+            {"_id": ObjectId(user_id), "credits": {"$gte": 1}},
+            {"$inc": {"credits": -1}}
+        )
         return TryonModel(**doc)
         
     async def set_tryon(self, tryon_id: str, s3_key: str):
