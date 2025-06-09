@@ -15,9 +15,7 @@ from app.features.tryon.tryon_schema import (
 from app.features.body.body_repo import BodyRepository
 from app.features.clothing.clothing_repo import ClothingRepository
 from app.core.errors import NotFoundError, UnauthorizedError, InternalServerError
-import aiohttp
 from app.core.pubsub_manager import pubsub_manager
-from starlette.responses import StreamingResponse
 from fastapi import WebSocket, WebSocketDisconnect
 
 class TryonService:
@@ -83,75 +81,80 @@ class TryonService:
 
     async def _call_ia(self, user_id: str, body, tryon_id: str, clothing):
         logger.info(f"🤖 [IA] Starting virtual try-on for body={body.id} × clothing={clothing.id}")
-        body_url = await self.storage.get_presigned_url(body.image_url)
-        clothing_url = await self.storage.get_presigned_url(clothing.image_url)
+        # On simule un délai pour l'IA
+        await asyncio.sleep(5)
+        # body_url = await self.storage.get_presigned_url(body.image_url)
+        # clothing_url = await self.storage.get_presigned_url(clothing.image_url)
 
-        mask_field_map = {
-            "upper": "mask_upper",
-            "lower": "mask_lower",
-            "dress": "mask_dress",
-        }
-        mask_attr = mask_field_map.get(clothing.cloth_type)
-        if not mask_attr:
-            raise ValueError(f"No mask defined for cloth_type '{clothing.cloth_type}'")
+        # mask_field_map = {
+        #     "upper": "mask_upper",
+        #     "lower": "mask_lower",
+        #     "dress": "mask_dress",
+        # }
+        # mask_attr = mask_field_map.get(clothing.cloth_type)
+        # if not mask_attr:
+        #     raise ValueError(f"No mask defined for cloth_type '{clothing.cloth_type}'")
         
-        mask_key = getattr(body, mask_attr, None)
-        if not mask_key:
-            raise ValueError(f"Body has no attribute '{mask_attr}' or it's empty")
+        # mask_key = getattr(body, mask_attr, None)
+        # if not mask_key:
+        #     raise ValueError(f"Body has no attribute '{mask_attr}' or it's empty")
         
-        mask_url = await self.storage.get_presigned_url(mask_key)
+        # mask_url = await self.storage.get_presigned_url(mask_key)
                 
-        try:
-            raw_output = await asyncio.to_thread(
-                lambda: replicate.run(
-                    settings.REPLICATE_MODEL_REF,
-                    input={
-                        "person":        body_url,
-                        "cloth":         clothing_url,
-                        "mask":          mask_url,
-                        "steps":         50,
-                        "guidance_scale":2,
-                        "return_dict":   False,
-                    },
-                )
-            )
-        except Exception as e:
-            msg = "Échec de la génération IA"
-            logger.exception(msg)
-            await self.repo.set_error(tryon_id, msg)
-            await self._publish_error(user_id, tryon_id, msg)
-            raise InternalServerError(msg)
+        # try:
+        #     raw_output = await asyncio.to_thread(
+        #         lambda: replicate.run(
+        #             settings.REPLICATE_MODEL_REF,
+        #             input={
+        #                 "person":        body_url,
+        #                 "cloth":         clothing_url,
+        #                 "mask":          mask_url,
+        #                 "steps":         50,
+        #                 "guidance_scale":2,
+        #                 "return_dict":   False,
+        #             },
+        #         )
+        #     )
+        # except Exception as e:
+        #     msg = "Échec de la génération IA"
+        #     logger.exception(msg)
+        #     await self.repo.set_error(tryon_id, msg)
+        #     await self._publish_error(user_id, tryon_id, msg)
+        #     raise InternalServerError(msg)
         
-        output_url = raw_output[0] if isinstance(raw_output, list) else raw_output
-        if not isinstance(output_url, str):
-            output_url = str(output_url)
-        logger.info(f"✅ [IA] Replicate returned: {output_url}")
+        # output_url = raw_output[0] if isinstance(raw_output, list) else raw_output
+        # if not isinstance(output_url, str):
+        #     output_url = str(output_url)
+        # logger.info(f"✅ [IA] Replicate returned: {output_url}")
         
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(output_url) as resp:
-                    resp.raise_for_status()
-                    img_bytes = await resp.read()
-        except Exception as e:
-            msg = "Échec du téléchargement de l’image IA"
-            logger.exception(msg)
-            await self.repo.set_error(tryon_id, msg)
-            await self._publish_error(user_id, tryon_id, msg)
-            raise InternalServerError(msg)
+        # try:
+        #     async with aiohttp.ClientSession() as session:
+        #         async with session.get(output_url) as resp:
+        #             resp.raise_for_status()
+        #             img_bytes = await resp.read()
+        # except Exception as e:
+        #     msg = "Échec du téléchargement de l’image IA"
+        #     logger.exception(msg)
+        #     await self.repo.set_error(tryon_id, msg)
+        #     await self._publish_error(user_id, tryon_id, msg)
+        #     raise InternalServerError(msg)
 
-        s3_key = StoragePathBuilder.tryon(user_id, body.id, tryon_id)
-        await self.storage.upload_image(s3_key, img_bytes)
+        # s3_key = StoragePathBuilder.tryon(user_id, body.id, tryon_id)
+        # await self.storage.upload_image(s3_key, img_bytes)
 
-        await self.repo.set_tryon(tryon_id, s3_key)
-        logger.info(f"✅ [IA] Output stored at {s3_key}")
+        # await self.repo.set_tryon(tryon_id, s3_key)
+        # logger.info(f"✅ [IA] Output stored at {s3_key}")
         
-        public_url = await self.storage.get_presigned_url(s3_key)
+        # public_url = await self.storage.get_presigned_url(s3_key)
+
+        logger.info(f"✅ [IA] Replicate OK")
+        
         await pubsub_manager.publish(
             user_id,
             {
                 "type":       "tryon_update",
                 "tryon_id":   str(tryon_id),
-                "output_url": public_url,
+                "output_url": "public_url",
                 "status":     "ready",
             }
         )
