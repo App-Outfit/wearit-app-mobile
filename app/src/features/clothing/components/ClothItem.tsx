@@ -12,17 +12,23 @@ import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import { createTryon } from '../../vto/tryonThunks';
 import { selectCurrentBody } from '../../body/bodySelectors';
 import { BodyItem } from '../../body/bodyTypes';
+import { selectUserCredits } from '../../profil/selectors/userSelectors';
 
-export function ClothItem({ cloth }) {
+export const ClothItem = React.memo(function ClothItem({
+    navigation,
+    cloth,
+    associatedTryon,
+}: any) {
     const [status, setStatus] = React.useState<
         'loading' | 'success' | 'undefined'
     >('undefined');
     const [modal, setModal] = React.useState(false);
+    const credits = useAppSelector(selectUserCredits);
 
     const dispatch = useAppDispatch();
-    const associatedTryon: TryonItem | null = useAppSelector(
-        selectTryonByClothID(cloth.id),
-    );
+    // const associatedTryon: TryonItem | null = useAppSelector(
+    //     selectTryonByClothID(cloth.id),
+    // );
     const body: BodyItem | null = useAppSelector(selectCurrentBody);
 
     React.useEffect(() => {
@@ -46,6 +52,14 @@ export function ClothItem({ cloth }) {
             }
         } else if (status === 'undefined') {
             setModal(true);
+        }
+    };
+
+    const verifyCredits = () => {
+        if (credits < 10) {
+            navigation.push('ProfilSubscription');
+        } else {
+            getTryon();
         }
     };
 
@@ -94,7 +108,7 @@ export function ClothItem({ cloth }) {
             <ModalChoice
                 open={modal}
                 onCancel={() => setModal(false)}
-                onAccept={getTryon}
+                onAccept={verifyCredits}
                 textHeader="Essayer un vêtement"
                 textSubHeader="Cette opération vous coutera X crédits."
                 textButtonConfirm="Essayer"
@@ -102,7 +116,7 @@ export function ClothItem({ cloth }) {
             />
         </>
     );
-}
+});
 
 const styleClothing = StyleSheet.create({
     imgBox: {

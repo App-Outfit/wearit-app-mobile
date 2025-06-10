@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 import { parseApiError } from '../utils/apiError';
 
 function getHost(): string {
-    if (Platform.OS === 'android') return '10.41.167.187';
+    if (Platform.OS === 'android') return '192.168.1.162';
     // if (Platform.OS === 'android') return '127.0.0.1';
     if (Platform.OS === 'ios') return '192.168.1.26'; // votre IP LAN
     return 'localhost';
@@ -33,15 +33,15 @@ api.interceptors.request.use(
             }
         }
 
-        if (config) {
-            console.log(
-                '→ REQUEST →',
-                config.method?.toUpperCase(),
-                config.baseURL + config.url,
-            );
-            console.log('   headers =', config.headers);
-            console.log('   data =', config.data);
-        }
+        // if (config) {
+        //     console.log(
+        //         '→ REQUEST →',
+        //         config.method?.toUpperCase(),
+        //         config.baseURL + config.url,
+        //     );
+        //     console.log('   headers =', config.headers);
+        //     console.log('   data =', config.data);
+        // }
         return config;
     },
     (error) => Promise.reject(error),

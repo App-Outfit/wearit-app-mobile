@@ -16,6 +16,12 @@ import {
 
 import { logout } from '../../features/auth/slices/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+    fetchCredits,
+    fetchProfile,
+    fetchReferralCode,
+} from '../../features/profil/thunks/userThunks';
+import { fetchBodies, fetchCurrentBody } from '../../features/body/bodyThunks';
 
 export function LoadingScreen({ navigation, route }: any) {
     const { initialRoute } = route.params;
@@ -44,33 +50,39 @@ export function LoadingScreen({ navigation, route }: any) {
 
     const dispatch = useAppDispatch();
     const { status, token } = useAppSelector((state) => state.auth);
+    const [ready, setReady] = React.useState(false);
 
     useEffect(() => {
-        dispatch(loadToken());
-    }, []);
-
-    useEffect(() => {
-        const init = async () => {
+        const bootstrap = async () => {
             await preloadEssentialImages();
 
-            if (fontsLoaded && status !== 'loading') {
-                console.log('token : ', token);
-                console.log('token is expired : ', isTokenExpired(token));
+            dispatch(loadToken());
 
-                if (token && !isTokenExpired(token)) {
-                    navigation.replace('MainTabs');
-                } else {
-                    navigation.replace('Auth');
-                    AsyncStorage.removeItem('token');
-                    // TODO : dispatch(removeToken())
-                }
+            try {
+                await dispatch(fetchProfile()).unwrap();
+                await dispatch(fetchReferralCode()).unwrap();
+                await dispatch(fetchCurrentBody()).unwrap();
+                await dispatch(fetchCredits()).unwrap();
+                setReady(true);
+            } catch (err) {
+                console.error('Erreur lors des fetchs initiaux :', err);
+                setReady(true);
             }
-            // AsyncStorage.removeItem('token');
-            // dispatch(logout());
-            // navigation.replace(initialRoute);
         };
-        init();
-    }, [fontsLoaded, status, token]);
+
+        bootstrap();
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (!fontsLoaded || !ready) return;
+
+        if (token && !isTokenExpired(token)) {
+            navigation.replace('MainTabs');
+        } else {
+            AsyncStorage.removeItem('token');
+            navigation.replace('Auth');
+        }
+    }, [fontsLoaded, ready, token, navigation]);
 
     return (
         <View style={styles.loading_screen}>

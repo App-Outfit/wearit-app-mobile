@@ -1,3 +1,4 @@
+import 'react-native-event-source';
 import { registerRootComponent } from 'expo';
 
 import App from './App';

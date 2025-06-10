@@ -1,13 +1,25 @@
 // src/store/slices/tryonSlice.ts
 
-import { PayloadAction, createSlice, isAnyOf } from '@reduxjs/toolkit';
+import {
+    PayloadAction,
+    createEntityAdapter,
+    createSlice,
+    isAnyOf,
+} from '@reduxjs/toolkit';
 import {
     createTryon,
     fetchTryons,
     fetchTryonById,
     deleteTryon,
+    inpaintTryon,
 } from './tryonThunks';
 import { TryonItem, TryonDetailResponse } from './tryonTypes';
+// import { loadAssetBase64 } from './service/InpaintingService';
+
+// const mannequin_user_base = require('../../../assets/images/exemples/vto/original.png');
+// const uppermask_user_base = require('../../../assets/images/exemples/vto/upper_mask.png');
+// const lowermask_user_base = require('../../../assets/images/exemples/vto/lower_mask.png');
+// const dressmask_user_base = require('../../../assets/images/exemples/vto/dress_mask.png');
 
 export interface TryonState {
     tryons: TryonItem[];
@@ -16,6 +28,7 @@ export interface TryonState {
         lower: TryonItem | null;
         dress: TryonItem | null;
     };
+    currentResult: string | null;
     loading: boolean;
     error: string | null;
 }
@@ -23,6 +36,7 @@ export interface TryonState {
 const initialState: TryonState = {
     tryons: [],
     selectedTryon: { upper: null, lower: null, dress: null },
+    currentResult: null,
     loading: false,
     error: null,
 };
@@ -46,6 +60,13 @@ const tryonSlice = createSlice({
             state.selectedTryon.dress = action.payload;
             state.selectedTryon.upper = null;
             state.selectedTryon.lower = null;
+        },
+        setCurrentResult(state, action: PayloadAction<string | null>) {
+            if (action.payload === null) {
+                state.currentResult = null;
+                return;
+            }
+            state.currentResult = action.payload;
         },
         updateTryon(
             state,
@@ -81,6 +102,22 @@ const tryonSlice = createSlice({
             // }
         });
 
+        builder
+            .addCase(inpaintTryon.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(inpaintTryon.fulfilled, (state, { payload }) => {
+                state.loading = false;
+                state.currentResult = payload.resultBase64;
+                // on pourrait ici también setSelectedTryon via payload.tryonId
+            })
+            .addCase(inpaintTryon.rejected, (state, action) => {
+                state.loading = false;
+                state.error =
+                    (action.payload as string) || action.error.message || null;
+            });
+
         // pending → tous les thunks
         builder.addMatcher(
             isAnyOf(
@@ -88,6 +125,7 @@ const tryonSlice = createSlice({
                 fetchTryons.pending,
                 fetchTryonById.pending,
                 deleteTryon.pending,
+                inpaintTryon.pending,
             ),
             (state) => {
                 state.loading = true;
@@ -102,6 +140,7 @@ const tryonSlice = createSlice({
                 fetchTryons.rejected,
                 fetchTryonById.rejected,
                 deleteTryon.rejected,
+                inpaintTryon.rejected,
             ),
             (state, action) => {
                 state.loading = false;
@@ -117,6 +156,7 @@ const tryonSlice = createSlice({
                 fetchTryons.fulfilled,
                 fetchTryonById.fulfilled,
                 deleteTryon.fulfilled,
+                inpaintTryon.fulfilled,
             ),
             (state) => {
                 state.loading = false;
@@ -126,4 +166,5 @@ const tryonSlice = createSlice({
 });
 
 export default tryonSlice.reducer;
-export const { setUpper, setLower, setDress, updateTryon } = tryonSlice.actions;
+export const { setUpper, setLower, setDress, updateTryon, setCurrentResult } =
+    tryonSlice.actions;

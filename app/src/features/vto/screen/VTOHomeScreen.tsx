@@ -41,27 +41,24 @@ export function VTODressingScreen({ navigation }) {
     }, []);
 
     const toCreateBody = () => {
-        console.log(navigation);
         navigation.push('AvatarCreation');
     };
+
+    const display = React.useMemo(() => {
+        return <VTODisplay onNavigate={toCreateBody} />;
+    }, []);
 
     return (
         <GestureHandlerRootView>
             <View style={{ flex: 1, position: 'relative', margin: 14 }}>
                 <View style={styles.container}>
-                    <View style={styles.vtoDisplayContainer}>
-                        <VTODisplay onNavigate={toCreateBody} />
-                    </View>
+                    <View style={styles.vtoDisplayContainer}>{display}</View>
                     <View style={styles.scrollComponent}>
                         <MiniDressing />
                     </View>
                 </View>
 
                 <View style={styles.iconComponent}>
-                    {/* <TouchableOpacity style={styles.icon}>
-                    <Feather name="filter" size={20} />
-                    <Text style={styles.textIcon}>Filtrer</Text>
-                </TouchableOpacity> */}
                     <TouchableOpacity style={styles.icon} onPress={onPressSave}>
                         {currentIsSave ? (
                             <FontAwesome name="bookmark" size={20} />

@@ -7,7 +7,7 @@ import { InputField } from '../../../../components/core/PlaceHolders';
 import { CButton } from '../../../../components/core/Buttons';
 import { validateEmail } from '../../../../utils/validation';
 
-import { loginUser } from '../../slices/authSlice';
+import { isTokenExpired, loginUser } from '../../slices/authSlice';
 import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
 
 export const LogIn: React.FC = ({ navigation }: any) => {
@@ -63,7 +63,7 @@ export const LogIn: React.FC = ({ navigation }: any) => {
     }, [emailValid, passwordValid, email, password]);
 
     useEffect(() => {
-        if (status === 'succeeded' && token) {
+        if (status === 'succeeded' && token && !isTokenExpired(token)) {
             navigation.replace('MainTabs');
         }
     }, [status, token]);

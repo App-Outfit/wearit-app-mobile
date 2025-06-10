@@ -5,9 +5,27 @@ import { spacing, typography } from '../../../styles/theme';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import uuid from 'react-native-uuid';
+import { saveImageToGalleryAsync } from '../../../utils/download';
+import { useAppSelector } from '../../../utils/hooks';
+import { selectResultTryon } from '../tryonSelectors';
+import * as MediaLibrary from 'expo-media-library';
 
 export function ShareDrawer({ ref, onChange }) {
     const snapPoints = React.useMemo(() => ['25%'], []);
+
+    const currentResult = useAppSelector(selectResultTryon);
+
+    const handleSaveToGallery = async () => {
+        if (!currentResult) return;
+        const fileName = `wearit-${uuid.v4()}.jpg`;
+        try {
+            await saveImageToGalleryAsync(currentResult, fileName);
+            console.log('Enregistré dans la galerie !');
+        } catch (e) {
+            console.error('Échec enregistrement en galerie :', e);
+        }
+    };
 
     return (
         <BottomSheet
@@ -26,7 +44,7 @@ export function ShareDrawer({ ref, onChange }) {
                 <View style={styleShare.shareItemContainer}>
                     <TouchableOpacity
                         style={styleShare.shareItem}
-                        onPress={() => {}}
+                        onPress={handleSaveToGallery}
                     >
                         <View style={styleShare.shareIconContainer}>
                             <Feather name="download" size={37} />

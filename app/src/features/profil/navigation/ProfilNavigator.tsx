@@ -7,6 +7,8 @@ import { SubscribtionScreen } from '../screen/SubscriptionScreen';
 import { DressingOutfitScreen } from '../../dressing/screen/DressingOutfit';
 import { spacing } from '../../../styles/theme';
 import { DressingOutfitDetail } from '../../dressing/screen/DressingOutfitDetail';
+import { BodyScreen } from '../screen/BodyScreen';
+import { AvatarCreationNavigation } from '../../auth/navigation/AvatarNavigation';
 
 const ProfilStack = createStackNavigator();
 
@@ -16,6 +18,15 @@ export function ProfilNavigator() {
             <ProfilStack.Screen
                 name="ProfilHome"
                 component={ProfilScreen}
+                options={{
+                    ...screenOptions,
+                    headerShown: true,
+                    title: 'Profil',
+                }}
+            />
+            <ProfilStack.Screen
+                name="ProfilBody"
+                component={BodyScreen}
                 options={{
                     ...screenOptions,
                     headerShown: true,

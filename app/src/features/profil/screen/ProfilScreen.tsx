@@ -13,14 +13,23 @@ import { DeconnexionModal } from '../components/DeconnexionModal';
 
 import { useSelector } from 'react-redux';
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
-import { selectUserProfile } from '../selectors/userSelectors';
-import { fetchCredits, fetchProfile } from '../thunks/userThunks';
+import {
+    selectUserProfile,
+    selectUserReferralCode,
+} from '../selectors/userSelectors';
+import {
+    fetchCredits,
+    fetchProfile,
+    fetchReferralCode,
+} from '../thunks/userThunks';
 import { logout } from '../../auth/slices/authSlice';
 import { CommonActions } from '@react-navigation/native';
 
 export function ProfilScreen({ navigation }) {
     const [modalDisconect, setModalDisconnect] = React.useState<boolean>(false);
-    const userState = useAppSelector(selectUserProfile);
+    const userRefferalCode = useAppSelector(selectUserReferralCode);
+    console.log('userRefferalCode', userRefferalCode);
+
     const dispatch = useAppDispatch();
 
     const styleItem = {
@@ -66,6 +75,8 @@ export function ProfilScreen({ navigation }) {
 
     React.useEffect(() => {
         dispatch(fetchProfile());
+        dispatch(fetchCredits());
+        dispatch(fetchReferralCode());
     }, [dispatch]);
 
     return (
@@ -82,7 +93,7 @@ export function ProfilScreen({ navigation }) {
                         left={() => (
                             <Ionicons name="body-outline" {...iconLeftConfig} />
                         )}
-                        // onPress={}
+                        onPress={() => navigation.push('ProfilBody')}
                     />
                     <List.Item
                         {...styleItem}
@@ -123,6 +134,20 @@ export function ProfilScreen({ navigation }) {
                         onPress={() => navigation.push('OufitSaved')}
                     />
                 </List.Section>
+
+                <List.Section>
+                    <List.Subheader style={styles.subHeader}>
+                        Code de Parrainage
+                    </List.Subheader>
+                    <List.Item
+                        {...styleItem}
+                        title={userRefferalCode}
+                        left={() => (
+                            <Feather name="user-plus" {...iconLeftConfig} />
+                        )}
+                    />
+                </List.Section>
+
                 <List.Section>
                     <List.Subheader style={styles.subHeader}>
                         Paramètres de Session

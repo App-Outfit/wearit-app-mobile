@@ -8,7 +8,16 @@ import {
     TryonListResponse,
     TryonDetailResponse,
     TryonDeleteResponse,
+    InpaintPayload,
 } from './tryonTypes';
+
+import {
+    loadAssetBase64,
+    inpaintRegion,
+    inpaintUpper,
+    inpaintLower,
+    inpaintDress,
+} from './service/InpaintingService';
 
 /** Create a new tryon */
 export const createTryon = createAsyncThunk<
@@ -62,6 +71,53 @@ export const deleteTryon = createAsyncThunk<TryonDeleteResponse, string>(
             return rejectWithValue(
                 err.response?.data?.message || 'Delete try-on failed',
             );
+        }
+    },
+);
+
+export const inpaintTryon = createAsyncThunk<
+    { tryonId: string; resultBase64: string },
+    InpaintPayload
+>(
+    'tryon/inpaint',
+    async (
+        { currentBody, tryonId, outputUrl, maskBase64, type },
+        { rejectWithValue },
+    ) => {
+        try {
+            const tryon64 = await loadAssetBase64(outputUrl);
+            // const body64 = await loadAssetBase64(currentBody);
+
+            let result: string;
+            switch (type) {
+                case 'upper':
+                    result = await inpaintUpper(
+                        currentBody,
+                        tryon64,
+                        maskBase64,
+                    );
+                    break;
+                case 'lower':
+                    result = await inpaintLower(
+                        currentBody,
+                        tryon64,
+                        maskBase64,
+                    );
+                    break;
+                case 'dress':
+                    result = await inpaintDress(
+                        currentBody,
+                        tryon64,
+                        maskBase64,
+                    );
+                    break;
+                default:
+                    throw new Error(`Unknown inpaint type: ${type}`);
+            }
+
+            return { tryonId, resultBase64: result };
+        } catch (err: any) {
+            return rejectWithValue(err.message || 'Inpainting failed');
         }
     },
 );

@@ -1,6 +1,6 @@
 // src/types/tryon.types.ts
 
-import { paths } from '../../types/api.ts';
+import { paths } from '../../types/api';
 
 // 1️⃣ Create Tryon
 export type TryonCreatePayload =
@@ -20,3 +20,11 @@ export type TryonDetailResponse =
 // 4️⃣ Delete Tryon
 export type TryonDeleteResponse =
     paths['/api/v1/tryon/{tryon_id}']['delete']['responses']['200']['content']['application/json'];
+
+export interface InpaintPayload {
+    currentBody: string;
+    tryonId: string;
+    outputUrl: string;
+    maskBase64: string;
+    type: string;
+}

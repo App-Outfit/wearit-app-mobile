@@ -12,6 +12,7 @@ import { DressingNavigator } from '../features/dressing/navigation/DressingNavig
 import MainTabNavigator from './NavigationComponents/MainTabNavigator';
 import { useAppDispatch, useAppSelector } from '../utils/hooks';
 import { loadToken } from '../features/auth/slices/authSlice';
+import { AvatarCreationNavigation } from '../features/auth/navigation/AvatarNavigation';
 
 const Stack = createStackNavigator();
 
@@ -48,6 +49,14 @@ const AppNavigator = () => {
                     name="Auth"
                     component={AuthNavigator}
                     options={{ headerShown: false }}
+                />
+
+                <Stack.Screen
+                    name="AvatarCreation"
+                    component={AvatarCreationNavigation}
+                    options={{
+                        headerShown: false,
+                    }}
                 />
             </Stack.Navigator>
         </NavigationContainer>

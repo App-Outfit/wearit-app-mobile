@@ -1,40 +1,50 @@
 // src/hooks/useTryonSSE.ts
+import * as React from 'react';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import EventSource from 'react-native-event-source';
 import { updateTryon } from '../tryonSlice';
 
 import { BASE_URL } from '../../../api';
+import { useAppSelector } from '../../../utils/hooks';
+import { TryonItem } from '../tryonTypes';
 
-export function useTryonSSE(jwtToken: string | null) {
+export function useTryonSSE() {
     const dispatch = useDispatch();
+    const jwtToken = useAppSelector((state) => state.auth.token);
+
+    const wsRef = React.useRef<WebSocket | null>(null);
 
     useEffect(() => {
         if (!jwtToken) return;
-        const es = new EventSource(`${BASE_URL}/tryon/events`, {
-            headers: { Authorization: `Bearer ${jwtToken}` },
-        });
 
-        es.onopen = () => console.log('[SSE] connected');
-        es.onerror = (e) => console.warn('[SSE] error', e);
-        es.onmessage = (e) => {
-            try {
-                const data = JSON.parse(e.data);
-                if (data.type === 'tryon_update') {
-                    console.log('[SSE] tryon update', data);
-                    dispatch(
-                        updateTryon({
-                            id: data.tryon_id,
-                            output_url: data.output_url,
-                            status: data.status,
-                        }),
-                    );
-                }
-            } catch {
-                console.warn('[SSE] invalid JSON', e.data);
+        const isHttps = BASE_URL.startsWith('https');
+        const proto = isHttps ? 'wss' : 'ws';
+        const withoutSchema = BASE_URL.replace(/^https?:\/\//, '');
+        const wsUrl = `${proto}://${withoutSchema}/tryon/ws?token=${encodeURIComponent(jwtToken)}`;
+
+        const ws = new WebSocket(wsUrl);
+        ws.onopen = () => console.log('[WS] connected');
+        ws.onerror = (e) => console.warn('[WS] error', e);
+        ws.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if (data.type === 'tryon_update') {
+                const tryonItem: TryonItem = {
+                    id: data.tryon_id,
+                    output_url: data.output_url,
+                    status: data.status,
+                    body_id: data.body_id,
+                    clothing_id: data.clothing_id,
+                    created_at: data.created_at,
+                    version: data.version,
+                };
+                dispatch(updateTryon(tryonItem));
             }
         };
-
-        return () => es.close();
+        ws.onclose = () => console.log('[WS] closed');
+        wsRef.current = ws;
+        return () => {
+            ws.close();
+        };
     }, [jwtToken, dispatch]);
 }

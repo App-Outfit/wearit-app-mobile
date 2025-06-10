@@ -1,9 +1,13 @@
-import { createStackNavigator } from '@react-navigation/stack';
+import {
+    StackHeaderProps,
+    createStackNavigator,
+} from '@react-navigation/stack';
 import * as React from 'react';
 import { screenOptions } from '../../../styles/screen';
-import VTOTopTabNavigator from './VTOTabNavigator';
 import { VTODressingScreen } from '../screen/VTOHomeScreen';
-import { AvatarCreationNavigation } from '../../auth/navigation/AvatarNavigation';
+import { CreditComponent } from '../component/CreditComponent';
+import { useNavigation } from '@react-navigation/native';
+import { SubscribtionScreen } from '../../profil/screen/SubscriptionScreen';
 
 const VTOStack = createStackNavigator();
 
@@ -13,18 +17,23 @@ export function VTONavigator() {
             <VTOStack.Screen
                 name="VTOHome"
                 component={VTODressingScreen}
-                options={{
+                options={({ navigation }) => ({
                     ...screenOptions,
                     headerShown: true,
                     title: 'Virtual Try On',
-                }}
+                    headerRight: () => (
+                        <CreditComponent navigation={navigation} />
+                    ),
+                })}
             />
+
             <VTOStack.Screen
-                name="AvatarCreation"
-                component={AvatarCreationNavigation}
+                name="ProfilSubscription"
+                component={SubscribtionScreen}
                 options={{
-                    // ...screenOptions,
-                    headerShown: false,
+                    ...screenOptions,
+                    headerShown: true,
+                    title: 'Mes Crédits',
                 }}
             />
         </VTOStack.Navigator>

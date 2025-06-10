@@ -45,3 +45,8 @@ export const selectTryonByClothID = (clothId: string) =>
             state.tryons.find((tryon) => tryon.clothing_id === clothId) || null
         );
     });
+
+export const selectResultTryon = createSelector(selectTryonState, (state) => {
+    const result = state.currentResult;
+    return result || null;
+});

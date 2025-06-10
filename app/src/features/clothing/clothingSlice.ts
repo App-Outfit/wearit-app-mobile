@@ -58,6 +58,7 @@ const clothingSlice = createSlice({
                         ? payload.resized_url
                         : null,
                     category: payload.category,
+                    cloth_type: payload.cloth_type,
                     name: payload.name,
                     created_at: payload.created_at,
                 });

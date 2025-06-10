@@ -67,10 +67,7 @@ export default function WelcomeScreen({ navigation }: WelcomeProps) {
                             Déjà inscrit ?{' '}
                             <Text
                                 onPress={() => navigation.navigate('SignIn')}
-                                style={[
-                                    // styles.signinText,
-                                    styles.signinTextUnderline,
-                                ]}
+                                style={[styles.signinTextUnderline]}
                             >
                                 Connectez-vous
                             </Text>

@@ -9,12 +9,7 @@ import {
     inpaintLower,
     inpaintDress,
 } from '../service/InpaintingService';
-import {
-    loadTryonsSuccess,
-    setUpper,
-    setLower,
-    setDress,
-} from '../slice/TryonSlice';
+import { loadTryonsSuccess } from '../slice/TryonSlice';
 import { sampleTryons, sampleCloths } from '../slice/sampleTryons';
 import {
     fetchBodies,
@@ -22,152 +17,143 @@ import {
     fetchCurrentBody,
 } from '../../body/bodyThunks';
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
-import { selectBodyMasks, selectCurrentBody } from '../../body/bodySelectors';
 import { AddButtonText } from '../../../components/core/Buttons';
 import { baseColors, spacing } from '../../../styles/theme';
-import { getActionFromState } from '@react-navigation/native';
 import { TryonItem } from '../tryonTypes';
-import { selectSelectedTryon } from '../tryonSelectors';
-import { current } from '@reduxjs/toolkit';
+import { selectResultTryon, selectSelectedTryon } from '../tryonSelectors';
 import { ClothingItem } from '../../clothing/clothingTypes';
-import { selectAllClothes } from '../../clothing/clothingSelectors';
+import {
+    selectAllClothes,
+    selectClothTypeByTryonID,
+} from '../../clothing/clothingSelectors';
+import FastImage from '@d11/react-native-fast-image';
+import { selectCurrentBody } from '../../body/bodySelectors';
+import { setCurrentResult } from '../tryonSlice';
+import { inpaintTryon } from '../tryonThunks';
+import { current } from '@reduxjs/toolkit';
 
-const mannequin_user_base = require('../../../assets/images/exemples/vto/original.png');
-const uppermask_user_base = require('../../../assets/images/exemples/vto/upper_mask.png');
-const lowermask_user_base = require('../../../assets/images/exemples/vto/lower_mask.png');
-const dressmask_user_base = require('../../../assets/images/exemples/vto/dress_mask.png');
+const ImageDisplay = React.memo(
+    ({ uri }: { uri: string }) => (
+        <FastImage
+            style={styles.image}
+            source={{
+                uri: uri,
+                priority: FastImage.priority.high,
+                cache: FastImage.cacheControl.immutable,
+            }}
+            resizeMode={FastImage.resizeMode.cover}
+        />
+        // <Image style={styles.image} source={{ uri }} resizeMode="cover" fadeDuration={500} />
+    ),
+    (prev, next) => prev.uri === next.uri,
+);
 
 export default function VTODisplay({ onNavigate }) {
     const dispatch = useAppDispatch();
-    const [originalBase64, setOriginalBase64] = React.useState<string | null>();
+    const [resultBase64, setResultBase64] = React.useState<string>('');
     const [upperMaskBase64, setUpperMaskBase64] = React.useState<string>();
     const [lowerMaskBase64, setLowerMaskBase64] = React.useState<string>();
     const [dressMaskBase64, setDressMaskBase64] = React.useState<string>();
-    const [loadingMasks, setLoadingMasks] = React.useState(true);
-
+    const [tryon64, setTryon64] = React.useState<string>('');
     const current_body = useAppSelector(selectCurrentBody);
 
     React.useEffect(() => {
         dispatch(loadTryonsSuccess(sampleTryons));
-        if (!current_body) dispatch(fetchCurrentBody());
+        dispatch(fetchCurrentBody());
     }, [dispatch]);
 
     React.useEffect(() => {
-        (async () => {
-            try {
-                console.log('test cbody', current_body);
+        const initCurrentResult = async () => {
+            if (current_body) {
+                const uri = await loadAssetBase64(current_body.image_url);
+                const upperMask = await loadAssetBase64(
+                    current_body.mask_upper,
+                );
+                const lowerMask = await loadAssetBase64(
+                    current_body.mask_lower,
+                );
+                const dressMask = await loadAssetBase64(
+                    current_body.mask_dress,
+                );
 
-                const sources =
-                    current_body !== null
-                        ? {
-                              original: current_body.image_url,
-                              upperMask: current_body.mask_upper,
-                              lowerMask: current_body.mask_lower,
-                              dressMask: current_body.mask_dress,
-                          }
-                        : {
-                              original: mannequin_user_base,
-                              upperMask: uppermask_user_base,
-                              lowerMask: lowermask_user_base,
-                              dressMask: dressmask_user_base,
-                          };
-
-                const [
-                    oriBase64,
-                    upperMaskBase64,
-                    lowerMaskBase64,
-                    dressMaskBase64,
-                ] = await Promise.all([
-                    loadAssetBase64(sources.original),
-                    loadAssetBase64(sources.upperMask),
-                    loadAssetBase64(sources.lowerMask),
-                    loadAssetBase64(sources.dressMask),
-                ]);
-
-                setOriginalBase64(oriBase64);
-                setUpperMaskBase64(upperMaskBase64);
-                setLowerMaskBase64(lowerMaskBase64);
-                setDressMaskBase64(dressMaskBase64);
-            } catch (e) {
-                console.error('Erreur chargement assets:', e);
-            } finally {
-                setLoadingMasks(false);
+                dispatch(setCurrentResult(uri));
+                setResultBase64(uri);
+                setUpperMaskBase64(upperMask);
+                setLowerMaskBase64(lowerMask);
+                setDressMaskBase64(dressMask);
             }
-        })();
-    }, [current_body]);
+        };
+        initCurrentResult();
+    }, [current_body, dispatch]);
 
+    // const userCloth = useAppSelector(selectAllClothes);
     const selected = useAppSelector(selectSelectedTryon);
+    const userCloth = useAppSelector(selectAllClothes);
     const selectedTryon: TryonItem | null =
         selected.dress || selected.upper || selected.lower || null;
-
-    const userCloth = useAppSelector(selectAllClothes);
-
     const currentType = React.useMemo<string | null | undefined>(() => {
-        console.log('1');
         if (!selectedTryon) return null;
         const cloths = userCloth.find(
             (c: ClothingItem) => c.id === selectedTryon.clothing_id,
         );
-        console.log('cloths ', cloths);
         return cloths?.cloth_type;
-    }, [selectedTryon, loadingMasks]);
+    }, [selectedTryon]);
 
     React.useEffect(() => {
-        if (
-            !selectedTryon ||
-            !originalBase64 ||
-            loadingMasks ||
-            (currentType === 'upper' && !upperMaskBase64) ||
-            (currentType === 'lower' && !lowerMaskBase64) ||
-            (currentType === 'dress' && !dressMaskBase64)
-        ) {
+        if (!selectedTryon?.id || !selectedTryon.output_url || !currentType) {
             return;
         }
 
-        (async () => {
-            let newDisplay: string | undefined;
+        const computeResult = async () => {
             const tryon64 = await loadAssetBase64(selectedTryon.output_url);
+            try {
+                let result: string;
+                switch (currentType) {
+                    case 'upper':
+                        result = await inpaintUpper(
+                            resultBase64,
+                            tryon64,
+                            upperMaskBase64,
+                        );
+                        break;
+                    case 'lower':
+                        result = await inpaintLower(
+                            resultBase64,
+                            tryon64,
+                            lowerMaskBase64,
+                        );
+                        break;
+                    case 'dress':
+                        result = await inpaintDress(
+                            resultBase64,
+                            tryon64,
+                            dressMaskBase64,
+                        );
+                        break;
+                    default:
+                        throw new Error(`Unknown inpaint type: ${currentType}`);
+                }
 
-            if (currentType === 'upper') {
-                newDisplay = await inpaintUpper(
-                    originalBase64,
-                    tryon64,
-                    upperMaskBase64 || '',
-                );
-            } else if (currentType === 'lower') {
-                newDisplay = await inpaintLower(
-                    originalBase64,
-                    tryon64,
-                    lowerMaskBase64 || '',
-                );
-            } else {
-                newDisplay = await inpaintDress(
-                    originalBase64,
-                    tryon64,
-                    dressMaskBase64 || '',
-                );
+                setResultBase64(result);
+                dispatch(setCurrentResult(result));
+            } catch (err: any) {
+                console.log('Error inpainting tryon');
             }
+        };
 
-            if (newDisplay) {
-                setOriginalBase64(newDisplay);
-            }
-        })();
-    }, [selectedTryon, originalBase64, loadingMasks, currentType]);
+        computeResult();
+    }, [selectedTryon?.id, selectedTryon?.output_url, currentType, dispatch]);
 
     return (
         <View style={styles.boxImg}>
             {current_body !== null ? (
-                <Image
-                    style={styles.image}
-                    source={{ uri: `data:image/png;base64,${originalBase64}` }}
-                    resizeMode="cover"
-                />
+                <ImageDisplay uri={`data:image/png;base64,${resultBase64}`} />
             ) : (
                 <View style={styles.boxOri}>
                     <Image
                         style={styles.image}
                         source={{
-                            uri: `data:image/png;base64,${originalBase64}`,
+                            uri: `data:image/png;base64,${resultBase64}`,
                         }}
                         resizeMode="cover"
                     />
