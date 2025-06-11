@@ -12,9 +12,22 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import { ShareDrawer } from '../component/ShareDrawer';
 import { MiniDressing } from '../component/ListClothes';
 
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import {
+    selectReadyTryonsLower,
+    selectReadyTryonsUpper,
+    selectReadyTryonsWithType,
+} from '../tryonSelectors';
+import { setDress, setUpper, setUpperLower } from '../tryonSlice';
+
 export function VTODressingScreen({ navigation }) {
     const [currentIsSave, setCurrentSave] = React.useState<boolean>(false);
     const bottomSheetShare = React.useRef<BottomSheet>(null);
+    const tryonsReady = useAppSelector(selectReadyTryonsWithType);
+    const upperTryons = useAppSelector(selectReadyTryonsUpper);
+    const lowerTryons = useAppSelector(selectReadyTryonsLower);
+    const dispatch = useAppDispatch();
 
     const succesSaveOutfitToast = () => {
         Toast.show({
@@ -48,6 +61,61 @@ export function VTODressingScreen({ navigation }) {
         return <VTODisplay onNavigate={toCreateBody} />;
     }, []);
 
+    const generateRandomOutfit = async () => {
+        // select a random outfit from the list of available outfits
+        if (tryonsReady.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Aucun vêtement disponible',
+                position: 'bottom',
+            });
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * tryonsReady.length);
+        const randomOutfit = tryonsReady[randomIndex];
+
+        switch (randomOutfit.cloth_type) {
+            case 'dress':
+                dispatch(setDress(randomOutfit));
+                break;
+            case 'upper':
+                const lowerOutfit =
+                    lowerTryons[Math.floor(Math.random() * lowerTryons.length)];
+                if (lowerOutfit) {
+                    dispatch(
+                        setUpperLower({
+                            upper: randomOutfit,
+                            lower: lowerOutfit,
+                        }),
+                    );
+                } else {
+                    dispatch(setUpper(randomOutfit));
+                }
+                break;
+            case 'lower':
+                const upperOutfit =
+                    upperTryons[Math.floor(Math.random() * upperTryons.length)];
+                if (upperOutfit) {
+                    dispatch(
+                        setUpperLower({
+                            upper: upperOutfit,
+                            lower: randomOutfit,
+                        }),
+                    );
+                } else {
+                    dispatch(setUpper(randomOutfit));
+                }
+                break;
+            default:
+                Toast.show({
+                    type: 'error',
+                    text1: 'Type de vêtement inconnu',
+                    position: 'bottom',
+                });
+        }
+    };
+
     return (
         <GestureHandlerRootView>
             <View style={{ flex: 1, position: 'relative', margin: 14 }}>
@@ -59,14 +127,24 @@ export function VTODressingScreen({ navigation }) {
                 </View>
 
                 <View style={styles.iconComponent}>
-                    <TouchableOpacity style={styles.icon} onPress={onPressSave}>
+                    {/* <TouchableOpacity style={styles.icon} onPress={onPressSave}>
                         {currentIsSave ? (
                             <FontAwesome name="bookmark" size={20} />
                         ) : (
                             <FontAwesome name="bookmark-o" size={20} />
                         )}
                         <Text style={styles.textIcon}>Enregistrer</Text>
+                    </TouchableOpacity> */}
+                    <TouchableOpacity
+                        style={styles.icon}
+                        onPress={generateRandomOutfit}
+                    >
+                        <MaterialIcons name="shuffle" size={24} color="#000" />
+                        <Text style={styles.textIcon}>
+                            Génération aléatoire
+                        </Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity
                         style={styles.icon}
                         onPress={handleSnapPress}
@@ -138,5 +216,6 @@ const styles = StyleSheet.create({
         fontSize: 10,
         margin: 0,
         marginTop: spacing.xSmall,
+        textAlign: 'center',
     },
 });

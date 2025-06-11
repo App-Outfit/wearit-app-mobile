@@ -4,6 +4,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { ClothingItem, ClothingDetailResponse } from './clothingTypes';
 
 const selectClothingState = (state: RootState) => state.clothing;
+const selectTryonState = (state: RootState) => state.tryon;
 
 export const selectAllClothes = createSelector(
     selectClothingState,

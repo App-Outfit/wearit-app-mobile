@@ -133,3 +133,14 @@ export async function inpaintDress(
 ): Promise<string> {
     return inpaintRegion(source, dressCloth, dressMask);
 }
+
+export async function inpaintUpperLower(
+    source: string | number,
+    upperCloth: string | number,
+    upperMask: string | number,
+    lowerCloth: string | number,
+    lowerMask: string | number,
+): Promise<string> {
+    const upperResult = await inpaintUpper(source, upperCloth, upperMask);
+    return inpaintLower(upperResult, lowerCloth, lowerMask);
+}

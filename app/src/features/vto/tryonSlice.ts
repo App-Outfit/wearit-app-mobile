@@ -21,6 +21,11 @@ import { TryonItem, TryonDetailResponse } from './tryonTypes';
 // const lowermask_user_base = require('../../../assets/images/exemples/vto/lower_mask.png');
 // const dressmask_user_base = require('../../../assets/images/exemples/vto/dress_mask.png');
 
+export type UpperLowerTryon = {
+    upper: TryonItem | null;
+    lower: TryonItem | null;
+};
+
 export interface TryonState {
     tryons: TryonItem[];
     selectedTryon: {
@@ -35,7 +40,7 @@ export interface TryonState {
 
 const initialState: TryonState = {
     tryons: [],
-    selectedTryon: { upper: null, lower: null, dress: null },
+    selectedTryon: { upper: null, lower: null, dress: null, upperLower: null },
     currentResult: null,
     loading: false,
     error: null,
@@ -67,6 +72,12 @@ const tryonSlice = createSlice({
                 return;
             }
             state.currentResult = action.payload;
+        },
+        setUpperLower(state, action: PayloadAction<UpperLowerTryon>) {
+            const { upper, lower } = action.payload;
+            state.selectedTryon.upper = upper;
+            state.selectedTryon.lower = lower;
+            state.selectedTryon.dress = null;
         },
         updateTryon(
             state,
@@ -166,5 +177,11 @@ const tryonSlice = createSlice({
 });
 
 export default tryonSlice.reducer;
-export const { setUpper, setLower, setDress, updateTryon, setCurrentResult } =
-    tryonSlice.actions;
+export const {
+    setUpper,
+    setLower,
+    setDress,
+    setUpperLower,
+    updateTryon,
+    setCurrentResult,
+} = tryonSlice.actions;
