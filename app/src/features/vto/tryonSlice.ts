@@ -40,7 +40,7 @@ export interface TryonState {
 
 const initialState: TryonState = {
     tryons: [],
-    selectedTryon: { upper: null, lower: null, dress: null, upperLower: null },
+    selectedTryon: { upper: null, lower: null, dress: null },
     currentResult: null,
     loading: false,
     error: null,
