@@ -3,12 +3,16 @@ import asyncio
 from fastapi import UploadFile
 from app.core.logging_config import logger
 from .body_repo import BodyRepository
+from app.core.pubsub_manager import pubsub_manager
+from datetime import datetime
 from .body_schema import (
     BodyUploadResponse, BodyListResponse, BodyItem, BodyMasksResponse
 )
 from app.infrastructure.storage.storage_repo import StorageRepository
 from app.infrastructure.storage.storage_path_builder import StoragePathBuilder
 from app.core.errors import NotFoundError, UnauthorizedError
+from app.core.config import settings
+import replicate
 
 class BodyService:
     def __init__(self, repo: BodyRepository, storage: StorageRepository = None):
@@ -36,28 +40,109 @@ class BodyService:
         )
 
         # Lance preprocessing async
-        asyncio.create_task(self._simulate_preprocessing(user.id, body_id_str))
+        asyncio.create_task(self._body_preprocessing(user.id, body))
 
         return BodyUploadResponse(
             body_id=body_id_str,
             status="pending",
             message="Body uploaded. Preprocessing started."
         )
+    
+    async def _publish_error(self, user_id: str, body_id: str, msg: str):
+        await pubsub_manager.publish(
+            user_id,
+            {
+                "type": "body_preprocessing",
+                "body_id": str(body_id),
+                "status": "failed",
+                "error": msg,
+            }
+        )
 
-    # 🔧 Fake preprocessing async
-    async def _simulate_preprocessing(self, user_id: str, body_id: str):
-        logger.info(f"🧪 Preprocessing body {body_id}")
-        await asyncio.sleep(4)
+    async def _body_preprocessing(self, user_id: str, body):
+        logger.info(f"🧪 [IA] Starting preprocessing for body={body.id}")
 
-        # Stocke les chemins internes (pas les URLs signées) dans Mongo
-        masks = {
-            "mask_upper": StoragePathBuilder.body_mask(user_id, body_id, "upper"),
-            "mask_lower": StoragePathBuilder.body_mask(user_id, body_id, "lower"),
-            "mask_dress": StoragePathBuilder.body_mask(user_id, body_id, "dress"),
-        }
+        body_id = str(body.id)
+        original_key = body.image_url
 
-        await self.repo.set_masks(body_id, masks)
-        logger.info(f"✅ Preprocessing done for body {body_id}")
+        try:
+            # 1️⃣ Génère URL signée pour le modèle
+            original_url = await self.storage.get_presigned_url(original_key)
+
+            # 2️⃣ Appel IA Replicate (exécuté dans un thread)
+            raw_output: dict = await asyncio.to_thread(
+                lambda: replicate.run(
+                    settings.REPLICATE_BODY_REF,
+                    input={
+                        "image": original_url,
+                        "max_height": 512,
+                    }
+                )
+            )
+
+            if not isinstance(raw_output, dict):
+                raise ValueError("Le modèle n’a pas retourné un dict")
+
+            logger.info(f"✅ [IA] Replicate returned: {raw_output}")
+
+            # ✅ 3️⃣ (a) Lire le FileOutput pour l'original et overwrite sur S3
+            original_file = raw_output.get("original")
+            if not original_file:
+                raise ValueError("Pas de champ 'original' dans la sortie IA")
+
+            orig_bytes = await asyncio.to_thread(original_file.read)
+            await self.storage.upload_image(original_key, orig_bytes)
+
+            # ✅ 3️⃣ (b) Lire et uploader chaque mask
+            mask_map = {
+                "upper": "upper",
+                "lower": "lower",
+                "overall": "dress",
+            }
+            s3_masks = {}
+            for model_key, mask_type in mask_map.items():
+                mask_file = raw_output.get(model_key)
+                if not mask_file:
+                    raise ValueError(f"Pas de mask '{model_key}' dans la sortie IA")
+
+                mask_bytes = await asyncio.to_thread(mask_file.read)
+
+                s3_key = StoragePathBuilder.body_mask(user_id, body_id, mask_type)
+                await self.storage.upload_image(s3_key, mask_bytes)
+                s3_masks[f"mask_{mask_type}"] = s3_key
+
+            # ✅ 4️⃣ Mise à jour DB (image_url et masks)
+            await self.repo.update_body_image_url(body_id, original_key)
+            await self.repo.set_masks(body_id, s3_masks)
+            logger.info(f"✅ [IA] Body preprocessing done for {body_id}")
+
+            # ✅ 5️⃣ Génère URLs signées pour le front
+            presigned_original = await self.storage.get_presigned_url(original_key)
+            presigned_masks = {
+                field: await self.storage.get_presigned_url(key)
+                for field, key in s3_masks.items()
+            }
+
+            # ✅ 6️⃣ SSE pour prévenir le front
+            await pubsub_manager.publish(
+                user_id,
+                {
+                    "type": "body_preprocessing",
+                    "body_id": body_id,
+                    "status": "ready",
+                    "original": presigned_original,
+                    "masks": presigned_masks,
+                    "created_at": datetime.now().isoformat(),
+                }
+            )
+            logger.info(f"✅ [IA] SSE published for body {body_id}")
+
+        except Exception as e:
+            msg = f"Échec du preprocessing IA : {e}"
+            logger.exception(msg)
+            await self.repo.set_error(body_id, msg)
+            await self._publish_error(user_id, body_id, msg)
+
 
     # ✅ Liste des bodies
     async def get_all_bodies(self, user) -> BodyListResponse:

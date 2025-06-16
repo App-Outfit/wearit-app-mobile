@@ -21,7 +21,7 @@ class StoragePathBuilder:
         
     @staticmethod
     def body_original(user_id: str, body_id: str) -> str:
-        return f"{user_id}/bodies/{body_id}/original.jpg"
+        return f"{user_id}/bodies/{body_id}/original.png"
 
     @staticmethod
     def body_mask(user_id: str, body_id: str, mask_type: str) -> str:
@@ -30,12 +30,12 @@ class StoragePathBuilder:
 
     @staticmethod
     def clothing_original(user_id: str, clothing_id: str) -> str:
-        return f"{user_id}/clothing/{clothing_id}/original.jpg"
+        return f"{user_id}/clothing/{clothing_id}/original.png"
 
     @staticmethod
     def clothing_resized(user_id: str, clothing_id: str) -> str:
-        return f"{user_id}/clothing/{clothing_id}/resized.jpg"
+        return f"{user_id}/clothing/{clothing_id}/resized.png"
 
     @staticmethod
     def tryon(user_id: str, body_id: str, tryon_id: str) -> str:
-        return f"{user_id}/tryons/{body_id}/{tryon_id}.jpg"
+        return f"{user_id}/tryons/{body_id}/{tryon_id}.png"

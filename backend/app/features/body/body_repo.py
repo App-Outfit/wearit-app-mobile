@@ -64,9 +64,15 @@ class BodyRepository:
             raise NotFoundError("Body not found")
         return BodyModel(**doc)
        
-
-    # ✅ Supprime un body
-    async def delete_body(self, body_id: str):
-        result = await self._col.delete_one({"_id": ObjectId(body_id)})
-        if result.deleted_count != 1:
-            raise NotFoundError("No body deleted")
+    # ✅ Met à jour le champ image_url d’un body
+    async def update_body_image_url(self, body_id: str, new_image_url: str):
+        update = {
+            "image_url": new_image_url,
+            "updated_at": datetime.now()
+        }
+        result = await self._col.update_one(
+            {"_id": ObjectId(body_id)},
+            {"$set": update}
+        )
+        if result.matched_count == 0:
+            raise NotFoundError("Body not found")
