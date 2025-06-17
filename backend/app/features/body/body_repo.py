@@ -82,3 +82,16 @@ class BodyRepository:
         if result.deleted_count == 0:
             raise NotFoundError("Body not found")
         return result.deleted_count > 0
+    
+    async def set_error(self, body_id: str, error_message: str):
+        update = {
+            "status": "error",
+            "error_message": error_message,
+            "updated_at": datetime.now()
+        }
+        result = await self._col.update_one(
+            {"_id": ObjectId(body_id)},
+            {"$set": update}
+        )
+        if result.matched_count == 0:
+            raise NotFoundError("Body not found")
