@@ -76,3 +76,9 @@ class BodyRepository:
         )
         if result.matched_count == 0:
             raise NotFoundError("Body not found")
+        
+    async def delete_body(self, body_id: str):
+        result = await self._col.delete_one({"_id": ObjectId(body_id)})
+        if result.deleted_count == 0:
+            raise NotFoundError("Body not found")
+        return result.deleted_count > 0
