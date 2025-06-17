@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pymongo.database import Database, ReturnDocument
+from pymongo.database import Database
 from bson import ObjectId
 from datetime import datetime
 
@@ -24,7 +24,6 @@ class TryonRepository:
         result = await self._users_col.find_one_and_update(
             {"_id": ObjectId(user_id), "credits": {"$gt": 0}},
             {"$inc": {"credits": -1}},
-            return_document=ReturnDocument.AFTER
         )
 
         if not result:
