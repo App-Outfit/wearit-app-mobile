@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pymongo.database import Database
+from pymongo.database import Database, ReturnDocument
 from bson import ObjectId
 from datetime import datetime
 
@@ -10,6 +10,7 @@ from .tryon_model import TryonModel
 class TryonRepository:
     def __init__(self, db: Database):
         self._col = db["tryons"]
+        self._user = db["users"]
 
     async def create_tryon(
         self,
@@ -20,6 +21,15 @@ class TryonRepository:
         version: int,
         created_at: datetime
     ) -> TryonModel:
+        result = await self._users_col.find_one_and_update(
+            {"_id": ObjectId(user_id), "credits": {"$gt": 0}},
+            {"$inc": {"credits": -1}},
+            return_document=ReturnDocument.AFTER
+        )
+
+        if not result:
+            raise Exception("User has no credits left")
+        
         doc = {
             "_id": tryon_id,
             "user_id": ObjectId(user_id),
