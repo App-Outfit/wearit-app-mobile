@@ -235,3 +235,36 @@ class TryonService:
         finally:
             # 4) Désabonnement propre
             pubsub_manager.unsubscribe(user_id, queue)
+
+    async def get_tryon_by_body(
+        self, body_id: str, user
+    ) -> TryonListResponse:
+        """
+        Récupère tous les try-ons pour un body spécifique.
+        """
+        body = await self.body_repo.get_body_by_id(body_id)
+        if not body or str(body.user_id) != str(user.id):
+            raise UnauthorizedError("You do not own this body")
+
+        docs = await self.repo.get_all_by_body_and_clothing(body_id, None)
+        tryons = []
+        for doc in docs:
+            if doc.output_url:
+                url = await self.storage.get_presigned_url(doc.output_url)
+            else:
+                url = None
+
+            if not url:
+                logger.warning(f"🔴 [Tryon] No output URL for tryon {doc.id}, skipping")
+                continue
+
+            tryons.append(TryonItem(
+                id=str(doc.id),
+                output_url=url,
+                body_id=str(doc.body_id),
+                clothing_id=str(doc.clothing_id),
+                status=doc.status,
+                created_at=doc.created_at,
+                version=doc.version
+            ))
+        return TryonListResponse(tryons=tryons)

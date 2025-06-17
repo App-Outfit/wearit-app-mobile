@@ -57,6 +57,16 @@ async def get_all_tryons(
     logger.info(f"📦 List tryons for user {current_user.id}")
     return await service.get_all_tryons(current_user.id)
 
+# ✅ Obtenir tous les tryons d'un body spécifique
+@router.get("/body/{body_id}", response_model=TryonListResponse)
+async def get_tryons_by_body(
+    body_id: str,
+    current_user=Depends(get_current_user),
+    service: TryonService = Depends(get_service)
+):
+    logger.info(f"📦 List tryons for body {body_id} for user {current_user.id}")
+    return await service.get_tryons_by_body(body_id, current_user)
+
 # ✅ Obtenir un tryon par ID
 @router.get("/{tryon_id}", response_model=TryonDetailResponse)
 async def get_tryon_by_id(
