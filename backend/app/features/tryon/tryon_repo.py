@@ -21,7 +21,7 @@ class TryonRepository:
         version: int,
         created_at: datetime
     ) -> TryonModel:
-        result = await self._users_col.find_one_and_update(
+        result = await self._users.find_one_and_update(
             {"_id": ObjectId(user_id), "credits": {"$gt": 0}},
             {"$inc": {"credits": -1}},
         )
