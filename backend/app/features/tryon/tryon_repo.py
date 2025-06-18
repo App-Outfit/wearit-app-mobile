@@ -10,7 +10,7 @@ from .tryon_model import TryonModel
 class TryonRepository:
     def __init__(self, db: Database):
         self._col = db["tryons"]
-        self._user = db["users"]
+        self._users = db["users"]
 
     async def create_tryon(
         self,
