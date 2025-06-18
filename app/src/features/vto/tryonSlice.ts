@@ -12,6 +12,7 @@ import {
     fetchTryonById,
     deleteTryon,
     inpaintTryon,
+    fetchTryonsByBodyId,
 } from './tryonThunks';
 import { TryonItem, TryonDetailResponse } from './tryonTypes';
 // import { loadAssetBase64 } from './service/InpaintingService';
@@ -100,6 +101,10 @@ const tryonSlice = createSlice({
             state.tryons = payload.tryons;
         });
 
+        builder.addCase(fetchTryonsByBodyId.fulfilled, (state, { payload }) => {
+            state.tryons = payload.tryons;
+        });
+
         // on stocke le détail via fetchTryonById
         builder.addCase(fetchTryonById.fulfilled, (state, { payload }) => {
             // state.selectedTryon = payload;
@@ -137,6 +142,7 @@ const tryonSlice = createSlice({
                 fetchTryonById.pending,
                 deleteTryon.pending,
                 inpaintTryon.pending,
+                fetchTryonsByBodyId.pending,
             ),
             (state) => {
                 state.loading = true;
@@ -152,6 +158,7 @@ const tryonSlice = createSlice({
                 fetchTryonById.rejected,
                 deleteTryon.rejected,
                 inpaintTryon.rejected,
+                fetchTryonsByBodyId.rejected,
             ),
             (state, action) => {
                 state.loading = false;
@@ -168,6 +175,7 @@ const tryonSlice = createSlice({
                 fetchTryonById.fulfilled,
                 deleteTryon.fulfilled,
                 inpaintTryon.fulfilled,
+                fetchTryonsByBodyId.fulfilled,
             ),
             (state) => {
                 state.loading = false;

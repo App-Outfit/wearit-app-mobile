@@ -23,6 +23,37 @@ export const toastConfig = {
             trailingIcon={null}
         />
     ),
+
+    error: (props: any) => (
+        <BaseToast
+            {...props}
+            style={[styles.container, { backgroundColor: baseColors.error }]}
+            contentContainerStyle={styles.contentContainer}
+            text1Style={styles.text1}
+            renderLeadingIcon={() => (
+                <Feather name="x" size={23} color="#fff" style={styles.icon} />
+            )}
+            trailingIcon={null}
+        />
+    ),
+
+    info: (props: any) => (
+        <BaseToast
+            {...props}
+            style={[styles.container, { backgroundColor: baseColors.primary }]}
+            contentContainerStyle={styles.contentContainer}
+            text1Style={styles.text1}
+            renderLeadingIcon={() => (
+                <Feather
+                    name="info"
+                    size={23}
+                    color="#fff"
+                    style={styles.icon}
+                />
+            )}
+            trailingIcon={null}
+        />
+    ),
 };
 
 export function ToastAlert() {

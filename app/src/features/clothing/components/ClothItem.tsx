@@ -14,6 +14,9 @@ import { selectCurrentBody } from '../../body/bodySelectors';
 import { BodyItem } from '../../body/bodyTypes';
 import { selectUserCredits } from '../../profil/selectors/userSelectors';
 
+import Toast from 'react-native-toast-message';
+import { fetchCredits } from '../../profil/thunks/userThunks';
+
 export const ClothItem = React.memo(function ClothItem({
     navigation,
     cloth,
@@ -56,8 +59,11 @@ export const ClothItem = React.memo(function ClothItem({
     };
 
     const verifyCredits = () => {
-        if (credits < 10) {
-            navigation.push('ProfilSubscription');
+        console.debug('verifyCredits : ', credits);
+        console.debug('navigation : ', navigation);
+
+        if (credits < 1) {
+            navigation.navigate('ProfilSubscription');
         } else {
             getTryon();
         }
@@ -71,8 +77,21 @@ export const ClothItem = React.memo(function ClothItem({
                 createTryon({ body_id: body!.id, clothing_id: cloth.id }),
             );
 
+            Toast.show({
+                type: 'info',
+                text1: "Try on en cours d'excution",
+                position: 'bottom',
+            });
+
             setStatus('loading');
+            dispatch(fetchCredits());
         } catch (errorMessage) {
+            Toast.show({
+                type: 'error',
+                text1: 'Erreur lors de la création du try on',
+                position: 'bottom',
+            });
+
             setStatus('undefined');
         }
 
@@ -120,10 +139,14 @@ export const ClothItem = React.memo(function ClothItem({
 
 const styleClothing = StyleSheet.create({
     imgBox: {
+        minWidth: 90,
         width: 90,
         height: 140,
-        marginBottom: spacing.small,
+        marginBottom: spacing.medium,
         position: 'relative',
+        borderRadius: spacing.small,
+        boxShadow: '0px 2px 8px rgba(0,0,0,0.2)',
+        overflow: 'hidden',
     },
     img: {
         width: '100%',

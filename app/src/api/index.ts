@@ -5,14 +5,15 @@ import { Platform } from 'react-native';
 import { parseApiError } from '../utils/apiError';
 
 function getHost(): string {
-    if (Platform.OS === 'android') return '192.168.1.162';
+    if (Platform.OS === 'android') return '10.41.167.187';
+    // if (Platform.OS === 'android') return '192.168.1.162';
     // if (Platform.OS === 'android') return '127.0.0.1';
     if (Platform.OS === 'ios') return '192.168.1.26'; // votre IP LAN
     return 'localhost';
 }
 
 export const BASE_URL = `http://${getHost()}:8000/api/v1`;
-console.log(`🌐 API baseURL = ${BASE_URL}`);
+// console.log(`🌐 API baseURL = ${BASE_URL}`);
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -50,11 +51,11 @@ api.interceptors.request.use(
 // — Response interceptor : logs + normalisation d’erreur
 api.interceptors.response.use(
     (resp) => {
-        console.log('← HTTP RESPONSE', resp.status, resp.config.url);
+        // console.log('← HTTP RESPONSE', resp.status, resp.config.url);
         return resp;
     },
     (error: AxiosError) => {
-        console.log('← HTTP ERROR', error.message, '→', error.config?.url);
+        // console.log('← HTTP ERROR', error.message, '→', error.config?.url);
         // Transforme tout AxiosError en Error avec message friendly
         const message = parseApiError(error);
         return Promise.reject(new Error(message));

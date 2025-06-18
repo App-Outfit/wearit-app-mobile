@@ -57,6 +57,7 @@ type Colors = {
 type Spacing = {
     xSmall: number;
     small: number;
+    smallPlus: number;
     medium: number;
     large: number;
     xLarge: number;
@@ -184,6 +185,7 @@ const typography = {
 const spacing: Spacing = {
     xSmall: normalize(4),
     small: normalize(8),
+    smallPlus: normalize(12),
     medium: normalize(16),
     large: normalize(24),
     xLarge: normalize(32),

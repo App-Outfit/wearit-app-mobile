@@ -5,6 +5,7 @@ import { CommonActions } from '@react-navigation/native';
 import {
     BottomNavigation,
     Provider as PaperProvider,
+    TouchableRipple,
 } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
@@ -12,15 +13,9 @@ import { View, Text } from 'react-native';
 
 // Import your screens
 import { HomeScreen } from '../../screens/HomeScreen/HomeScreen';
-// import MarketplaceScreen from '../../screens/MarketplaceScreen/MarketplaceScreen';
-// import VirtualTryOnScreen from '../screens/VirtualTryOnScreen/VirtualTryOnScreen';
-// import { DressingHomeScreen } from '../../features/dressing/screen/DressingHomeScreen';
-// import { DressingNavigator } from '../../features/dressing/navigation/DressingNavigator';
-import { lightTheme } from '../../styles/theme';
+import { baseColors, lightTheme } from '../../styles/theme';
 import { VTONavigator } from '../../features/vto/navigation/VTOMainNavigation';
-import { ProfilScreen } from '../../features/profil/screen/ProfilScreen';
 import { ProfilNavigator } from '../../features/profil/navigation/ProfilNavigator';
-// import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 
 export type MainTabParamList = {
     Home: undefined;
@@ -45,7 +40,10 @@ const MainTabNavigator: React.FC = () => (
                     safeAreaInsets={insets}
                     activeColor="#7E57C2"
                     inactiveColor="#757575"
-                    barStyle={{ backgroundColor: '#fff', elevation: 4 }}
+                    style={{
+                        height: 75,
+                        backgroundColor: '#f7f7ff',
+                    }}
                     shifting={false}
                     onTabPress={({ route, preventDefault }) => {
                         const event = navigation.emit({
@@ -70,6 +68,7 @@ const MainTabNavigator: React.FC = () => (
                         const color = focused
                             ? lightTheme.colors.primary
                             : '#f7f7ff7';
+
                         return (
                             options.tabBarIcon?.({ focused, color, size }) ??
                             null
@@ -82,6 +81,11 @@ const MainTabNavigator: React.FC = () => (
                             : typeof options.title === 'string'
                               ? options.title
                               : route.name;
+                    }}
+                    theme={{
+                        colors: {
+                            secondaryContainer: 'transparent',
+                        },
                     }}
                 />
             )}

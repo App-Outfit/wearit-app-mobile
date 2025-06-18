@@ -32,6 +32,7 @@ import { selectCurrentBody } from '../../body/bodySelectors';
 import { UpperLowerTryon, setCurrentResult } from '../tryonSlice';
 import { inpaintTryon } from '../tryonThunks';
 import { current } from '@reduxjs/toolkit';
+import Toast from 'react-native-toast-message';
 
 const ImageDisplay = React.memo(
     ({ uri }: { uri: string }) => (
@@ -49,12 +50,7 @@ const ImageDisplay = React.memo(
 );
 
 export function isUpperLowerTryon(x: any): x is UpperLowerTryon {
-    return (
-        x && typeof x === 'object' && 'upper' in x && 'lower' in x
-        // optionnel : tu peux aussi vérifier
-        // && x.upper?.id !== undefined
-        // && x.lower?.id !== undefined
-    );
+    return x && typeof x === 'object' && 'upper' in x && 'lower' in x;
 }
 
 export default function VTODisplay({ onNavigate }) {
@@ -67,7 +63,7 @@ export default function VTODisplay({ onNavigate }) {
     const current_body = useAppSelector(selectCurrentBody);
 
     React.useEffect(() => {
-        dispatch(loadTryonsSuccess(sampleTryons));
+        // dispatch(loadTryonsSuccess(sampleTryons));
         dispatch(fetchCurrentBody());
     }, [dispatch]);
 
@@ -212,6 +208,12 @@ export default function VTODisplay({ onNavigate }) {
         }
     }, [selectedTryon, currentType, dispatch]);
 
+    React.useEffect(() => {
+        if (resultBase64) {
+            setTryon64(resultBase64);
+        }
+    }, [resultBase64]);
+
     return (
         <View style={styles.boxImg}>
             {current_body !== null ? (
@@ -223,7 +225,7 @@ export default function VTODisplay({ onNavigate }) {
                         source={{
                             uri: `data:image/png;base64,${resultBase64}`,
                         }}
-                        resizeMode="cover"
+                        resizeMode="contain"
                     />
                     <View style={styles.addButtonBox}>
                         <AddButtonText

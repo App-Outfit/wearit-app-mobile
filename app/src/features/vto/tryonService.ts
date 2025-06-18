@@ -22,6 +22,10 @@ export const tryonService = {
     getTryonById: (tryon_id: string): Promise<TryonDetailResponse> =>
         api.get(`/tryon/${tryon_id}`).then((r) => r.data),
 
+    /** GET /api/v1/tryon/{bodyID} */
+    getTryonsByBodyId: (bodyID: string): Promise<TryonListResponse> =>
+        api.get(`/tryon/body/${bodyID}`).then((r) => r.data),
+
     /** DELETE /api/v1/tryon/{tryon_id} */
     deleteTryon: (tryon_id: string): Promise<TryonDeleteResponse> =>
         api.delete(`/tryon/${tryon_id}`).then((r) => r.data),

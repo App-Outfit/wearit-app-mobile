@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, StyleSheet, FlatList } from 'react-native';
+import { Text, StyleSheet, FlatList, Dimensions } from 'react-native';
 
 import { ImportChoice } from '../../../components/choice_component/ImportChoice';
 import { ModalAddClothInfo } from '../component/ModalAddClothInfo';
@@ -13,12 +13,19 @@ import {
     ClothingItem,
     ClothingUploadPayload,
 } from '../../clothing/clothingTypes';
-import { fetchTryons } from '../tryonThunks';
+import { fetchTryons, fetchTryonsByBodyId } from '../tryonThunks';
 import { selectAllTryons, selectTryonByClothID } from '../tryonSelectors';
 import { ClothItem } from '../../clothing/components/ClothItem';
 import { useTryonSSE } from '../hooks/useTryonSSE';
+import { DrawerToggleButton } from '../../../components/core/DrawerToggleButton';
+import Toast from 'react-native-toast-message';
+import { useNavigation } from '@react-navigation/native';
+import { selectCurrentBody } from '../../body/bodySelectors';
+import { fetchCurrentBody } from '../../body/bodyThunks';
 
-export function MiniDressing() {
+export function MiniDressing({ setDrawerCloth, drawerCloth }) {
+    // Navigation
+    const navigation = useNavigation();
     const dispatch = useAppDispatch();
     const [newPictureUri, setNewPictureUri] = React.useState<string | null>(
         null,
@@ -29,21 +36,25 @@ export function MiniDressing() {
         setImportModalOpen(true);
     };
 
+    const current_body = useAppSelector(selectCurrentBody);
     const userCloth = useAppSelector(selectAllClothes);
     const allTryons = useAppSelector(selectAllTryons);
     const allCloths = userCloth;
 
-    const userTryon = useAppSelector(selectAllTryons);
-    const jwtToken = useAppSelector((state) => state.auth.token);
+    const screenWidth = Dimensions.get('window').width;
 
     useTryonSSE();
 
     React.useEffect(() => {
         dispatch(fetchClothes());
-
-        // try on
-        dispatch(fetchTryons());
+        dispatch(fetchCurrentBody());
     }, [dispatch]);
+
+    React.useEffect(() => {
+        if (current_body) {
+            dispatch(fetchTryonsByBodyId(current_body.id));
+        }
+    }, [current_body, dispatch]);
 
     const handleImagePicked = async (uri) => {
         setImportModalOpen(false);
@@ -81,7 +92,23 @@ export function MiniDressing() {
                 file: formData,
             };
 
-            const action = await dispatch(uploadClothing(payload));
+            const action = await dispatch(uploadClothing(payload)).then(
+                (result) => {
+                    if (uploadClothing.fulfilled.match(result)) {
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Vêtement ajouté avec succès !',
+                            position: 'bottom',
+                        });
+                    } else {
+                        Toast.show({
+                            type: 'error',
+                            text1: "Erreur lors de l'ajout du vêtement.",
+                            position: 'bottom',
+                        });
+                    }
+                },
+            );
         } catch (error) {
             console.error('ERROR UPLOAD CLOTHING :', error);
         }
@@ -94,28 +121,57 @@ export function MiniDressing() {
         ({ item }: { item: ClothingItem }) => {
             const associatedTryon =
                 allTryons.find((t) => t.clothing_id === item.id) ?? null;
-            return <ClothItem cloth={item} associatedTryon={associatedTryon} />;
+            return (
+                <ClothItem
+                    navigation={navigation}
+                    cloth={item}
+                    associatedTryon={associatedTryon}
+                />
+            );
         },
         [allTryons],
     );
 
     return (
         <>
-            <FlatList
-                data={allCloths}
-                keyExtractor={(c) => c.id}
-                renderItem={renderItem}
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={5}
-                removeClippedSubviews={true}
-                ListHeaderComponent={
-                    <AddButtonText
-                        onPress={openModalAddCloth}
-                        text="Ajouter un vêtement"
-                    />
-                }
+            {drawerCloth && (
+                <FlatList
+                    data={allCloths}
+                    style={styleDressing.scrollView}
+                    contentContainerStyle={{
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                    }}
+                    keyExtractor={(c) => c.id}
+                    renderItem={renderItem}
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={10}
+                    windowSize={21}
+                    removeClippedSubviews={true}
+                    ListHeaderComponent={
+                        <AddButtonText
+                            onPress={openModalAddCloth}
+                            text="Ajouter un vêtement"
+                        />
+                    }
+                />
+            )}
+
+            <DrawerToggleButton
+                active={true}
+                onPress={() => {
+                    setDrawerCloth(!drawerCloth);
+                }}
+                size={40}
+                iconColor={baseColors.black}
+                backgroundColor={baseColors.white}
+                style={{
+                    position: 'absolute',
+                    top: screenWidth / 1.5,
+                    right: '90%',
+                }}
             />
+
             <ImportChoice
                 open={importModalOpen}
                 onClose={() => setImportModalOpen(false)}
@@ -135,10 +191,4 @@ const styleDressing = StyleSheet.create({
         flex: 1,
         width: '100%',
     },
-    scrollViewContainer: {
-        flexDirection: 'column',
-        alignSelf: 'flex-end',
-        width: '100%',
-    },
 });
-<Text>React Component</Text>;

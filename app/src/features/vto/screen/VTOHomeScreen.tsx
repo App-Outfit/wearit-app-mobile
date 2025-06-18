@@ -4,7 +4,7 @@ import VTODisplay from '../component/VTODisplay';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { spacing } from '../../../styles/theme';
+import { baseColors, spacing } from '../../../styles/theme';
 import Toast from 'react-native-toast-message';
 import { ToastAlert } from '../../../components/core/Toast';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -20,6 +20,8 @@ import {
     selectReadyTryonsWithType,
 } from '../tryonSelectors';
 import { setDress, setUpper, setUpperLower } from '../tryonSlice';
+import MenuDrawer from 'react-native-side-drawer';
+import { DrawerToggleButton } from '../../../components/core/DrawerToggleButton';
 
 export function VTODressingScreen({ navigation }) {
     const [currentIsSave, setCurrentSave] = React.useState<boolean>(false);
@@ -27,6 +29,7 @@ export function VTODressingScreen({ navigation }) {
     const tryonsReady = useAppSelector(selectReadyTryonsWithType);
     const upperTryons = useAppSelector(selectReadyTryonsUpper);
     const lowerTryons = useAppSelector(selectReadyTryonsLower);
+    const [drawerCloth, setDrawerCloth] = React.useState<boolean>(true);
     const dispatch = useAppDispatch();
 
     const succesSaveOutfitToast = () => {
@@ -118,11 +121,46 @@ export function VTODressingScreen({ navigation }) {
 
     return (
         <GestureHandlerRootView>
-            <View style={{ flex: 1, position: 'relative', margin: 14 }}>
+            <View
+                style={{
+                    flex: 1,
+                    position: 'relative',
+                    marginHorizontal: spacing.small,
+                }}
+            >
                 <View style={styles.container}>
-                    <View style={styles.vtoDisplayContainer}>{display}</View>
-                    <View style={styles.scrollComponent}>
-                        <MiniDressing />
+                    <View
+                        style={[
+                            styles.vtoDisplayContainer,
+                            {
+                                flex: drawerCloth ? 1 : 2.8,
+                            },
+                        ]}
+                    >
+                        {display}
+                    </View>
+                    <View
+                        style={[
+                            styles.scrollComponent,
+                            {
+                                minWidth: drawerCloth ? 110 : 0,
+                                width: drawerCloth ? 'auto' : 0,
+                            },
+                        ]}
+                    >
+                        {/* <MenuDrawer
+                            open={drawerCloth}
+                            position={'right'}
+                            drawerContent={<MiniDressing setDrawerCloth={setDrawerCloth} drawerCloth={drawerCloth}/>}
+                            drawerPercentage={25}
+                            animationTime={250}
+                            overlay={true}
+                            opacity={1}
+                        />   */}
+                        <MiniDressing
+                            setDrawerCloth={setDrawerCloth}
+                            drawerCloth={drawerCloth}
+                        />
                     </View>
                 </View>
 
@@ -171,24 +209,22 @@ export function VTODressingScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scrollContent: {
-        padding: spacing.medium,
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-    },
     container: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'flex-start',
     },
     vtoDisplayContainer: {
-        flex: 3,
+        // flex: 2.8,
         marginRight: 10,
-        height: '95%',
+        height: '98%',
     },
     scrollComponent: {
-        flex: 1,
+        // flex: 1,
+        // minWidth: 110,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        position: 'relative',
     },
 
     iconComponent: {

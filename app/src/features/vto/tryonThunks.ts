@@ -61,6 +61,20 @@ export const fetchTryonById = createAsyncThunk<TryonDetailResponse, string>(
     },
 );
 
+/** Fetch all tryon of a body ID */
+export const fetchTryonsByBodyId = createAsyncThunk<TryonListResponse, string>(
+    'tryon/body',
+    async (body_id, { rejectWithValue }) => {
+        try {
+            return await tryonService.getTryonsByBodyId(body_id);
+        } catch (err: any) {
+            return rejectWithValue(
+                err.response?.data?.message || 'Fetch try-ons by body failed',
+            );
+        }
+    },
+);
+
 /** Delete a tryon */
 export const deleteTryon = createAsyncThunk<TryonDeleteResponse, string>(
     'tryon/delete',

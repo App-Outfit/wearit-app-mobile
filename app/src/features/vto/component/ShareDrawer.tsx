@@ -89,6 +89,7 @@ export function ShareDrawer({ ref, onChange }) {
 const styleShare = StyleSheet.create({
     contentContainer: {
         flex: 1,
+        zIndex: 2000,
     },
     titleContainer: {
         height: 30,

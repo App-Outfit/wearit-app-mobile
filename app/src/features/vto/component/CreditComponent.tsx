@@ -4,11 +4,19 @@ import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { useNavigation } from '@react-navigation/native';
-import { useAppSelector } from '../../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
 import { selectUserCredits } from '../../profil/selectors/userSelectors';
+import { fetchCredits } from '../../profil/thunks/userThunks';
 
 export const CreditComponent = ({ navigation }) => {
     const credits = useAppSelector(selectUserCredits);
+    const dispatch = useAppDispatch();
+
+    React.useEffect(() => {
+        if (credits === null || credits === undefined || credits <= 0) {
+            dispatch(fetchCredits());
+        }
+    }, [credits]);
 
     return (
         <View style={styles.creditBox}>
@@ -16,7 +24,7 @@ export const CreditComponent = ({ navigation }) => {
                 style={styles.creditContent}
                 onPress={() => navigation.push('ProfilSubscription')}
             >
-                <Text style={styles.textCredit}>{credits}</Text>
+                <Text style={styles.textCredit}>{credits || 0}</Text>
                 <MaterialCommunityIcons
                     name="diamond"
                     size={14}

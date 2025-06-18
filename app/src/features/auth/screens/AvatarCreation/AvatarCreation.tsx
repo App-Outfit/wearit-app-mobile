@@ -27,6 +27,8 @@ import Feather from 'react-native-vector-icons/Feather';
 import { uploadBody } from '../../../body/bodyThunks';
 import { useAppDispatch } from '../../../../utils/hooks';
 import { createFormData } from '../../../../utils/form';
+import Toast from 'react-native-toast-message';
+import { ToastAlert } from '../../../../components/core/Toast';
 
 const width = Dimensions.get('window').width;
 const data = [
@@ -74,16 +76,26 @@ export function AvatarCreationScreen({ navigation }: any) {
         // Send newPictureURI to backend
         try {
             const formData = createFormData(uri);
-            const action = await dispatch(uploadBody(formData));
-
-            if (uploadBody.fulfilled.match(action)) {
-                navigation.push('AvatarWaiting');
-            }
+            const action = await dispatch(uploadBody(formData)).then(
+                (result) => {
+                    if (uploadBody.fulfilled.match(result)) {
+                        navigation.push('AvatarWaiting');
+                    } else {
+                        Toast.show({
+                            type: 'error',
+                            text1: "Erreur de création d'avatar",
+                            position: 'bottom',
+                        });
+                    }
+                },
+            );
         } catch (error) {
-            console.log('ERROR UPLOAD BODY : ', error);
+            Toast.show({
+                type: 'error',
+                text1: "Erreur de création d'avatar",
+                position: 'bottom',
+            });
         }
-
-        // Navigate to Screen Waiting Create Avatar
     };
 
     return (
@@ -190,6 +202,8 @@ export function AvatarCreationScreen({ navigation }: any) {
                     onPicked={(uri) => handleImagePicked(uri)}
                 />
             </View>
+
+            <ToastAlert />
         </View>
     );
 }
