@@ -246,7 +246,7 @@ class TryonService:
         if not body or str(body.user_id) != str(user.id):
             raise UnauthorizedError("You do not own this body")
 
-        docs = await self.repo.get_all_by_body_and_clothing(body_id, None)
+        docs = await self.repo.get_all_by_body(body_id)
         tryons = []
         for doc in docs:
             if doc.output_url:

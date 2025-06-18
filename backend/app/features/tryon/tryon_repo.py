@@ -98,6 +98,18 @@ class TryonRepository:
         for doc in docs:
             doc.setdefault("output_url", None)
         return [TryonModel(**doc) for doc in docs]
+    
+    async def get_all_by_body(
+        self,
+        body_id: str
+    ) -> List[TryonModel]:
+        cursor = self._col.find({"body_id": ObjectId(body_id)}).sort("created_at", 1)
+
+        docs = await cursor.to_list(length=None)
+        for doc in docs:
+            doc.setdefault("output_url", None)
+        return [TryonModel(**doc) for doc in docs]
+
 
     async def get_tryon_by_id(self, tryon_id: str) -> Optional[TryonModel]:
         doc = await self._col.find_one({"_id": ObjectId(tryon_id)})
