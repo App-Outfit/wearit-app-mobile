@@ -236,7 +236,7 @@ class TryonService:
             # 4) Désabonnement propre
             pubsub_manager.unsubscribe(user_id, queue)
 
-    async def get_tryon_by_body(
+    async def get_tryons_by_body(
         self, body_id: str, user
     ) -> TryonListResponse:
         """
