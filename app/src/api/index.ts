@@ -5,8 +5,8 @@ import { Platform } from 'react-native';
 import { parseApiError } from '../utils/apiError';
 
 function getHost(): string {
-    if (Platform.OS === 'android') return '10.41.167.187';
-    // if (Platform.OS === 'android') return '192.168.1.162';
+    // if (Platform.OS === 'android') return '10.41.167.187';
+    if (Platform.OS === 'android') return '192.168.1.162';
     // if (Platform.OS === 'android') return '127.0.0.1';
     if (Platform.OS === 'ios') return '192.168.1.26'; // votre IP LAN
     return 'localhost';
