@@ -24,6 +24,7 @@ import {
 } from '../thunks/userThunks';
 import { logout } from '../../auth/slices/authSlice';
 import { CommonActions } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function ProfilScreen({ navigation }) {
     const [modalDisconect, setModalDisconnect] = React.useState<boolean>(false);
@@ -56,6 +57,7 @@ export function ProfilScreen({ navigation }) {
 
     const onDisconnect = React.useCallback(() => {
         dispatch(logout());
+        AsyncStorage.removeItem('token');
 
         navigation.dispatch(
             CommonActions.reset({

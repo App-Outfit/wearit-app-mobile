@@ -13,7 +13,7 @@ export const selectUserProfile = createSelector(
 /** Nombre de credits (0 si pas encore chargé) */
 export const selectUserCredits = createSelector(
     selectUserProfile,
-    (profile) => profile?.credits ?? 0,
+    (profile) => profile?.credits,
 );
 
 /** Date de dernière mise à jour des crédits */

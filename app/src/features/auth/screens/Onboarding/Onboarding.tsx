@@ -41,8 +41,10 @@ export default function OnboardingWizard({ navigation }: any) {
     }, [token]);
 
     const next = () => {
+        console.log('next', idx, steps.length - 1);
+
         if (idx === steps.length - 1) {
-            navigation.replace('MainTabs');
+            navigation.push('AvatarCreation');
         } else {
             setIdx((i) => Math.min(i + 1, steps.length - 1));
         }

@@ -6,17 +6,19 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
 import { selectUserCredits } from '../../profil/selectors/userSelectors';
-import { fetchCredits } from '../../profil/thunks/userThunks';
+import { fetchCredits, fetchProfile } from '../../profil/thunks/userThunks';
 
 export const CreditComponent = ({ navigation }) => {
     const credits = useAppSelector(selectUserCredits);
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
-        if (credits === null || credits === undefined || credits <= 0) {
-            dispatch(fetchCredits());
-        }
-    }, [credits]);
+        dispatch(fetchProfile());
+    }, []);
+
+    React.useEffect(() => {
+        dispatch(fetchCredits());
+    }, [credits, dispatch]);
 
     return (
         <View style={styles.creditBox}>

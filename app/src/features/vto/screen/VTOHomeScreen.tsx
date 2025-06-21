@@ -22,6 +22,8 @@ import {
 import { setDress, setUpper, setUpperLower } from '../tryonSlice';
 import MenuDrawer from 'react-native-side-drawer';
 import { DrawerToggleButton } from '../../../components/core/DrawerToggleButton';
+import { selectUserCredits } from '../../profil/selectors/userSelectors';
+import { fetchCredits } from '../../profil/thunks/userThunks';
 
 export function VTODressingScreen({ navigation }) {
     const [currentIsSave, setCurrentSave] = React.useState<boolean>(false);
@@ -30,6 +32,7 @@ export function VTODressingScreen({ navigation }) {
     const upperTryons = useAppSelector(selectReadyTryonsUpper);
     const lowerTryons = useAppSelector(selectReadyTryonsLower);
     const [drawerCloth, setDrawerCloth] = React.useState<boolean>(true);
+    const credits = useAppSelector(selectUserCredits);
     const dispatch = useAppDispatch();
 
     const succesSaveOutfitToast = () => {
@@ -118,6 +121,10 @@ export function VTODressingScreen({ navigation }) {
                 });
         }
     };
+
+    React.useEffect(() => {
+        if (!credits) dispatch(fetchCredits());
+    }, [credits, dispatch]);
 
     return (
         <GestureHandlerRootView>

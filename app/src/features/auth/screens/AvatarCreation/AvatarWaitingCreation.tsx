@@ -19,30 +19,72 @@ import {
 } from '../../../../styles/theme';
 import { ActivityIndicator, MD2Colors } from 'react-native-paper';
 import { color } from '@rneui/base';
+import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
+import { useBodyWS } from '../../hooks/useBodyWS';
+import { selectCurrentBody } from '../../../body/bodySelectors';
+import Feather from 'react-native-vector-icons/Feather';
 
-export function AvatarWaitingCreationScreen({ navigation }) {
+export function AvatarWaitingCreationScreen({ navigation, route }) {
+    const dispatch = useAppDispatch();
+
+    // Souscription aux événements WS
+    useBodyWS();
+
+    // Récupère l'état du body depuis le store
+    const currentBody = useAppSelector(selectCurrentBody);
+
+    // Quand le preprocessing est prêt, navigue vers l'écran de résultat
+    React.useEffect(() => {
+        // if (currentBody?.status === 'ready') {
+        //     navigation.getParent()?.navigate('Welcome');
+        // }
+        // navigation.getParent("Home")?.navigate('Welcome');
+    }, [currentBody?.status, currentBody?.id, navigation]);
+
     return (
         <View style={styles.container}>
-            <View style={styles.loadingBox}>
-                <ActivityIndicator
-                    animating={true}
-                    color={baseColors.white}
-                    size={60}
-                />
-            </View>
+            {currentBody?.status !== 'ready' ? (
+                <>
+                    <View style={styles.loadingBox}>
+                        <ActivityIndicator
+                            animating={true}
+                            color={baseColors.white}
+                            size={60}
+                        />
+                    </View>
 
-            {/* Section texte */}
-            <View style={styles.textContainer}>
-                <Header variant="h3" style={styles.title}>
-                    Votre Mannequin est en cour de création
-                </Header>
-                <Text style={styles.text}>
-                    Cela prend généralement 15 minutes, mais cela peut prendre
-                    plus de temps. Pendant ce temps, vous êtes libre de faire ce
-                    que vous voulez. Une fois que tout est terminé, nous vous
-                    enverrons un message push !
-                </Text>
-            </View>
+                    <View style={styles.textContainer}>
+                        <Header variant="h3" style={styles.title}>
+                            Votre Mannequin est en cours de création
+                        </Header>
+                        <Text style={styles.text}>
+                            Cela prend généralement X minutes, mais cela peut
+                            prendre plus de temps. Pendant ce temps, vous êtes
+                            libre de faire ce que vous voulez. Une fois que tout
+                            est terminé, nous vous enverrons un message push !
+                        </Text>
+                    </View>
+                </>
+            ) : (
+                <>
+                    <View style={styles.loadingBox}>
+                        <Feather
+                            name="check-circle"
+                            size={60}
+                            color={baseColors.white}
+                        />
+                    </View>
+                    <View style={styles.textContainer}>
+                        <Header variant="h3" style={styles.title}>
+                            Votre Mannequin est prêt !
+                        </Header>
+                        <Text style={styles.text}>
+                            Vous pouvez maintenant continuer à personnaliser
+                            votre avatar et découvrir nos vêtements.
+                        </Text>
+                    </View>
+                </>
+            )}
 
             {/* Boutons CTA */}
             <View style={styles.bottomContainer}>
@@ -55,12 +97,15 @@ export function AvatarWaitingCreationScreen({ navigation }) {
                 >
                     <View style={styles.buttonBottomContainer}>
                         <CButton
-                            disabled
+                            disabled={currentBody?.status !== 'ready'}
                             size="xlarge"
                             style={{ width: 320 }}
-                            onPress={() => console.log('finish')}
+                            onPress={() =>
+                                navigation.getParent()?.navigate('Welcome') ||
+                                navigation.getParent()?.navigate('MainTabs')
+                            }
                         >
-                            Aller à l'acceuil
+                            Continuer
                         </CButton>
                     </View>
                 </LinearGradient>
@@ -68,7 +113,6 @@ export function AvatarWaitingCreationScreen({ navigation }) {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,

@@ -1,6 +1,6 @@
 from bson import ObjectId
 import asyncio
-from fastapi import UploadFile
+from fastapi import UploadFile, WebSocket, WebSocketDisconnect
 from app.core.logging_config import logger
 from .body_repo import BodyRepository
 from app.core.pubsub_manager import pubsub_manager
@@ -219,3 +219,22 @@ class BodyService:
 
         logger.info(f"🗑️ Deleted body {body_id} for user {user.id}")
         return {"message": "Body deleted"}
+    
+    async def stream_body_ws(self, websocket: WebSocket, user_id: str):
+        """
+        Prend en charge une connexion WebSocket et push chaque événement
+        de prétraitement de body pour l'utilisateur donné.
+        """
+        # 1) Abonne l'utilisateur à son canal
+        queue = pubsub_manager.subscribe(user_id)
+        try:
+            # 2) Tant que le client est connecté, on envoie les messages
+            while True:
+                data = await queue.get()           # JSON string depuis le manager
+                await websocket.send_text(data)
+        except WebSocketDisconnect:
+            # 3) Le client a fermé la connexion
+            pass
+        finally:
+            # 4) Désabonnement propre
+            pubsub_manager.unsubscribe(user_id, queue)
