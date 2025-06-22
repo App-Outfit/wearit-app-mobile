@@ -63,7 +63,8 @@ export default function MailStep({
 
         dispatch(
             signupUser({
-                name: onboarding.name!,
+                email: email,
+                first_name: onboarding.name!,
                 answers: {
                     gender: onboarding.gender!,
                     age: onboarding.age!,
@@ -72,7 +73,6 @@ export default function MailStep({
                     q3: onboarding.answers3!.join(','),
                     brand: onboarding.brands!.join(','),
                 },
-                email,
                 password,
             }),
         );
@@ -107,7 +107,9 @@ export default function MailStep({
                             type="error"
                             visible={emailTouched && !emailValid}
                         >
-                            Email invalide
+                            {
+                                'L’adresse e-mail doit être au format utilisateur@domaine.extension'
+                            }
                         </HelperText>
 
                         <TextInput
@@ -123,7 +125,9 @@ export default function MailStep({
                             type="error"
                             visible={passwordTouched && !passwordValid}
                         >
-                            Mot de passe invalide (ex : GTH6dk_dk!)
+                            {'Le mot de passe doit contenir au moins 8 caractères.\n' +
+                                'Inclure au moins une lettre et un chiffre \n' +
+                                'Et ne pas comporter d’espaces.'}
                         </HelperText>
 
                         {error && (

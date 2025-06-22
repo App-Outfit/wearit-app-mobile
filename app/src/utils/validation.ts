@@ -36,6 +36,6 @@ export const validateUsername = (username: string): boolean => {
  * @returns boolean - Returns `true` if the password is valid, otherwise `false`.
  */
 export const validatePassword = (password: string): boolean => {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)\S{6,}$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)\S{8,}$/;
     return passwordRegex.test(password);
 };
