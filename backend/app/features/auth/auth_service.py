@@ -75,7 +75,7 @@ class AuthService:
             "first_name": user.first_name,
             "gender": user.gender,
             "answers": user.answers or {},
-            "credits": 5,
+            "credits": 20,
             "referral_code": referral_code,
             "ref_by": None,
             "created_at": datetime.now(),
