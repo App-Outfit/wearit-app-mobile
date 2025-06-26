@@ -5,15 +5,13 @@ from urllib.parse import quote
 
 import requests
 from requests import Session
-from tqdm import tqdm
 
 from .constants import (
     BASE_OPTIONS,
     PINTEREST_BASE_HEADERS,
 )
 
-from .explorer_schema import (
-
+from .explorer_model import (
     PinterestProduct,
     ProductsPage,
 )
