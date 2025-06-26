@@ -12,3 +12,4 @@ class SearchClothingPayload(BaseModel):
     csrf_token: Optional[str] = Field(
         default=None, description="CSRF token for session validation, if available"
     )
+    gender: Optional[str] = Field(default=None,description="")
