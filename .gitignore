@@ -65,3 +65,4 @@ package-lock.json
 
 backend/.coverage
 openapi.json
+backend/test_endpoint.py

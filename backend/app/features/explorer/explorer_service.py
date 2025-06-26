@@ -52,8 +52,6 @@ class ExplorerService:
         start_time = time.time()
         score = self.best_fashion_score(query)
         begin_time = time.time() - start_time
-        print(f"Time taken to compute score: {begin_time:.2f} seconds")
-        print(f"Score for query '{query}': {score}")
         if score < 0.5:
             return "outfit" + " " + query
         else:
