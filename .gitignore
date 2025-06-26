@@ -64,3 +64,4 @@ node_modules/
 package-lock.json
 
 backend/.coverage
+openapi.json
