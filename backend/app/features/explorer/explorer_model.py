@@ -23,7 +23,7 @@ class PinterestProduct(BaseModel):
 
 
 class ProductsPage(BaseModel):
-    products: List[Union[dict, PinterestProduct]] = Field(
+    products: List[PinterestProduct] = Field(
         default=[],
         description="List of products with their URLs, descriptions, and image URLs",
     )
