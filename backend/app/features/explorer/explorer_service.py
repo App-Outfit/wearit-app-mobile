@@ -48,11 +48,14 @@ class ExplorerService:
         max_score = scores.max().item()
         return max_score
 
-    def transform_as_clothe_query(self, query: str) -> str:
+    def transform_as_clothe_query(self, query: str,gender :str = None) -> str:
         start_time = time.time()
         score = self.best_fashion_score(query)
         begin_time = time.time() - start_time
         if score < 0.5:
-            return "outfit" + " " + query
-        else:
-            return query
+            query = "outfit" + " " + query
+
+        if gender:
+            query = query + ' ' + gender
+
+        return query.strip()
