@@ -8,6 +8,7 @@ from app.features.clothing import clothing_route
 from app.features.tryon import tryon_route
 from app.features.favorite import favorite_route
 from app.features.payment import payment_route
+from app.features.explorer import explorer_route
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -92,6 +93,7 @@ app.add_middleware(
 
 # Vos routers
 API_V1 = settings.API_V1_STR
+
 app.include_router(auth_route.router, prefix=API_V1)
 app.include_router(user_route.router, prefix=API_V1)
 app.include_router(body_route.router, prefix=API_V1)
@@ -99,3 +101,4 @@ app.include_router(clothing_route.router, prefix=API_V1)
 app.include_router(tryon_route.router, prefix=API_V1)
 app.include_router(favorite_route.router, prefix=API_V1)
 app.include_router(payment_route.router, prefix=API_V1)
+app.include_router(explorer_route.router, prefix=API_V1)
