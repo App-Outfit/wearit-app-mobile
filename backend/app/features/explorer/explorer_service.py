@@ -1,8 +1,10 @@
 from .pinterest_scraper import PinterestScraper
-from .explorer_model import PinterestProduct
+from .explorer_model import ProductsPage
+from .explorer_schema import SearchClothingPayload
 from sentence_transformers import SentenceTransformer, util
 import time
 from typing import List
+
 # Concepts mode génériques
 fashion_concepts = [
     "clothing",
@@ -27,13 +29,15 @@ class ExplorerService:
         self.model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
         self.fashion_embeddings = self.model.encode(fashion_concepts)
 
-    def search_clothes(self, query: str, nb_pages: int = 1) -> List[PinterestProduct]:
-
+    def search_clothes(self, payload: SearchClothingPayload) -> List[ProductsPage]:
+        query = payload.query
+        bookmark = payload.bookmark
+        csrf_token = payload.csrf_token
         query = self.transform_as_clothe_query(query)
-        products = self.pinterest_scraper.get_products(
-            query=query, nb_pages=nb_pages, is_buyable=True
+        products_page = self.pinterest_scraper.get_page(
+            query=query, bookmark=bookmark, csrf_token=csrf_token,is_buyable=True
         )
-        return products
+        return products_page
 
     # Embeddings de référence
 
