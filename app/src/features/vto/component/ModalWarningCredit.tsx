@@ -9,7 +9,7 @@ export function ModalWarningCredit({ open, onCancel, onAccept }) {
             onCancel={onCancel}
             onAccept={onAccept}
             textHeader={
-                'Vous avez atteint votre quota de 10 essais par mois en mode gratuit'
+                'Vous avez atteint votre quota de X essais par jour en mode gratuit'
             }
             textSubHeader={'Rechargez des crédits pour continuer'}
             textButtonConfirm={'Recharger'}

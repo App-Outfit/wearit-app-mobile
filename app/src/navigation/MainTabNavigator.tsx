@@ -12,13 +12,17 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { View, Text } from 'react-native';
 
 // Import your screens
-import { HomeScreen } from '../../screens/HomeScreen/HomeScreen';
-import { baseColors, lightTheme } from '../../styles/theme';
-import { VTONavigator } from '../../features/vto/navigation/VTOMainNavigation';
-import { ProfilNavigator } from '../../features/profil/navigation/ProfilNavigator';
+import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
+import { baseColors, lightTheme } from '../styles/theme';
+import { VTONavigator } from '../features/vto/navigation/VTOMainNavigation';
+import { ProfilNavigator } from '../features/profil/navigation/ProfilNavigator';
+
+import Feather from 'react-native-vector-icons/Feather';
+import { ExplorerScreen } from '../features/explorer/screens/ExplorerScreen';
 
 export type MainTabParamList = {
     Home: undefined;
+    Explorer: undefined;
     Marketplace: undefined;
     VirtualTryOn: undefined;
     Dressing: undefined;
@@ -90,7 +94,7 @@ const MainTabNavigator: React.FC = () => (
                 />
             )}
         >
-            <Tab.Screen
+            {/* <Tab.Screen
                 name="Home"
                 component={HomeScreen}
                 options={{
@@ -101,6 +105,16 @@ const MainTabNavigator: React.FC = () => (
                             color={color}
                             size={size}
                         />
+                    ),
+                }}
+            /> */}
+            <Tab.Screen
+                name="Explorer"
+                component={ExplorerScreen}
+                options={{
+                    tabBarLabel: 'Explorer',
+                    tabBarIcon: ({ color, size }) => (
+                        <Feather name="image" color={color} size={size} />
                     ),
                 }}
             />

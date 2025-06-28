@@ -9,7 +9,7 @@ import { CoreExampleScreen } from '../screens/CoreExampleScreen/CoreExampleScree
 
 import AuthNavigator from '../features/auth/navigation/AuthNavigator';
 import { DressingNavigator } from '../features/dressing/navigation/DressingNavigator';
-import MainTabNavigator from './NavigationComponents/MainTabNavigator';
+import MainTabNavigator from './MainTabNavigator';
 import { useAppDispatch, useAppSelector } from '../utils/hooks';
 import { loadToken } from '../features/auth/slices/authSlice';
 import { AvatarCreationNavigation } from '../features/auth/navigation/AvatarNavigation';
