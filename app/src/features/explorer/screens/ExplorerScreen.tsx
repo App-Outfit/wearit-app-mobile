@@ -6,6 +6,7 @@ import React, {
     useMemo,
     useEffect,
     useState,
+    use,
 } from 'react';
 import {
     View,
@@ -16,6 +17,7 @@ import {
     ActivityIndicator,
     SafeAreaView,
     Dimensions,
+    TouchableWithoutFeedback,
 } from 'react-native';
 import {
     RecyclerListView,
@@ -38,6 +40,8 @@ import { baseColors, spacing, typography } from '../../../styles/theme';
 
 import FastImage from '@d11/react-native-fast-image';
 import { ExplorerCard } from '../components/ExplorerCard';
+import { fetchProfile } from '../../profil/thunks/userThunks';
+import { ToastAlert } from '../../../components/core/Toast';
 
 export function ExplorerScreen() {
     const dispatch = useAppDispatch();
@@ -50,6 +54,9 @@ export function ExplorerScreen() {
     const loading = useAppSelector(selectExplorerLoading);
     const error = useAppSelector(selectExplorerError);
     const gender = useAppSelector(selectUserGender);
+
+    const [activeCard, setActiveCard] = useState<string | null>(null);
+    const [activeKey, setActiveKey] = useState<string | null>(null);
 
     // Recherche / pagination
     const handleSearch = useCallback(() => {
@@ -88,6 +95,12 @@ export function ExplorerScreen() {
         setDataProvider(dataProviderRef.current.cloneWithRows(products));
     }, [products]);
 
+    useEffect(() => {
+        if (!gender) {
+            dispatch(fetchProfile());
+        }
+    }, [dispatch]);
+
     // 2️⃣ LayoutProvider (taille fixe pour chaque cellule)
     const layoutProvider = useMemo(
         () =>
@@ -100,6 +113,36 @@ export function ExplorerScreen() {
             ),
         [columnWidth],
     );
+
+    const rowRenderer = useCallback(
+        (_type, item) => {
+            // on génère une clé à partir de l’URL
+            const key = item.image_url;
+            return (
+                <ExplorerCard
+                    item={item}
+                    columnWidth={columnWidth}
+                    isActive={activeKey === key}
+                    onOpen={() => setActiveKey(key)}
+                    onClose={() => setActiveKey(null)}
+                />
+            );
+        },
+        [activeKey, columnWidth],
+    );
+
+    const itemsWithActive = useMemo(
+        () =>
+            products.map((p) => ({
+                ...p,
+                isActive: activeKey === p.image_url,
+            })),
+        [products, activeKey],
+    );
+
+    useEffect(() => {
+        setDataProvider(dataProviderRef.current.cloneWithRows(itemsWithActive));
+    }, [itemsWithActive]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -123,22 +166,26 @@ export function ExplorerScreen() {
 
             {/* Liste RecyclerListView */}
             <RecyclerListView
-                style={styles.listView}
+                style={{ flex: 1 }}
                 layoutProvider={layoutProvider}
                 dataProvider={dataProvider}
-                rowRenderer={(_type, item) => (
-                    <ExplorerCard item={item} columnWidth={columnWidth} />
-                )}
+                rowRenderer={rowRenderer}
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={200}
-                renderAheadOffset={width}
-                scrollViewProps={{ scrollEventThrottle: 16 }}
             />
 
             {/* Loader en bas */}
             {loading && (
                 <ActivityIndicator style={styles.loader} size="large" />
             )}
+
+            {activeCard && (
+                <TouchableWithoutFeedback onPress={() => setActiveCard(null)}>
+                    <View style={styles.backdrop} />
+                </TouchableWithoutFeedback>
+            )}
+
+            <ToastAlert />
         </SafeAreaView>
     );
 }
@@ -174,5 +221,10 @@ const styles = StyleSheet.create({
     errorText: {
         color: baseColors.error,
         textAlign: 'center',
+    },
+    backdrop: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        zIndex: 1,
     },
 });
