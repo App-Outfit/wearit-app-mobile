@@ -1,0 +1,51 @@
+# Ne pas envoyer les dépendances JS
+node_modules/
+**/node_modules/
+
+# Caches Expo
+.expo/
+expo-shared/
+
+# Artéfacts Android lourds
+android/.gradle/
+android/gradle/
+android/build/
+android/.cxx/
+android/app/build/
+
+# Artéfacts iOS lourds (même si vous build Android)
+ios/Pods/
+ios/build/
+
+# Fichiers temporaires
+.vscode/
+.idea/
+*.log
+.DS_Store
+
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
