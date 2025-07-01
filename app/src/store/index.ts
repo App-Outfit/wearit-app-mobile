@@ -9,7 +9,6 @@ import useReducer from '../features/profil/slices/userSlice';
 import bodyReducer from '../features/body/bodySlice';
 import clothinReducer from '../features/clothing/clothingSlice';
 import favoriteReducer from '../features/favorite/favoriteSlice';
-import explorerReducer from '../features/explorer/store/explorerSlice';
 
 const persistConfig = {
     key: 'auth',
@@ -28,7 +27,6 @@ export const store = configureStore({
         body: bodyReducer,
         clothing: clothinReducer,
         favorite: favoriteReducer,
-        explorer: explorerReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({ serializableCheck: false }),
