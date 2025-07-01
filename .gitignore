@@ -33,6 +33,10 @@ yarn-error.*
 .env*.local
 *.env
 env/
+env_*/
+backend/.env
+backend/.venv
+
 
 # Ignorer les fichiers de build de Sphinx
 docs/build/
@@ -57,3 +61,12 @@ node_modules/
 .vscode/
 
 *__pycache__/
+
+.pytest_cache/
+
+package-lock.json
+
+backend/.coverage
+openapi.json
+backend/test_endpoint.py
+*.tar.gz

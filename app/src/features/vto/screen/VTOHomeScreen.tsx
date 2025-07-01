@@ -1,0 +1,264 @@
+import * as React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import VTODisplay from '../component/VTODisplay';
+
+import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { baseColors, spacing } from '../../../styles/theme';
+import Toast from 'react-native-toast-message';
+import { ToastAlert } from '../../../components/core/Toast';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BottomSheet from '@gorhom/bottom-sheet';
+import { ShareDrawer } from '../component/ShareDrawer';
+import { MiniDressing } from '../component/ListClothes';
+
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import {
+    selectReadyTryonsLower,
+    selectReadyTryonsUpper,
+    selectReadyTryonsWithType,
+} from '../tryonSelectors';
+import { setDress, setUpper, setUpperLower } from '../tryonSlice';
+import MenuDrawer from 'react-native-side-drawer';
+import { DrawerToggleButton } from '../../../components/core/DrawerToggleButton';
+import { selectUserCredits } from '../../profil/selectors/userSelectors';
+import { fetchCredits } from '../../profil/thunks/userThunks';
+
+export function VTODressingScreen({ navigation }) {
+    const [currentIsSave, setCurrentSave] = React.useState<boolean>(false);
+    const bottomSheetShare = React.useRef<BottomSheet>(null);
+    const tryonsReady = useAppSelector(selectReadyTryonsWithType);
+    const upperTryons = useAppSelector(selectReadyTryonsUpper);
+    const lowerTryons = useAppSelector(selectReadyTryonsLower);
+    const [drawerCloth, setDrawerCloth] = React.useState<boolean>(true);
+    const credits = useAppSelector(selectUserCredits);
+    const dispatch = useAppDispatch();
+
+    const succesSaveOutfitToast = () => {
+        Toast.show({
+            type: 'success',
+            text1: 'Outfit enregistré !',
+            position: 'bottom',
+        });
+    };
+
+    const saveOutfit = () => {
+        setCurrentSave(true);
+        succesSaveOutfitToast();
+    };
+
+    const cancelSaveOutfit = () => setCurrentSave(false);
+
+    const onPressSave = () => {
+        if (!currentIsSave) saveOutfit();
+        else cancelSaveOutfit();
+    };
+
+    const handleSnapPress = React.useCallback(() => {
+        bottomSheetShare.current?.snapToIndex(0);
+    }, []);
+
+    const toCreateBody = () => {
+        navigation.push('AvatarCreation');
+    };
+
+    const display = React.useMemo(() => {
+        return <VTODisplay onNavigate={toCreateBody} />;
+    }, []);
+
+    const generateRandomOutfit = async () => {
+        // select a random outfit from the list of available outfits
+        if (tryonsReady.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Aucun vêtement disponible',
+                position: 'bottom',
+            });
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * tryonsReady.length);
+        const randomOutfit = tryonsReady[randomIndex];
+
+        switch (randomOutfit.cloth_type) {
+            case 'dress':
+                dispatch(setDress(randomOutfit));
+                break;
+            case 'upper':
+                const lowerOutfit =
+                    lowerTryons[Math.floor(Math.random() * lowerTryons.length)];
+                if (lowerOutfit) {
+                    dispatch(
+                        setUpperLower({
+                            upper: randomOutfit,
+                            lower: lowerOutfit,
+                        }),
+                    );
+                } else {
+                    dispatch(setUpper(randomOutfit));
+                }
+                break;
+            case 'lower':
+                const upperOutfit =
+                    upperTryons[Math.floor(Math.random() * upperTryons.length)];
+                if (upperOutfit) {
+                    dispatch(
+                        setUpperLower({
+                            upper: upperOutfit,
+                            lower: randomOutfit,
+                        }),
+                    );
+                } else {
+                    dispatch(setUpper(randomOutfit));
+                }
+                break;
+            default:
+                Toast.show({
+                    type: 'error',
+                    text1: 'Type de vêtement inconnu',
+                    position: 'bottom',
+                });
+        }
+    };
+
+    React.useEffect(() => {
+        if (!credits) dispatch(fetchCredits());
+    }, [credits, dispatch]);
+
+    return (
+        <GestureHandlerRootView>
+            <View
+                style={{
+                    flex: 1,
+                    position: 'relative',
+                    marginHorizontal: spacing.small,
+                }}
+            >
+                <View style={styles.container}>
+                    <View
+                        style={[
+                            styles.vtoDisplayContainer,
+                            {
+                                flex: drawerCloth ? 1 : 2.8,
+                            },
+                        ]}
+                    >
+                        {display}
+                    </View>
+                    <View
+                        style={[
+                            styles.scrollComponent,
+                            {
+                                minWidth: drawerCloth ? 110 : 0,
+                                width: drawerCloth ? 'auto' : 0,
+                            },
+                        ]}
+                    >
+                        {/* <MenuDrawer
+                            open={drawerCloth}
+                            position={'right'}
+                            drawerContent={<MiniDressing setDrawerCloth={setDrawerCloth} drawerCloth={drawerCloth}/>}
+                            drawerPercentage={25}
+                            animationTime={250}
+                            overlay={true}
+                            opacity={1}
+                        />   */}
+                        <MiniDressing
+                            setDrawerCloth={setDrawerCloth}
+                            drawerCloth={drawerCloth}
+                        />
+                    </View>
+                </View>
+
+                <View style={styles.iconComponent}>
+                    {/* <TouchableOpacity style={styles.icon} onPress={onPressSave}>
+                        {currentIsSave ? (
+                            <FontAwesome name="bookmark" size={20} />
+                        ) : (
+                            <FontAwesome name="bookmark-o" size={20} />
+                        )}
+                        <Text style={styles.textIcon}>Enregistrer</Text>
+                    </TouchableOpacity> */}
+                    <TouchableOpacity
+                        style={styles.icon}
+                        onPress={generateRandomOutfit}
+                    >
+                        <MaterialIcons name="shuffle" size={24} color="#000" />
+                        <Text style={styles.textIcon}>
+                            Génération aléatoire
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.icon}
+                        onPress={handleSnapPress}
+                    >
+                        <Feather name="share-2" size={20} />
+                        <Text style={styles.textIcon}>Partager</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={[styles.iconComponent, styles.iconTopComponent]}>
+                    <TouchableOpacity
+                        style={[styles.icon, { marginBottom: 5 }]}
+                    >
+                        <Feather name="rotate-ccw" size={15} />
+                        <Text style={styles.textIcon}>Réessayer</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <ShareDrawer ref={bottomSheetShare} onChange={() => {}} />
+                <ToastAlert />
+            </View>
+        </GestureHandlerRootView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    vtoDisplayContainer: {
+        // flex: 2.8,
+        marginRight: 10,
+        height: '98%',
+    },
+    scrollComponent: {
+        // flex: 1,
+        // minWidth: 110,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        position: 'relative',
+    },
+
+    iconComponent: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        padding: 10,
+        paddingLeft: 0,
+        backgroundColor: '#fff',
+        borderTopRightRadius: 5,
+        borderBottomRightRadius: 5,
+        width: 60,
+    },
+    iconTopComponent: {
+        top: 0,
+        bottom: null,
+        borderTopRightRadius: 0,
+    },
+    icon: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    textIcon: {
+        fontSize: 10,
+        margin: 0,
+        marginTop: spacing.xSmall,
+        textAlign: 'center',
+    },
+});

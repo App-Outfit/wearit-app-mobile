@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "wearit-app-mobile",
+    "slug": "wearit-app-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/icons/logo-wearit.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./src/assets/icons/logo-wearit.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Nous avons besoin d’accéder à la caméra pour prendre des photos.",
+        "NSPhotoLibraryUsageDescription": "Nous avons besoin d’accéder à la galerie pour choisir des images."
+      },
+      "bundleIdentifier": "com.wearit.wearitappmobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/icons/logo-wearit.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.wearit.wearitappmobile"
+    },
+    "web": {
+      "favicon": "./src/assets/icons/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "14e9bc6d-1cde-4adf-8479-15a05697dcf6"
+      }
+    },
+    "owner": "wearit",
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+# Ignorer les fichiers et dossiers de configuration Git
+.git
+.gitignore
+
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environnements virtuels
+venv/
+env/
+ENV/
+.Python
+
+# Dépendances et paquets installés localement
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Fichiers de log et bases de données locales
+*.log
+*.sqlite3
+*.sqlite
+
+# Configuration, secrets et variables d’environnement locales
+*.env
+*.pem
+
+# Outils de tests et rapports de couverture
+tests/
+pytest.ini
+run_tests.sh
+htmlcov/
+.coverage
+.tox/
+.nox/
+
+# IDE et caches
+.vscode/
+.idea/
+.mypy_cache/
+.pyre/
+
+# MacOS
+.DS_Store
+
+# Docker Compose / Swarm (si utilisé ailleurs)
+docker-compose*.yml
+
+
+
