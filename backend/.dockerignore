@@ -48,3 +48,6 @@ htmlcov/
 
 # Docker Compose / Swarm (si utilisé ailleurs)
 docker-compose*.yml
+
+
+

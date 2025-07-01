@@ -11,7 +11,7 @@
     },
     "preview": {
       "distribution": "internal",
-      "workingDirectory": "app",
+      "workingDirectory": "app"
     },
     "production": {
       "autoIncrement": true

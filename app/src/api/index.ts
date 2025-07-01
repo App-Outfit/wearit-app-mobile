@@ -6,16 +6,17 @@ import { parseApiError } from '../utils/apiError';
 
 function getHost(): string {
     // if (Platform.OS === 'android') return '10.41.167.187';
-    if (Platform.OS === 'android') return '192.168.1.162';
+    // if (Platform.OS === 'android') return '192.168.1.162';
     // if (Platform.OS === 'android') return '127.0.0.1';
     // if (Platform.OS === 'ios')
     // return '192.168.1.26'; // votre IP LAN
-    else return 'localhost'; // pour le web
-    // return 'ec2-52-47-47-191.eu-west-3.compute.amazonaws.com';
+    // else return 'localhost'; // pour le web
+    return 'ec2-52-47-47-191.eu-west-3.compute.amazonaws.com';
 }
 
 // export const BASE_URL = `http://${getHost()}/api/v1`;
-export const BASE_URL = `http://${getHost()}:8000/api/v1`;
+export const BASE_URL = 'https://api-backend.wearit-paris.com/api/v1';
+// export const BASE_URL = `http://${getHost()}:8000/api/v1`;
 // console.log(`🌐 API baseURL = ${BASE_URL}`);
 
 const api = axios.create({

@@ -1,0 +1,8 @@
+version: "3.12"
+services:
+  app:
+    image: fastapi-app
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"

@@ -34,6 +34,9 @@ yarn-error.*
 *.env
 env/
 env_*/
+backend/.env
+backend/.venv
+
 
 # Ignorer les fichiers de build de Sphinx
 docs/build/
@@ -66,3 +69,4 @@ package-lock.json
 backend/.coverage
 openapi.json
 backend/test_endpoint.py
+*.tar.gz
