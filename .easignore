@@ -49,3 +49,20 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
+backend/
+
+
+# Caches Expo
+app/.expo/
+app/expo-shared/
+
+# Artéfacts Android lourds
+app/android/.gradle/
+app/android/gradle/
+app/android/build/
+app/android/.cxx/
+app/android/app/build/
+
+# Artéfacts iOS lourds (même si vous build Android)
+app/ios/Pods/
+app/ios/build/
