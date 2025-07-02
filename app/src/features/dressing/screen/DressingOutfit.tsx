@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     Image,
 } from 'react-native';
-import { Searchbar, Menu, Button, IconButton } from 'react-native-paper';
+import { Input, Icon } from '@rneui/themed';
 
 import { DressingBoxCategory } from '../component/DressingBoxCategory';
 import DropdownMenu from '../component/DropDownMenu';
@@ -76,7 +76,7 @@ export function DressingOutfitScreen({ navigation }: any) {
         <View>
             {/* SearchBar Box */}
             <View style={styles.searchBarBox}>
-                <Searchbar
+                <Input
                     placeholder="Rechercher..."
                     onChangeText={setSearchQuery}
                     value={searchQuery}
@@ -85,7 +85,14 @@ export function DressingOutfitScreen({ navigation }: any) {
                         color: 'black',
                         fontSize: 16,
                     }}
-                    iconColor="#B3B3B3"
+                    leftIcon={
+                        <Icon
+                            name="search"
+                            type="feather"
+                            size={20}
+                            color="#B3B3B3"
+                        />
+                    }
                     placeholderTextColor="#808080"
                 />
 

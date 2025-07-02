@@ -1,15 +1,16 @@
 //SuccessStep.tsx
 import * as React from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import {
-    ProgressBar,
-    Title,
-    Subheading,
-    Button,
-    useTheme,
-    Avatar,
-} from 'react-native-paper';
+    View,
+    Text,
+    StyleSheet,
+    KeyboardAvoidingView,
+    Platform,
+} from 'react-native';
+import { LinearProgress, Avatar, Button } from '@rneui/themed';
 import type { OnboardingStepProps } from '../types';
+import { CButton } from '../../../../../components/core/Buttons';
+import { baseColors } from '../../../../../styles/theme';
 
 export default function SuccessStep({
     onNext,
@@ -17,7 +18,6 @@ export default function SuccessStep({
     currentStep = 1,
     totalSteps = 1,
 }: OnboardingStepProps) {
-    const { colors } = useTheme();
     const progress = currentStep / totalSteps;
 
     const handlePress = () => {
@@ -29,26 +29,30 @@ export default function SuccessStep({
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            <ProgressBar
-                progress={progress}
-                color={colors.primary}
+            <LinearProgress
+                value={progress}
+                color={baseColors.primary}
+                variant="determinate"
                 style={styles.progressBar}
             />
 
             <View style={styles.content}>
                 <View>
-                    <Title style={styles.title}>Félicitations</Title>
-                    <Subheading style={styles.subtitle}>
+                    <Text style={styles.title}>Félicitations</Text>
+                    <Text style={styles.subtitle}>
                         Tu as été correctement inscrit sur l’application.
-                    </Subheading>
+                    </Text>
                 </View>
 
                 <View style={styles.successIconBox}>
-                    <Avatar.Icon
+                    <Avatar
                         size={78}
-                        icon="check"
-                        color="#6a0dad"
-                        style={{
+                        icon={{
+                            name: 'check',
+                            type: 'material-community',
+                            color: '#6a0dad',
+                        }}
+                        containerStyle={{
                             backgroundColor: '#e1cfef',
                             borderWidth: 4,
                             borderColor: '#6a0dad',
@@ -56,14 +60,13 @@ export default function SuccessStep({
                     />
                 </View>
 
-                <Button
-                    mode="contained"
+                <CButton
                     onPress={handlePress}
-                    contentStyle={styles.buttonContent}
                     style={styles.button}
+                    variant="primary"
                 >
                     Continuer
-                </Button>
+                </CButton>
             </View>
         </KeyboardAvoidingView>
     );

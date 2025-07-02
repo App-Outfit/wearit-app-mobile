@@ -1,144 +1,78 @@
 // MainTabNavigator.tsx
 import * as React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { CommonActions } from '@react-navigation/native';
-import {
-    BottomNavigation,
-    Provider as PaperProvider,
-} from 'react-native-paper';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import { View, Text } from 'react-native';
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Import your screens
-import { baseColors, lightTheme } from '../styles/theme';
 import { VTONavigator } from '../features/vto/navigation/VTOMainNavigation';
 import { ProfilNavigator } from '../features/profil/navigation/ProfilNavigator';
 import { ExplorerScreen } from '../features/explorer/screens/ExplorerScreen';
-import Feather from 'react-native-vector-icons/Feather';
+import { lightTheme } from '../styles/theme';
 
 export type MainTabParamList = {
-    Home: undefined;
     Explorer: undefined;
-    Marketplace: undefined;
     VirtualTryOn: undefined;
-    Dressing: undefined;
     Profile: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const MainTabNavigator: React.FC = () => (
-    <PaperProvider>
-        <Tab.Navigator
-            initialRouteName="VirtualTryOn"
-            screenOptions={{
-                headerShown: false,
-            }}
-            tabBar={({ navigation, state, descriptors, insets }) => (
-                <BottomNavigation.Bar
-                    navigationState={state}
-                    safeAreaInsets={insets}
-                    activeColor="#7E57C2"
-                    inactiveColor="#757575"
-                    style={{
-                        height: 75,
-                        backgroundColor: '#f7f7ff',
-                    }}
-                    shifting={false}
-                    onTabPress={({ route, preventDefault }) => {
-                        const event = navigation.emit({
-                            type: 'tabPress',
-                            target: route.key,
-                            canPreventDefault: true,
-                        });
-                        if (!event.defaultPrevented) {
-                            navigation.dispatch(
-                                CommonActions.navigate(
-                                    route.name,
-                                    route.params,
-                                ),
-                            );
-                        } else {
-                            preventDefault();
-                        }
-                    }}
-                    renderIcon={({ route, focused }) => {
-                        const { options } = descriptors[route.key];
-                        const size = focused ? 25 : 23;
-                        const color = focused
-                            ? lightTheme.colors.primary
-                            : '#f7f7ff7';
+    <Tab.Navigator
+        initialRouteName="VirtualTryOn"
+        screenOptions={({ route }) => ({
+            headerShown: false,
+            tabBarStyle: {
+                height: 75,
+                backgroundColor: '#F7F7FF',
+                borderTopColor: '#E0E0E0',
+                borderTopWidth: 1,
+            },
+            tabBarActiveTintColor: lightTheme.colors.primary,
+            tabBarInactiveTintColor: '#757575',
+            tabBarIcon: ({ color, size, focused }) => {
+                size = focused ? 25 : 23;
 
-                        return (
-                            options.tabBarIcon?.({ focused, color, size }) ??
-                            null
-                        );
-                    }}
-                    getLabelText={({ route }) => {
-                        const { options } = descriptors[route.key];
-                        return typeof options.tabBarLabel === 'string'
-                            ? options.tabBarLabel
-                            : typeof options.title === 'string'
-                              ? options.title
-                              : route.name;
-                    }}
-                    theme={{
-                        colors: {
-                            secondaryContainer: 'transparent',
-                        },
-                    }}
-                />
-            )}
-        >
-            <Tab.Screen
-                name="Explorer"
-                component={ExplorerScreen}
-                options={{
-                    tabBarLabel: 'Explorer',
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="image" color={color} size={size} />
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="VirtualTryOn"
-                component={VTONavigator}
-                options={{
-                    tabBarLabel: 'Try On',
-                    tabBarIcon: ({ color, size }) => (
+                if (route.name === 'Explorer') {
+                    return <Feather name="image" size={size} color={color} />;
+                } else if (route.name === 'VirtualTryOn') {
+                    return (
                         <FontAwesome6
                             name="person-booth"
-                            color={color}
                             size={size}
+                            color={color}
                         />
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="Profile"
-                component={ProfilNavigator}
-                options={{
-                    tabBarLabel: 'Profil',
-                    tabBarIcon: ({ color, size }) => (
+                    );
+                } else if (route.name === 'Profile') {
+                    return (
                         <MaterialCommunityIcons
                             name="account-outline"
-                            color={color}
                             size={size}
+                            color={color}
                         />
-                    ),
-                }}
-            />
-        </Tab.Navigator>
-    </PaperProvider>
+                    );
+                }
+                return null;
+            },
+        })}
+    >
+        <Tab.Screen
+            name="Explorer"
+            component={ExplorerScreen}
+            options={{ tabBarLabel: 'Explorer' }}
+        />
+        <Tab.Screen
+            name="VirtualTryOn"
+            component={VTONavigator}
+            options={{ tabBarLabel: 'Try On' }}
+        />
+        <Tab.Screen
+            name="Profile"
+            component={ProfilNavigator}
+            options={{ tabBarLabel: 'Profil' }}
+        />
+    </Tab.Navigator>
 );
-
-const RandomComponent = () => {
-    return (
-        <View>
-            <Text>Hello</Text>
-        </View>
-    );
-};
 
 export default MainTabNavigator;

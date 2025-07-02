@@ -1,9 +1,18 @@
 import * as React from 'react';
 import { useState, forwardRef } from 'react';
 import { StyleSheet } from 'react-native';
-import { Input, normalize } from 'react-native-elements';
 import { lightTheme } from '../../styles/theme';
 import { circleCheckIcon, circleErrorIcon } from '../../assets';
+import { normalize } from '../../utils/normalize';
+
+import {
+    TextInput,
+    Text,
+    View,
+    StyleProp,
+    ViewStyle,
+    TextStyle,
+} from 'react-native';
 
 type InputFieldProps = {
     placeholder: string; // Votre prop obligatoire
@@ -40,7 +49,7 @@ export const InputField = forwardRef<any, InputFieldProps>(
         };
 
         return (
-            <Input
+            <InputField
                 ref={ref}
                 placeholder={placeholder}
                 value={current_value}

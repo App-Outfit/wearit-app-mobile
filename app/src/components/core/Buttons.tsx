@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Button } from 'react-native-elements';
 import {
     StyleSheet,
     TextStyle,
@@ -10,7 +9,6 @@ import {
 
 import { styles } from './Buttons.styles';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { IconButton } from 'react-native-paper';
 import { baseColors, lightTheme, spacing } from '../../styles/theme';
 
 import Feather from 'react-native-vector-icons/Feather';
@@ -38,7 +36,6 @@ export const CButton: React.FC<ButtonProps> = ({
     disabled = false,
     style,
 }) => {
-    // Determine the style based on the variant
     const buttonStyle = StyleSheet.flatten([
         styles.baseButton,
         variant === 'primary' && styles.primaryButton,
@@ -61,28 +58,17 @@ export const CButton: React.FC<ButtonProps> = ({
         disabled && styles.disabledTitle,
     ]);
 
-    const containerStyle = StyleSheet.flatten([
-        styles.center,
-        size === 'small' && styles.smallButton,
-        size === 'medium' && styles.mediumButton,
-        size === 'large' && styles.largeButton,
-        size === 'xlarge' && styles.xlargeButton,
-    ]);
-
     return (
-        <Button
-            title={children}
+        <TouchableOpacity
             onPress={onPress}
             onLongPress={onLongPress}
             onPressIn={onPressIn}
             onPressOut={onPressOut}
-            buttonStyle={buttonStyle}
-            // containerStyle={containerStyle}
-            titleStyle={titleStyle}
             disabled={disabled}
-            disabledStyle={styles.disabledButton}
-            disabledTitleStyle={styles.disabledTitle}
-        />
+            style={buttonStyle}
+        >
+            <Text style={titleStyle}>{children}</Text>
+        </TouchableOpacity>
     );
 };
 
@@ -96,13 +82,9 @@ export const AddCircleButton: React.FC<{ onPress: () => void }> = ({
 
 export const AddButton = ({ onPressFunction }: any) => {
     return (
-        <IconButton
-            style={styles2.addButton}
-            icon="plus"
-            iconColor="white"
-            size={28}
-            onPress={onPressFunction}
-        />
+        <TouchableOpacity style={styles2.addButton} onPress={onPressFunction}>
+            <Feather name="plus" size={28} color="white" />
+        </TouchableOpacity>
     );
 };
 

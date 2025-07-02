@@ -5,14 +5,10 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Text,
 } from 'react-native';
-import {
-    ProgressBar,
-    useTheme,
-    Title,
-    Subheading,
-    Button,
-} from 'react-native-paper';
+import { Button, LinearProgress } from '@rneui/themed';
+import * as Progress from 'react-native-progress';
 
 interface StepLayoutProps {
     title: string;
@@ -35,8 +31,6 @@ export function StepLayout({
     scrollable = false,
     children,
 }: StepLayoutProps) {
-    const { colors } = useTheme();
-
     const Body = scrollable ? ScrollView : View;
 
     return (
@@ -44,18 +38,19 @@ export function StepLayout({
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            <ProgressBar
-                progress={progress}
-                color={colors.primary}
+            {/* <LinearProgress
+                value={parseFloat(progress.toFixed(4))}
+                variant="determinate"
+                color="#6a0dad"
                 style={styles.progressBar}
-            />
+            /> */}
+            <Progress.Bar progress={progress} width={null} />
+
             <View style={styles.inner}>
                 <View style={styles.header}>
-                    <Title style={styles.title}>{title}</Title>
+                    <Text style={styles.title}>{title}</Text>
                     {subtitle ? (
-                        <Subheading style={styles.subtitle}>
-                            {subtitle}
-                        </Subheading>
+                        <Text style={styles.subtitle}>{subtitle}</Text>
                     ) : null}
                 </View>
 
@@ -71,21 +66,20 @@ export function StepLayout({
                 <View style={styles.footer}>
                     {onNext && (
                         <Button
-                            mode="contained"
                             onPress={onNext}
                             disabled={disableNext}
-                            contentStyle={styles.buttonContent}
-                            style={styles.button}
+                            containerStyle={styles.button}
+                            buttonStyle={styles.buttonContent}
                         >
                             Suivant
                         </Button>
                     )}
                     {onBack && (
                         <Button
-                            mode="outlined"
+                            type="outline"
                             onPress={onBack}
-                            contentStyle={styles.buttonContent}
-                            style={[styles.button, styles.backButton]}
+                            containerStyle={[styles.button, styles.backButton]}
+                            buttonStyle={styles.buttonContent}
                         >
                             Retour
                         </Button>
@@ -102,7 +96,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
     },
     progressBar: {
-        height: 10,
+        height: 12,
         marginTop: 60,
         marginBottom: 40,
         marginHorizontal: 20,

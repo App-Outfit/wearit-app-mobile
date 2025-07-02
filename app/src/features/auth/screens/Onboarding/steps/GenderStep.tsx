@@ -1,7 +1,6 @@
-// src/features/auth/screens/Onboarding/steps/GenderStep.tsx
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Chip, useTheme } from 'react-native-paper';
+import { Button, useTheme } from '@rneui/themed';
 import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setGender } from '../../../slices/onboardingSlice';
 import { StepLayout } from '../StepLayout';
@@ -22,7 +21,7 @@ export default function GenderStep({
     const dispatch = useAppDispatch();
     const onboardGenre = useAppSelector((s) => s.onboarding.gender ?? '');
     const [genre, setGenre] = useState(onboardGenre);
-    const { colors } = useTheme();
+    const { theme } = useTheme();
     const progress = (currentStep ?? 1) / (totalSteps ?? 1);
 
     const handlePress = () => {
@@ -43,27 +42,27 @@ export default function GenderStep({
                 {options.map(({ key, label }) => {
                     const selected = genre === key;
                     return (
-                        <Chip
+                        <Button
                             key={key}
-                            mode="flat"
-                            selected={selected}
+                            title={label}
+                            type={selected ? 'solid' : 'outline'}
                             onPress={() => setGenre(key)}
-                            style={[
+                            buttonStyle={[
                                 styles.chip,
                                 {
                                     backgroundColor: selected
-                                        ? colors.primary
+                                        ? theme.colors.primary
                                         : '#E0E0E0',
+                                    borderWidth: selected ? 0 : 1,
+                                    borderColor: '#BDBDBD',
                                 },
                             ]}
-                            textStyle={{
+                            titleStyle={{
                                 color: selected ? '#FFFFFF' : '#757575',
                                 fontSize: 16,
                                 fontFamily: 'Poppins-Regular',
                             }}
-                        >
-                            {label}
-                        </Chip>
+                        />
                     );
                 })}
             </View>
@@ -75,13 +74,12 @@ const styles = StyleSheet.create({
     optionsContainer: {
         flexDirection: 'column',
         alignItems: 'center',
-        // on centre les chips horizontalement
     },
     chip: {
-        width: '80%', // même largeur que les boutons
+        width: '80%',
         height: 57,
         marginBottom: 20,
-        elevation: 0,
         justifyContent: 'center',
+        borderRadius: 30,
     },
 });

@@ -6,24 +6,14 @@ import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
 import NameStep from './steps/Name';
 import AgeStep from './steps/AgeStep';
 import GenderStep from './steps/GenderStep';
-import Question1Step from './steps/Question1Step';
-import Question2Step from './steps/Question2Step';
-import Question3Step from './steps/Question3Step';
-import BrandStep from './steps/BrandStep';
+// import Question1Step from './steps/Question1Step';
+// import Question2Step from './steps/Question2Step';
+// import Question3Step from './steps/Question3Step';
+// import BrandStep from './steps/BrandStep';
 import MailStep from './steps/MailStep';
 import SuccessStep from './steps/SuccessStep';
 
-const steps = [
-    NameStep,
-    AgeStep,
-    GenderStep,
-    Question1Step,
-    Question2Step,
-    Question3Step,
-    BrandStep,
-    MailStep,
-    SuccessStep,
-];
+const steps = [NameStep, AgeStep, GenderStep, MailStep, SuccessStep];
 
 export default function OnboardingWizard({ navigation }: any) {
     const [idx, setIdx] = useState(0);

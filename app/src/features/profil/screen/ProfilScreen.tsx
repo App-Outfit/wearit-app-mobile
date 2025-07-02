@@ -1,22 +1,16 @@
 import * as React from 'react';
-
-import { View, Text, StyleSheet } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { List } from 'react-native-paper';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { ListItem, Icon } from '@rneui/themed';
 import { baseColors, spacing } from '../../../styles/theme';
 
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { DeconnexionModal } from '../components/DeconnexionModal';
 
-import { useSelector } from 'react-redux';
+import { DeconnexionModal } from '../components/DeconnexionModal';
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
-import {
-    selectUserProfile,
-    selectUserReferralCode,
-} from '../selectors/userSelectors';
+import { selectUserReferralCode } from '../selectors/userSelectors';
 import {
     fetchCredits,
     fetchProfile,
@@ -29,31 +23,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export function ProfilScreen({ navigation }) {
     const [modalDisconect, setModalDisconnect] = React.useState<boolean>(false);
     const userRefferalCode = useAppSelector(selectUserReferralCode);
-    console.log('userRefferalCode', userRefferalCode);
-
     const dispatch = useAppDispatch();
 
-    const styleItem = {
-        titleStyle: styles.itemTitle,
-        containerStyle: styles.itemContainerStyle,
-    };
-
     const sizeIcon = 25;
-    const leftArrow = () => (
-        <Feather
-            name="chevron-right"
-            size={sizeIcon}
-            color={baseColors.lightGray}
-        />
-    );
-    const leftArrowWarning = () => (
-        <Feather
-            name="chevron-right"
-            size={sizeIcon}
-            color={baseColors.error}
-        />
-    );
-    const iconLeftConfig = { size: sizeIcon, color: baseColors.black };
 
     const onDisconnect = React.useCallback(() => {
         dispatch(logout());
@@ -83,96 +55,151 @@ export function ProfilScreen({ navigation }) {
 
     return (
         <View>
-            <ScrollView>
-                <List.Section>
-                    <List.Subheader style={styles.subHeader}>
-                        Utilisateur
-                    </List.Subheader>
-                    <List.Item
-                        {...styleItem}
-                        title="Mon mannequin"
-                        right={leftArrow}
-                        left={() => (
-                            <Ionicons name="body-outline" {...iconLeftConfig} />
-                        )}
-                        onPress={() => navigation.push('ProfilBody')}
-                    />
-                    <List.Item
-                        {...styleItem}
-                        title="Mes données"
-                        right={leftArrow}
-                        left={() => (
-                            <FontAwesome name="id-card-o" {...iconLeftConfig} />
-                        )}
-                        onPress={() => navigation.push('ProfilUserData')}
-                    />
-                    <List.Item
-                        {...styleItem}
-                        title="Plans et Crédits"
-                        right={leftArrow}
-                        left={() => (
-                            <MaterialCommunityIcons
-                                name="wallet-membership"
-                                {...iconLeftConfig}
-                            />
-                        )}
-                        onPress={() => navigation.push('ProfilSubscription')}
-                    />
-                </List.Section>
-                <List.Section>
-                    <List.Subheader style={styles.subHeader}>
-                        Essayages
-                    </List.Subheader>
-                    <List.Item
-                        {...styleItem}
-                        title="Essayages enregistrés"
-                        right={leftArrow}
-                        left={() => (
-                            <FontAwesome
-                                name="bookmark-o"
-                                {...iconLeftConfig}
-                            />
-                        )}
-                        onPress={() => navigation.push('OufitSaved')}
-                    />
-                </List.Section>
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: spacing.large }}
+            >
+                {/* Section: Utilisateur */}
+                <Text style={styles.subHeader}>Utilisateur</Text>
 
-                <List.Section>
-                    <List.Subheader style={styles.subHeader}>
-                        Code de Parrainage
-                    </List.Subheader>
-                    <List.Item
-                        {...styleItem}
-                        title={userRefferalCode}
-                        left={() => (
-                            <Feather name="user-plus" {...iconLeftConfig} />
-                        )}
+                <ListItem
+                    bottomDivider
+                    onPress={() => navigation.push('ProfilBody')}
+                >
+                    <Icon
+                        name="body-outline"
+                        type="ionicon"
+                        size={sizeIcon}
+                        color={baseColors.black}
                     />
-                </List.Section>
+                    <ListItem.Content>
+                        <ListItem.Title style={styles.itemTitle}>
+                            Mon mannequin
+                        </ListItem.Title>
+                    </ListItem.Content>
+                    <Feather
+                        name="chevron-right"
+                        size={sizeIcon}
+                        color={baseColors.lightGray}
+                    />
+                </ListItem>
 
-                <List.Section>
-                    <List.Subheader style={styles.subHeader}>
-                        Paramètres de Session
-                    </List.Subheader>
-                    <List.Item
-                        {...styleItem}
-                        titleStyle={{
-                            ...styleItem.titleStyle,
-                            color: baseColors.error,
-                        }}
-                        title="Se déconnecter"
-                        right={leftArrowWarning}
-                        left={() => (
-                            <Feather
-                                name="log-out"
-                                {...iconLeftConfig}
-                                color={baseColors.error}
-                            />
-                        )}
-                        onPress={() => setModalDisconnect(true)}
+                <ListItem
+                    bottomDivider
+                    onPress={() => navigation.push('ProfilUserData')}
+                >
+                    <Icon
+                        name="id-card-o"
+                        type="font-awesome"
+                        size={sizeIcon}
+                        color={baseColors.black}
                     />
-                </List.Section>
+                    <ListItem.Content>
+                        <ListItem.Title style={styles.itemTitle}>
+                            Mes données
+                        </ListItem.Title>
+                    </ListItem.Content>
+                    <Feather
+                        name="chevron-right"
+                        size={sizeIcon}
+                        color={baseColors.lightGray}
+                    />
+                </ListItem>
+
+                <ListItem
+                    bottomDivider
+                    onPress={() => navigation.push('ProfilSubscription')}
+                >
+                    <Icon
+                        name="wallet-membership"
+                        type="material-community"
+                        size={sizeIcon}
+                        color={baseColors.black}
+                    />
+                    <ListItem.Content>
+                        <ListItem.Title style={styles.itemTitle}>
+                            Plans et Crédits
+                        </ListItem.Title>
+                    </ListItem.Content>
+                    <Feather
+                        name="chevron-right"
+                        size={sizeIcon}
+                        color={baseColors.lightGray}
+                    />
+                </ListItem>
+
+                {/* Section: Essayages */}
+                <Text style={styles.subHeader}>Essayages</Text>
+
+                <ListItem
+                    bottomDivider
+                    onPress={() => navigation.push('OufitSaved')}
+                >
+                    <Icon
+                        name="bookmark-o"
+                        type="font-awesome"
+                        size={sizeIcon}
+                        color={baseColors.black}
+                    />
+                    <ListItem.Content>
+                        <ListItem.Title style={styles.itemTitle}>
+                            Essayages enregistrés
+                        </ListItem.Title>
+                    </ListItem.Content>
+                    <Feather
+                        name="chevron-right"
+                        size={sizeIcon}
+                        color={baseColors.lightGray}
+                    />
+                </ListItem>
+
+                {/* Section: Parrainage */}
+                <Text style={styles.subHeader}>Code de Parrainage</Text>
+
+                <ListItem bottomDivider>
+                    <Icon
+                        name="user-plus"
+                        type="feather"
+                        size={sizeIcon}
+                        color={baseColors.black}
+                    />
+                    <ListItem.Content>
+                        <ListItem.Title style={styles.itemTitle}>
+                            {userRefferalCode}
+                        </ListItem.Title>
+                    </ListItem.Content>
+                </ListItem>
+
+                {/* Section: Session */}
+                <Text style={styles.subHeader}>Paramètres de Session</Text>
+
+                <ListItem
+                    bottomDivider
+                    onPress={() => setModalDisconnect(true)}
+                >
+                    <Icon
+                        name="log-out"
+                        type="feather"
+                        size={sizeIcon}
+                        color={baseColors.error}
+                    />
+                    <ListItem.Content>
+                        <ListItem.Title
+                            style={[
+                                styles.itemTitle,
+                                { color: baseColors.error },
+                            ]}
+                        >
+                            Se déconnecter
+                        </ListItem.Title>
+                    </ListItem.Content>
+                    <Feather
+                        name="chevron-right"
+                        size={sizeIcon}
+                        color={baseColors.error}
+                    />
+                </ListItem>
             </ScrollView>
+
             <DeconnexionModal
                 open={modalDisconect}
                 onCancel={() => setModalDisconnect(false)}
@@ -185,15 +212,14 @@ export function ProfilScreen({ navigation }) {
 const styles = StyleSheet.create({
     subHeader: {
         color: baseColors.gray_5,
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: spacing.large,
+        marginLeft: spacing.medium,
+        marginBottom: spacing.small,
     },
     itemTitle: {
         color: baseColors.black,
         fontSize: 16,
-    },
-    itemContainerStyle: {
-        justifyContent: 'center',
-        paddingLeft: spacing.medium,
-        // borderBlockColor: "#000",
-        // borderWidth: 1,
     },
 });

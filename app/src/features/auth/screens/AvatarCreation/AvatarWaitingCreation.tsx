@@ -7,6 +7,7 @@ import {
     Image,
     StyleSheet,
     TouchableOpacity,
+    ActivityIndicator,
 } from 'react-native';
 import { Header } from '../../../../components/core/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,7 +18,6 @@ import {
     spacing,
     typography,
 } from '../../../../styles/theme';
-import { ActivityIndicator, MD2Colors } from 'react-native-paper';
 import { color } from '@rneui/base';
 import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
 import { useBodyWS } from '../../hooks/useBodyWS';

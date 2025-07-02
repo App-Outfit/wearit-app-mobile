@@ -1,13 +1,14 @@
 import * as React from 'react';
 import {
-    Button,
-    TouchableOpacity,
+    Modal,
     View,
     Text,
     StyleSheet,
     Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    TouchableWithoutFeedback,
 } from 'react-native';
-import { Modal, Portal } from 'react-native-paper';
 import { spacing, typography } from '../../../styles/theme';
 import MultiChoice, {
     Option,
@@ -24,9 +25,6 @@ export function ModalAddClothInfo({ open, onCancel, onSave }) {
     const [clothId, setClothId] = React.useState<string>();
 
     const saveNewCloth = () => {
-        console.log(
-            `Saving new cloth with type: ${clothType}, category: ${category}, id: ${clothId}`,
-        );
         onSave({
             cloth_type: clothType,
             category,
@@ -47,15 +45,18 @@ export function ModalAddClothInfo({ open, onCancel, onSave }) {
     );
 
     return (
-        <Portal>
-            <Modal
-                visible={open}
-                onDismiss={onCancel}
-                contentContainerStyle={styles.modalContentContainer}
-                theme={{ colors: { backdrop: 'rgba(0, 0, 0, 0.5)' } }}
-            >
+        <Modal
+            visible={open}
+            animationType="fade"
+            transparent
+            onRequestClose={onCancel}
+        >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                        style={styles.modalContent}
+                    >
                         <Text style={styles.typeText}>Type :</Text>
                         <View
                             style={{ flex: 1, marginVertical: spacing.small }}
@@ -86,34 +87,30 @@ export function ModalAddClothInfo({ open, onCancel, onSave }) {
                             onChangeText={setCategory}
                             onSubmitEditing={() => Keyboard.dismiss()}
                         />
+
                         <CButton
                             variant="primary"
                             size="xlarge"
                             disabled={
                                 clothType === undefined ||
-                                !clothId === undefined ||
+                                clothId === undefined ||
                                 category === undefined
                             }
                             onPress={saveNewCloth}
                         >
                             Enregistrer
                         </CButton>
-                    </View>
+                    </KeyboardAvoidingView>
                 </View>
-            </Modal>
-        </Portal>
+            </TouchableWithoutFeedback>
+        </Modal>
     );
 }
 
 const styles = StyleSheet.create({
-    modalContentContainer: {
-        width: '100%',
-        height: '100%',
-        alignSelf: 'center',
-    },
     modalOverlay: {
         flex: 1,
-        backgroundColor: '#00000088',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -123,27 +120,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 8,
         padding: spacing.medium,
-
         justifyContent: 'space-between',
-        alignContent: 'stretch',
     },
     typeText: {
         fontFamily: typography.poppins.regular,
         fontSize: 16,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 8,
-        marginVertical: 6,
-        borderRadius: 4,
-    },
-    typeButton: {
-        padding: 8,
-        borderWidth: 1,
-        borderRadius: 4,
-    },
-    typeButtonActive: {
-        backgroundColor: '#ddd',
     },
 });

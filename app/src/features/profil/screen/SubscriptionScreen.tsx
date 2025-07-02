@@ -3,9 +3,8 @@ import * as React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { baseColors, spacing, typography } from '../../../styles/theme';
-import { Button, Chip } from 'react-native-paper';
 import { CButton } from '../../../components/core/Buttons';
-import { color } from 'react-native-elements/dist/helpers';
+import { Chip } from '@rneui/base';
 
 export function SubscribtionScreen() {
     return (
@@ -58,9 +57,12 @@ function SubscribtionItem({
             ]}
         >
             {isRecommanded && (
-                <Chip style={styles.chip} selectedColor={baseColors.yellow}>
-                    Recommandé
-                </Chip>
+                <Chip
+                    style={styles.chip}
+                    title="Recommandé"
+                    buttonStyle={styles.chip}
+                    titleStyle={{ color: baseColors.yellow }}
+                />
             )}
 
             <View>

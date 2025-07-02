@@ -1,8 +1,8 @@
 // UniqueChoice.tsx
 import * as React from 'react';
 import { View, StyleSheet, Pressable, Text } from 'react-native';
-import { useTheme } from 'react-native-paper';
 import { Option } from './MultipleChoice';
+import { baseColors } from '../../styles/theme';
 
 interface UniqueChoiceProps {
     options: Option[];
@@ -15,8 +15,6 @@ const UniqueChoice: React.FC<UniqueChoiceProps> = ({
     selected,
     onChange,
 }) => {
-    const { colors } = useTheme();
-
     return (
         <View style={styles.optionsContainer}>
             {options.map(({ key, label }) => {
@@ -29,7 +27,7 @@ const UniqueChoice: React.FC<UniqueChoiceProps> = ({
                             styles.chip,
                             {
                                 backgroundColor: isSelected
-                                    ? colors.primary
+                                    ? baseColors.primary
                                     : '#E0E0E0',
                             },
                         ]}

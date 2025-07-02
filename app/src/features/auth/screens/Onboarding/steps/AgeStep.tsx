@@ -8,7 +8,6 @@ import {
     NativeScrollEvent,
     Text,
 } from 'react-native';
-import { useTheme } from 'react-native-paper';
 import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setAge } from '../../../slices/onboardingSlice';
 import { StepLayout } from '../StepLayout';
@@ -29,7 +28,6 @@ export default function AgeStep({
     const [ageRange, setAgeRange] = useState(onboardAge);
     const dispatch = useAppDispatch();
     const wheelRef = useRef<FlatList<string>>(null);
-    const { colors } = useTheme();
     const progress = (currentStep ?? 1) / (totalSteps ?? 1);
 
     // centrer la roue

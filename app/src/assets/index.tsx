@@ -1,47 +1,49 @@
-import { Icon } from 'react-native-elements';
+import * as React from 'react';
 import { lightTheme } from '../styles/theme';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
-type ImageSource = number; // React Native images are required as numbers
-type AnimationSource = string; // Lottie animations are usually JSON objects
+type ImageSource = number;
+type AnimationSource = string;
 
 // Images
 export const Images: Record<string, ImageSource> = {
     logo_wearit: require('./images/logo-wearit.png'),
 };
 
-// Icons
+// Icônes
 export const Icons: Record<string, ImageSource> = {};
+
 export const circleCheckIcon = (
-    <Icon
+    <Ionicons
         name="checkmark-circle-outline"
-        type="ionicon"
-        iconProps={{ size: 24, name: 'checkmark-circle-outline' }}
+        size={24}
         color={lightTheme.colors.primary}
     />
 );
+
 export const circleErrorIcon = (
-    <Icon
+    <AntDesign
         name="exclamationcircleo"
-        type="antdesign"
-        iconProps={{ size: 20, name: 'exclamationcircleo' }}
+        size={20}
         color={lightTheme.colors.error}
         style={{ marginRight: 2 }}
     />
 );
+
 export const eyeIcon = (
-    <Icon
+    <AntDesign
         name="eye"
-        type="antdesign"
-        iconProps={{ size: 20, name: 'eye' }}
+        size={20}
         color={lightTheme.colors.black}
         style={{ marginRight: 2 }}
     />
 );
+
 export const eyeOffIcon = (
-    <Icon
-        name="eye-off"
-        type="antdesign"
-        iconProps={{ size: 20, name: 'eye-off' }}
+    <AntDesign
+        name="eyeo"
+        size={20}
         color={lightTheme.colors.black}
         style={{ marginRight: 2 }}
     />
@@ -52,45 +54,7 @@ export const Animations: Record<string, AnimationSource> = {
     loading_spinner: require('./lottie/lottie-loading-spinner.json'),
 };
 
-// Fonts
-
-// Images SVG Brand
-// import Adidas from './images/icons-brands/adidas.png'
-// import Asos from './images/icons-brands/asos.png'
-// import Bershka from './images/icons-brands/bershka.png'
-// import Hm from './images/icons-brands/h&m.png'
-// import Lacoste from './images/icons-brands/lacoste.png'
-// import Mango from './images/icons-brands/mango.png'
-// import Nike from './images/icons-brands/nike.png'
-// import OffWhite from './images/icons-brands/off-white.png'
-// import PullAndBear from './images/icons-brands/Pull-&-Bear.png'
-// import Puma from './images/icons-brands/puma.png'
-// import RickOwens from './images/icons-brands/rick-owens.png'
-// import Stradivarius from './images/icons-brands/stradivarius.png'
-// import Uniqlo from './images/icons-brands/uniqlo.png'
-// import NorthFace from './images/icons-brands/the-north-face.png'
-// import UrbanOutfitters from './images/icons-brands/urban-outfitters.png'
-// import Zara from './images/icons-brands/zara.png'
-
-// export const BrandIcons: Record<string, number> = {
-//   adidas: Adidas,
-//   asos: Asos,
-//   bershka: Bershka,
-//   hm: Hm,
-//   lacoste: Lacoste,
-//   mango: Mango,
-//   nike: Nike,
-//   'off-white': OffWhite,
-//   'pull-and-bear': PullAndBear,
-//   puma: Puma,
-//   'rick-owens': RickOwens,
-//   stradivarius: Stradivarius,
-//   uniqlo: Uniqlo,
-//   'the-north-face': NorthFace,
-//   'urban-outfitters': UrbanOutfitters,
-//   zara: Zara,
-// };
-
+// Brand icons
 export const BrandIcons: Record<string, number> = {
     adidas: require('./images/icons-brands/adidas.png'),
     asos: require('./images/icons-brands/asos.png'),

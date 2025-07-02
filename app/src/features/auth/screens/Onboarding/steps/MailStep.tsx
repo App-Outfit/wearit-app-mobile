@@ -1,12 +1,12 @@
-// src/features/auth/screens/Onboarding/steps/MailStep.tsx
 import React, { useEffect, useCallback, useState } from 'react';
 import {
     View,
     StyleSheet,
     Keyboard,
     TouchableWithoutFeedback,
+    Text,
 } from 'react-native';
-import { TextInput, HelperText, useTheme } from 'react-native-paper';
+import { Input } from '@rneui/themed';
 import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import {
     setEmail as setOnboardEmail,
@@ -40,12 +40,10 @@ export default function MailStep({
     const passwordValid = validatePassword(password);
     const isFormValid = emailValid && passwordValid;
 
-    // clear old errors/status on mount
     useEffect(() => {
         dispatch(clearStatus());
     }, [dispatch]);
 
-    // on succès signup → next
     useEffect(() => {
         if (status === 'succeeded' && token) {
             dispatch(resetOnboarding());
@@ -95,49 +93,35 @@ export default function MailStep({
                     disableNext={!isFormValid || status === 'loading'}
                 >
                     <View>
-                        <TextInput
+                        <Input
                             label="Adresse email"
                             value={email}
                             onChangeText={setEmail}
                             onBlur={() => setEmailTouched(true)}
-                            error={emailTouched && !emailValid}
-                            mode="flat"
-                        />
-                        <HelperText
-                            type="error"
-                            visible={emailTouched && !emailValid}
-                        >
-                            {
-                                'L’adresse e-mail doit être au format utilisateur@domaine.extension'
+                            errorMessage={
+                                emailTouched && !emailValid
+                                    ? "L'adresse e-mail doit être au format utilisateur@domaine.extension"
+                                    : ''
                             }
-                        </HelperText>
+                            containerStyle={styles.inputContainer}
+                        />
 
-                        <TextInput
+                        <Input
                             label="Mot de passe"
                             value={password}
                             onChangeText={setPassword}
                             onBlur={() => setPasswordTouched(true)}
                             secureTextEntry
-                            error={passwordTouched && !passwordValid}
-                            mode="flat"
+                            errorMessage={
+                                passwordTouched && !passwordValid
+                                    ? "Le mot de passe doit contenir au moins 8 caractères.\nInclure au moins une lettre et un chiffre\nEt ne pas comporter d'espaces."
+                                    : ''
+                            }
+                            containerStyle={styles.inputContainer}
                         />
-                        <HelperText
-                            type="error"
-                            visible={passwordTouched && !passwordValid}
-                        >
-                            {'Le mot de passe doit contenir au moins 8 caractères.\n' +
-                                'Inclure au moins une lettre et un chiffre \n' +
-                                'Et ne pas comporter d’espaces.'}
-                        </HelperText>
 
                         {error && (
-                            <HelperText
-                                type="error"
-                                visible
-                                style={styles.serverError}
-                            >
-                                {error}
-                            </HelperText>
+                            <Text style={styles.serverError}>{error}</Text>
                         )}
                     </View>
                 </StepLayout>
@@ -147,11 +131,13 @@ export default function MailStep({
 }
 
 const styles = StyleSheet.create({
-    inputs: {
-        flex: 1,
-        justifyContent: 'center',
+    inputContainer: {
+        paddingHorizontal: 0,
+        marginTop: 16,
     },
     serverError: {
+        color: 'red',
         textAlign: 'center',
+        marginTop: 8,
     },
 });

@@ -6,7 +6,7 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
 } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { Input } from '@rneui/themed';
 import { useAppDispatch, useAppSelector } from '../../../../../utils/hooks';
 import { setName } from '../../../slices/onboardingSlice';
 import { StepLayout } from '../StepLayout';
@@ -23,6 +23,8 @@ export default function NameStep({
     const [name, setLocalName] = useState(onboardName);
 
     const progress = (currentStep ?? 1) / (totalSteps ?? 1);
+
+    console.debug('NameStep', { currentStep, totalSteps, progress });
     const handlePress = () => {
         dispatch(setName(name));
         onNext!();
@@ -39,14 +41,14 @@ export default function NameStep({
                     onBack={onBack}
                     disableNext={!name.trim()}
                 >
-                    <TextInput
-                        mode="flat"
+                    <Input
                         placeholder="Prénom"
                         value={name}
                         onChangeText={setLocalName}
-                        style={styles.input}
+                        inputStyle={styles.input}
                         placeholderTextColor="rgba(128, 128, 128, 0.5)"
-                        underlineColor="transparent"
+                        containerStyle={{ paddingHorizontal: 0 }}
+                        inputContainerStyle={{ borderBottomWidth: 0 }}
                     />
                 </StepLayout>
             </View>
