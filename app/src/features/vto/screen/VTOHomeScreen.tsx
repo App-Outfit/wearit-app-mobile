@@ -155,15 +155,6 @@ export function VTODressingScreen({ navigation }) {
                             },
                         ]}
                     >
-                        {/* <MenuDrawer
-                            open={drawerCloth}
-                            position={'right'}
-                            drawerContent={<MiniDressing setDrawerCloth={setDrawerCloth} drawerCloth={drawerCloth}/>}
-                            drawerPercentage={25}
-                            animationTime={250}
-                            overlay={true}
-                            opacity={1}
-                        />   */}
                         <MiniDressing
                             setDrawerCloth={setDrawerCloth}
                             drawerCloth={drawerCloth}
@@ -172,14 +163,6 @@ export function VTODressingScreen({ navigation }) {
                 </View>
 
                 <View style={styles.iconComponent}>
-                    {/* <TouchableOpacity style={styles.icon} onPress={onPressSave}>
-                        {currentIsSave ? (
-                            <FontAwesome name="bookmark" size={20} />
-                        ) : (
-                            <FontAwesome name="bookmark-o" size={20} />
-                        )}
-                        <Text style={styles.textIcon}>Enregistrer</Text>
-                    </TouchableOpacity> */}
                     <TouchableOpacity
                         style={styles.icon}
                         onPress={generateRandomOutfit}
@@ -199,14 +182,14 @@ export function VTODressingScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <View style={[styles.iconComponent, styles.iconTopComponent]}>
+                {/* <View style={[styles.iconComponent, styles.iconTopComponent]}>
                     <TouchableOpacity
                         style={[styles.icon, { marginBottom: 5 }]}
                     >
                         <Feather name="rotate-ccw" size={15} />
                         <Text style={styles.textIcon}>Réessayer</Text>
                     </TouchableOpacity>
-                </View>
+                </View> */}
 
                 <ShareDrawer ref={bottomSheetShare} onChange={() => {}} />
                 <ToastAlert />

@@ -53,7 +53,7 @@ export function ShareDrawer({ ref, onChange }) {
                             Télécharger
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={styleShare.shareItem}
                         onPress={() => {}}
                     >
@@ -79,7 +79,7 @@ export function ShareDrawer({ ref, onChange }) {
                             <Feather name="instagram" size={37} />
                         </View>
                         <Text style={styleShare.shareItemText}>Instagram</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </BottomSheetView>
         </BottomSheet>
