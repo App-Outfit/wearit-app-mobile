@@ -14,7 +14,8 @@ import { View, Text } from 'react-native';
 import { baseColors, lightTheme } from '../styles/theme';
 import { VTONavigator } from '../features/vto/navigation/VTOMainNavigation';
 import { ProfilNavigator } from '../features/profil/navigation/ProfilNavigator';
-
+import { ExplorerScreen } from '../features/explorer/screens/ExplorerScreen';
+import Feather from 'react-native-vector-icons/Feather';
 
 export type MainTabParamList = {
     Home: undefined;
@@ -90,6 +91,16 @@ const MainTabNavigator: React.FC = () => (
                 />
             )}
         >
+            <Tab.Screen
+                name="Explorer"
+                component={ExplorerScreen}
+                options={{
+                    tabBarLabel: 'Explorer',
+                    tabBarIcon: ({ color, size }) => (
+                        <Feather name="image" color={color} size={size} />
+                    ),
+                }}
+            />
             <Tab.Screen
                 name="VirtualTryOn"
                 component={VTONavigator}
