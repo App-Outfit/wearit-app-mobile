@@ -65,6 +65,24 @@ npm start --reset-cache
 * **Backend**: `cd backend && pytest tests/ -v`
 * **Frontend**: `cd frontend && npm test`
 
+
+## IOS Build Dev
+```bash
+eas build --profile development --platform ios
+```
+```bash
+npx expo start --dev-client
+```
+
+## IOS Build Production
+
+```bash
+eas build --platform ios --profile production
+```
+```bash
+eas submit -p ios --latest
+```
+
 ---
 
 ## Contributing
