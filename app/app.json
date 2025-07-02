@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Nous avons besoin d’accéder à la caméra pour prendre des photos.",
-        "NSPhotoLibraryUsageDescription": "Nous avons besoin d’accéder à la galerie pour choisir des images."
+        "NSPhotoLibraryUsageDescription": "Nous avons besoin d’accéder à la galerie pour choisir des images.",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.wearit.wearitappmobile"
     },
