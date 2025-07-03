@@ -18,7 +18,6 @@ import {
     typography,
 } from '../../../../styles/theme';
 import { ActivityIndicator, MD2Colors } from 'react-native-paper';
-import { color } from '@rneui/base';
 import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
 import { useBodyWS } from '../../hooks/useBodyWS';
 import { selectCurrentBody } from '../../../body/bodySelectors';

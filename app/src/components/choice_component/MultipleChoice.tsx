@@ -1,6 +1,5 @@
 // MultiChoice.tsx
 import * as React from 'react';
-import { color } from '@rneui/base';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { useTheme } from 'react-native-paper';
 
@@ -20,8 +19,6 @@ const MultiChoice: React.FC<MultiChoiceProps> = ({
     selected,
     onChange,
 }) => {
-    const { colors } = useTheme();
-
     const toggle = (key: string) => {
         if (selected.includes(key)) {
             onChange(selected.filter((k) => k !== key));

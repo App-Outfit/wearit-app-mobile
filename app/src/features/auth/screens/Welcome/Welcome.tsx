@@ -1,12 +1,11 @@
 // src/features/auth/screens/Welcome/WelcomeScreen.tsx
 
 import * as React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { Header } from '../../../../components/core/Typography';
 import { baseColors, lightTheme, normalize } from '../../../../styles/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CButton } from '../../../../components/core/Buttons';
-import { Text } from '@rneui/themed';
 
 interface WelcomeProps {
     navigation: {
