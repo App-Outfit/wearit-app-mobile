@@ -8,6 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "check:deps": "npx depcheck",
     "release:start": "./scripts/start_release.sh",
     "release:stop": "./scripts/stop_release.sh",
     "docs:build": "make -C docs html",
