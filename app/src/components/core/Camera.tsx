@@ -10,7 +10,7 @@ export async function pickFromCamera(): Promise<string | null> {
 
     const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
+        allowsEditing: false,
         quality: 0.8,
     });
 
@@ -30,7 +30,7 @@ export async function pickFromGallery(): Promise<string | null> {
 
     const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
+        allowsEditing: false,
         quality: 0.8,
     });
 
@@ -48,8 +48,8 @@ export const handleCamera = async (setImageUri: any) => {
     }
 };
 
-export const handleGallery = async (setImageUri: any) => {
-    const uri = await pickFromGallery();
+export const handleGallery = async (setImageUri: any, options?: { aspect?: [number, number] }) => {
+    const uri = await pickFromGallery(options);
     if (uri) {
         setImageUri(uri);
     }

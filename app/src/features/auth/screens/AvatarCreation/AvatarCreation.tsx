@@ -200,6 +200,7 @@ export function AvatarCreationScreen({ navigation }: any) {
                     open={modalChoice}
                     onClose={() => setModalChoice(false)}
                     onPicked={(uri) => handleImagePicked(uri)}
+                    aspect={[9, 16]}
                 />
             </View>
 

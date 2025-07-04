@@ -49,6 +49,7 @@
     "lottie-react-native": "7.2.2",
     "react": "19.0.0",
     "react-native": "0.79.4",
+    "react-native-confetti-cannon": "^1.5.2",
     "react-native-elements": "3.4.3",
     "react-native-event-source": "^1.1.0",
     "react-native-fast-opencv": "^0.4.5",

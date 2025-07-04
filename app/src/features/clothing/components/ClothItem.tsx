@@ -62,13 +62,12 @@ export const ClothItem = React.memo(function ClothItem({
         console.debug('verifyCredits : ', credits);
         console.debug('navigation : ', navigation);
 
-        if (credits <= 0) {
+        if (credits && credits <= 0) {
             navigation.navigate('ProfilSubscription');
         } else {
             getTryon();
         }
 
-        getTryon();
     };
 
     const getTryon = async () => {

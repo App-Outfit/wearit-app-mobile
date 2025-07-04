@@ -11,6 +11,14 @@ export interface OnboardingState {
     brands: string[];
     email: string | null;
     password: string | null;
+    wardrobeCounts: WardrobeCounts;
+}
+
+export interface WardrobeCounts {
+    tops: number;
+    bottoms: number;
+    shoes: number;
+    outers: number;
 }
 
 const initialState: OnboardingState = {
@@ -23,6 +31,7 @@ const initialState: OnboardingState = {
     brands: [],
     email: null,
     password: null,
+    wardrobeCounts: { tops: 0, bottoms: 0, shoes: 0, outers: 0 },
 };
 
 const onboardingSlice = createSlice({
@@ -56,6 +65,9 @@ const onboardingSlice = createSlice({
         setPassword: (s, a: PayloadAction<string>) => {
             s.password = a.payload;
         },
+        setWardrobeCounts: (s, a: PayloadAction<WardrobeCounts>) => {
+            s.wardrobeCounts = a.payload;
+        },
         resetOnboarding: () => initialState,
     },
 });
@@ -70,6 +82,7 @@ export const {
     setBrands,
     setEmail,
     setPassword,
+    setWardrobeCounts,
     resetOnboarding,
 } = onboardingSlice.actions;
 

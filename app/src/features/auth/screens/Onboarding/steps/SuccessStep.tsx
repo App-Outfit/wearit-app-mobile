@@ -10,6 +10,8 @@ import {
     Avatar,
 } from 'react-native-paper';
 import type { OnboardingStepProps } from '../types';
+import { useAppSelector } from '../../../../../utils/hooks';
+import { useEffect, useState } from 'react';
 
 export default function SuccessStep({
     onNext,
@@ -39,7 +41,7 @@ export default function SuccessStep({
                 <View>
                     <Title style={styles.title}>Félicitations</Title>
                     <Subheading style={styles.subtitle}>
-                        Tu as été correctement inscrit sur l’application.
+                        Tu as été correctement inscrit sur l'application.
                     </Subheading>
                 </View>
 

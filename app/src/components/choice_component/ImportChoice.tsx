@@ -9,7 +9,7 @@ import { baseColors } from '../../styles/theme';
 import { handleCamera, handleGallery } from '../core/Camera';
 import { useDispatch } from 'react-redux';
 
-export function ImportChoice({ open, onClose, onPicked }) {
+export function ImportChoice({ open, onClose, onPicked, aspect }: { open: boolean, onClose: () => void, onPicked: (uri: string) => void, aspect?: [number, number] }) {
     const dispatch = useDispatch();
     const [newImageUri, setNewImageUri] = React.useState<string | null>(null);
 

@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Button, Text } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
 
-// Vos étapes, dans l’ordre :
+// Vos étapes, dans l'ordre :
 import NameStep from './steps/Name';
 import AgeStep from './steps/AgeStep';
 import GenderStep from './steps/GenderStep';
-import Question1Step from './steps/Question1Step';
-import Question2Step from './steps/Question2Step';
-import Question3Step from './steps/Question3Step';
-import BrandStep from './steps/BrandStep';
+import WardrobeCountStep from './steps/WardrobeCountStep';
+import WardrobeComboStep from './steps/WardrobeComboStep';
 import MailStep from './steps/MailStep';
 import SuccessStep from './steps/SuccessStep';
 
@@ -17,10 +15,8 @@ const steps = [
     NameStep,
     AgeStep,
     GenderStep,
-    Question1Step,
-    Question2Step,
-    Question3Step,
-    BrandStep,
+    WardrobeCountStep,
+    WardrobeComboStep,
     MailStep,
     SuccessStep,
 ];
