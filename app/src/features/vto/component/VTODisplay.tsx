@@ -64,7 +64,6 @@ export default function VTODisplay({ onNavigate }) {
 
     React.useEffect(() => {
         // dispatch(loadTryonsSuccess(sampleTryons));
-        dispatch(fetchCurrentBody());
     }, [dispatch]);
 
     React.useEffect(() => {
@@ -151,9 +150,7 @@ export default function VTODisplay({ onNavigate }) {
                     );
                     setResultBase64(result);
                     dispatch(setCurrentResult(result));
-                } catch (err: any) {
-                    console.log('Error inpainting tryon');
-                }
+                } catch (err) {}
             };
             computeResult();
         } else {
@@ -199,9 +196,7 @@ export default function VTODisplay({ onNavigate }) {
 
                     setResultBase64(result);
                     dispatch(setCurrentResult(result));
-                } catch (err: any) {
-                    console.log('Error inpainting tryon');
-                }
+                } catch (err) {}
             };
 
             computeResult();

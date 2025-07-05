@@ -61,13 +61,9 @@ export function LoadingScreen({ navigation, route }: any) {
 
             try {
                 await dispatch(fetchProfile()).unwrap();
-                console.debug('Profile fetched successfully');
                 await dispatch(fetchReferralCode()).unwrap();
-                console.debug('Referral code fetched successfully');
                 await dispatch(fetchCurrentBody()).unwrap();
-                console.debug('Current body fetched successfully');
                 await dispatch(fetchCredits()).unwrap();
-                console.debug('Credits fetched successfully');
 
                 setReady(true);
             } catch (err) {

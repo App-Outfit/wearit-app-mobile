@@ -29,7 +29,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export function ProfilScreen({ navigation }) {
     const [modalDisconect, setModalDisconnect] = React.useState<boolean>(false);
     const userRefferalCode = useAppSelector(selectUserReferralCode);
-    console.log('userRefferalCode', userRefferalCode);
 
     const dispatch = useAppDispatch();
 
@@ -74,12 +73,6 @@ export function ProfilScreen({ navigation }) {
             }),
         );
     }, []);
-
-    React.useEffect(() => {
-        dispatch(fetchProfile());
-        dispatch(fetchCredits());
-        dispatch(fetchReferralCode());
-    }, [dispatch]);
 
     return (
         <View>

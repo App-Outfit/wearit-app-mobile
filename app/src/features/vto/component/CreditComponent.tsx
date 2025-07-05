@@ -13,12 +13,10 @@ export const CreditComponent = ({ navigation }) => {
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
-        dispatch(fetchProfile());
-    }, []);
-
-    React.useEffect(() => {
-        dispatch(fetchCredits());
-    }, [credits, dispatch]);
+        if (!credits) {
+            dispatch(fetchCredits());
+        }
+    }, [dispatch]);
 
     return (
         <View style={styles.creditBox}>

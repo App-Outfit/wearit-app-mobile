@@ -13,6 +13,7 @@ import {
     CategoryListResponse,
     ClothingDetailResponse,
 } from './clothingTypes';
+import { removeTryonsByClothingId } from '../vto/tryonSlice';
 
 interface ClothingState {
     clothes: ClothingItem[];
@@ -76,6 +77,10 @@ const clothingSlice = createSlice({
                 if (state.selectedClothing?.id === meta.arg) {
                     state.selectedClothing = null;
                 }
+            })
+            .addCase(removeTryonsByClothingId, (state, action) => {
+                // Cette action est gérée par le slice tryon
+                // On l'ajoute ici pour éviter les erreurs de Redux
             });
 
         // pending matcher

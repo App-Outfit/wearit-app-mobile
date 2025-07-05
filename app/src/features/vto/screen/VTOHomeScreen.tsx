@@ -24,6 +24,9 @@ import MenuDrawer from 'react-native-side-drawer';
 import { DrawerToggleButton } from '../../../components/core/DrawerToggleButton';
 import { selectUserCredits } from '../../profil/selectors/userSelectors';
 import { fetchCredits } from '../../profil/thunks/userThunks';
+import { selectResultTryon } from '../tryonSelectors';
+import uuid from 'react-native-uuid';
+import { saveImageToGalleryAsync } from '../../../utils/download';
 
 export function VTODressingScreen({ navigation }) {
     const [currentIsSave, setCurrentSave] = React.useState<boolean>(false);
@@ -33,7 +36,13 @@ export function VTODressingScreen({ navigation }) {
     const lowerTryons = useAppSelector(selectReadyTryonsLower);
     const [drawerCloth, setDrawerCloth] = React.useState<boolean>(true);
     const credits = useAppSelector(selectUserCredits);
+    const currentResult = useAppSelector(selectResultTryon);
     const dispatch = useAppDispatch();
+
+    // Mémoriser les sélecteurs pour éviter les recalculs
+    const memoizedTryonsReady = React.useMemo(() => tryonsReady, [tryonsReady]);
+    const memoizedUpperTryons = React.useMemo(() => upperTryons, [upperTryons]);
+    const memoizedLowerTryons = React.useMemo(() => lowerTryons, [lowerTryons]);
 
     const succesSaveOutfitToast = () => {
         Toast.show({
@@ -59,6 +68,34 @@ export function VTODressingScreen({ navigation }) {
         bottomSheetShare.current?.snapToIndex(0);
     }, []);
 
+    const handleDownloadImage = async () => {
+        if (!currentResult) {
+            Toast.show({
+                type: 'error',
+                text1: 'Aucune image à télécharger',
+                position: 'bottom',
+            });
+            return;
+        }
+        
+        const fileName = `wearit-${uuid.v4()}.jpg`;
+        try {
+            await saveImageToGalleryAsync(currentResult, fileName);
+            Toast.show({
+                type: 'success',
+                text1: 'Image téléchargée !',
+                position: 'bottom',
+            });
+        } catch (e) {
+            console.error('Échec téléchargement :', e);
+            Toast.show({
+                type: 'error',
+                text1: 'Erreur lors du téléchargement',
+                position: 'bottom',
+            });
+        }
+    };
+
     const toCreateBody = () => {
         navigation.push('AvatarCreation');
     };
@@ -67,9 +104,9 @@ export function VTODressingScreen({ navigation }) {
         return <VTODisplay onNavigate={toCreateBody} />;
     }, []);
 
-    const generateRandomOutfit = async () => {
+    const generateRandomOutfit = React.useCallback(() => {
         // select a random outfit from the list of available outfits
-        if (tryonsReady.length === 0) {
+        if (memoizedTryonsReady.length === 0) {
             Toast.show({
                 type: 'error',
                 text1: 'Aucun vêtement disponible',
@@ -78,8 +115,8 @@ export function VTODressingScreen({ navigation }) {
             return;
         }
 
-        const randomIndex = Math.floor(Math.random() * tryonsReady.length);
-        const randomOutfit = tryonsReady[randomIndex];
+        const randomIndex = Math.floor(Math.random() * memoizedTryonsReady.length);
+        const randomOutfit = memoizedTryonsReady[randomIndex];
 
         switch (randomOutfit.cloth_type) {
             case 'dress':
@@ -87,7 +124,7 @@ export function VTODressingScreen({ navigation }) {
                 break;
             case 'upper':
                 const lowerOutfit =
-                    lowerTryons[Math.floor(Math.random() * lowerTryons.length)];
+                    memoizedLowerTryons[Math.floor(Math.random() * memoizedLowerTryons.length)];
                 if (lowerOutfit) {
                     dispatch(
                         setUpperLower({
@@ -101,7 +138,7 @@ export function VTODressingScreen({ navigation }) {
                 break;
             case 'lower':
                 const upperOutfit =
-                    upperTryons[Math.floor(Math.random() * upperTryons.length)];
+                    memoizedUpperTryons[Math.floor(Math.random() * memoizedUpperTryons.length)];
                 if (upperOutfit) {
                     dispatch(
                         setUpperLower({
@@ -120,11 +157,14 @@ export function VTODressingScreen({ navigation }) {
                     position: 'bottom',
                 });
         }
-    };
+    }, [memoizedTryonsReady, memoizedUpperTryons, memoizedLowerTryons, dispatch]);
 
     React.useEffect(() => {
-        if (!credits) dispatch(fetchCredits());
-    }, [credits, dispatch]);
+        // Ne charger les crédits qu'une seule fois si ils ne sont pas déjà chargés
+        if (!credits) {
+            dispatch(fetchCredits());
+        }
+    }, [dispatch]); // Suppression de credits des dépendances
 
     return (
         <GestureHandlerRootView>
@@ -192,19 +232,10 @@ export function VTODressingScreen({ navigation }) {
 
                     <TouchableOpacity
                         style={styles.icon}
-                        onPress={handleSnapPress}
+                        onPress={handleDownloadImage}
                     >
-                        <Feather name="share-2" size={20} />
-                        <Text style={styles.textIcon}>Partager</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={[styles.iconComponent, styles.iconTopComponent]}>
-                    <TouchableOpacity
-                        style={[styles.icon, { marginBottom: 5 }]}
-                    >
-                        <Feather name="rotate-ccw" size={15} />
-                        <Text style={styles.textIcon}>Réessayer</Text>
+                        <Feather name="download" size={20} />
+                        <Text style={styles.textIcon}>Télécharger</Text>
                     </TouchableOpacity>
                 </View>
 

@@ -62,13 +62,21 @@ const selectClothTypeById = createSelector(selectAllClothes, (clothes) =>
 
 export const selectReadyTryonsWithType = createSelector(
     [selectAllTryons, selectClothTypeById],
-    (tryons, clothTypeById) =>
-        tryons
+    (tryons, clothTypeById) => {
+        return tryons
             .filter((t) => t.status === 'ready')
-            .map((t) => ({
-                ...t,
-                cloth_type: clothTypeById[t.clothing_id] ?? 'unknown',
-            })),
+            .filter((t) => {
+                // Filtrer les tryons orphelins (vêtements supprimés)
+                return clothTypeById[t.clothing_id] !== undefined;
+            })
+            .map((t) => {
+                const clothType = clothTypeById[t.clothing_id];
+                return {
+                    ...t,
+                    cloth_type: clothType,
+                };
+            });
+    },
 );
 
 export const selectReadyTryonsUpper = createSelector(

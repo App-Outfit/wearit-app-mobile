@@ -94,6 +94,24 @@ const tryonSlice = createSlice({
                 state.tryons.push(action.payload as TryonItem);
             }
         },
+        // Nettoyer les tryons orphelins quand un vêtement est supprimé
+        removeTryonsByClothingId(state, action: PayloadAction<string>) {
+            const clothingId = action.payload;
+            
+            // Supprimer les tryons associés à ce vêtement
+            state.tryons = state.tryons.filter(t => t.clothing_id !== clothingId);
+            
+            // Nettoyer aussi les sélections si elles concernent ce vêtement
+            if (state.selectedTryon.upper?.clothing_id === clothingId) {
+                state.selectedTryon.upper = null;
+            }
+            if (state.selectedTryon.lower?.clothing_id === clothingId) {
+                state.selectedTryon.lower = null;
+            }
+            if (state.selectedTryon.dress?.clothing_id === clothingId) {
+                state.selectedTryon.dress = null;
+            }
+        },
     },
     extraReducers: (builder) => {
         // on recharge la liste après fetchTryons
@@ -192,4 +210,5 @@ export const {
     setUpperLower,
     updateTryon,
     setCurrentResult,
+    removeTryonsByClothingId,
 } = tryonSlice.actions;

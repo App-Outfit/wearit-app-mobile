@@ -15,6 +15,10 @@ export function useUploadClothing() {
         const fileName = uriParts[uriParts.length - 1];
         const fileType = fileName.split('.').pop() ?? 'jpeg';
 
+        console.log('👕 Upload - URI:', uri);
+        console.log('👕 Upload - FileName:', fileName);
+        console.log('👕 Upload - FileType:', fileType);
+
         const formData = new FormData();
         formData.append('file', {
             uri,
@@ -36,6 +40,9 @@ export function useUploadClothing() {
             cloth_type: ClothingUploadPayload['cloth_type'];
             name: string;
         }) => {
+            console.log('👕 Upload - Starting upload for:', { category, cloth_type, name });
+            console.log('👕 Upload - Image URI:', uri);
+            
             setLoading(true);
             setError(null);
 
@@ -48,8 +55,10 @@ export function useUploadClothing() {
             };
 
             try {
+                console.log('👕 Upload - Sending to backend...');
                 const resultAction = await dispatch(uploadClothing(payload));
                 if (uploadClothing.fulfilled.match(resultAction)) {
+                    console.log('👕 Upload - Success!');
                     Toast.show({
                         type: 'success',
                         text1: 'Vêtement ajouté avec succès !',
@@ -60,6 +69,7 @@ export function useUploadClothing() {
                         (resultAction.payload as string) ||
                         resultAction.error.message ||
                         "Erreur lors de l'ajout du vêtement.";
+                    console.error('👕 Upload - Failed:', message);
                     Toast.show({
                         type: 'error',
                         text1: message,
@@ -69,6 +79,7 @@ export function useUploadClothing() {
                 }
             } catch (e: any) {
                 const msg = e.message ?? 'Erreur inattendue';
+                console.error('👕 Upload - Exception:', e);
                 Toast.show({ type: 'error', text1: msg, position: 'bottom' });
                 setError(msg);
             } finally {

@@ -24,8 +24,8 @@ export function useTryonSSE() {
         const wsUrl = `${proto}://${withoutSchema}/tryon/ws?token=${encodeURIComponent(jwtToken)}`;
 
         const ws = new WebSocket(wsUrl);
-        ws.onopen = () => console.log('[WS] connected');
-        ws.onerror = (e) => console.warn('[WS] error', e);
+        ws.onopen = () => {};
+        ws.onerror = (e) => {};
         ws.onmessage = (e) => {
             const data = JSON.parse(e.data);
             if (data.type === 'tryon_update') {
@@ -41,7 +41,7 @@ export function useTryonSSE() {
                 dispatch(updateTryon(tryonItem));
             }
         };
-        ws.onclose = () => console.log('[WS] closed');
+        ws.onclose = () => {};
         wsRef.current = ws;
         return () => {
             ws.close();

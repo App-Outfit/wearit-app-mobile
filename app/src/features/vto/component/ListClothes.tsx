@@ -42,6 +42,7 @@ export function MiniDressing({ setDrawerCloth, drawerCloth }) {
     const userCloth = useAppSelector(selectAllClothes);
     const allTryons = useAppSelector(selectAllTryons);
     const allCloths = userCloth;
+    const [lastFetchedBodyId, setLastFetchedBodyId] = React.useState<string | null>(null);
 
     const screenWidth = Dimensions.get('window').width;
 
@@ -49,14 +50,15 @@ export function MiniDressing({ setDrawerCloth, drawerCloth }) {
 
     React.useEffect(() => {
         dispatch(fetchClothes());
-        dispatch(fetchCurrentBody());
     }, [dispatch]);
 
     React.useEffect(() => {
-        if (current_body) {
+        // Éviter les appels répétés pour le même body_id
+        if (current_body && current_body.id !== lastFetchedBodyId) {
             dispatch(fetchTryonsByBodyId(current_body.id));
+            setLastFetchedBodyId(current_body.id);
         }
-    }, [current_body, dispatch]);
+    }, [current_body, dispatch, lastFetchedBodyId]);
 
     const handleImagePicked = async (uri) => {
         setImportModalOpen(false);
@@ -74,7 +76,7 @@ export function MiniDressing({ setDrawerCloth, drawerCloth }) {
             cloth_type,
             name: cloth_id,
         });
-        // on ferme la modale et reset l’URI seulement si pas d’erreur
+        // on ferme la modale et reset l'URI seulement si pas d'erreur
         if (!uploadError) {
             setNewPictureUri(null);
             setInfoModalOpen(false);
