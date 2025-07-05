@@ -225,9 +225,6 @@ export function VTODressingScreen({ navigation }) {
                         onPress={generateRandomOutfit}
                     >
                         <MaterialIcons name="shuffle" size={24} color="#000" />
-                        <Text style={styles.textIcon}>
-                            Génération aléatoire
-                        </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -235,7 +232,6 @@ export function VTODressingScreen({ navigation }) {
                         onPress={handleDownloadImage}
                     >
                         <Feather name="download" size={20} />
-                        <Text style={styles.textIcon}>Télécharger</Text>
                     </TouchableOpacity>
                 </View>
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Image, Text, StyleSheet } from 'react-native';
+import { View, Image, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import type { TryonData, ClothData } from '../slice/sampleTryons';
 import {
@@ -69,22 +69,21 @@ export default function VTODisplay({ onNavigate }) {
     React.useEffect(() => {
         const initCurrentResult = async () => {
             if (current_body) {
+                // Charger l'image principale du body immédiatement
                 const uri = await loadAssetBase64(current_body.image_url);
-                const upperMask = await loadAssetBase64(
-                    current_body.mask_upper,
-                );
-                const lowerMask = await loadAssetBase64(
-                    current_body.mask_lower,
-                );
-                const dressMask = await loadAssetBase64(
-                    current_body.mask_dress,
-                );
-
                 dispatch(setCurrentResult(uri));
                 setResultBase64(uri);
-                setUpperMaskBase64(upperMask);
-                setLowerMaskBase64(lowerMask);
-                setDressMaskBase64(dressMask);
+
+                // Charger les masks en arrière-plan
+                Promise.all([
+                    loadAssetBase64(current_body.mask_upper),
+                    loadAssetBase64(current_body.mask_lower),
+                    loadAssetBase64(current_body.mask_dress),
+                ]).then(([upperMask, lowerMask, dressMask]) => {
+                    setUpperMaskBase64(upperMask);
+                    setLowerMaskBase64(lowerMask);
+                    setDressMaskBase64(dressMask);
+                });
             }
         };
         initCurrentResult();
@@ -244,6 +243,7 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: '100%',
+        borderRadius: spacing.small,
     },
     boxOri: {
         position: 'relative',

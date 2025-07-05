@@ -27,7 +27,7 @@ export const CreditComponent = ({ navigation }) => {
                 <Text style={styles.textCredit}>{credits || 0}</Text>
                 <MaterialCommunityIcons
                     name="diamond"
-                    size={14}
+                    size={18}
                     color="#FFB300"
                 />
             </TouchableOpacity>
@@ -38,24 +38,24 @@ export const CreditComponent = ({ navigation }) => {
 const styles = StyleSheet.create({
     creditBox: {
         flex: 1,
-        padding: 10,
         alignItems: 'center',
         justifyContent: 'center',
+        marginRight: 15, // Décalage vers la gauche
     },
     creditContent: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#F0F0F0',
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 5,
-        minWidth: 70,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 8,
+        minWidth: 90,
     },
     textCredit: {
-        fontSize: 15,
+        fontSize: 16,
         fontWeight: 'bold',
         color: '#000',
-        marginRight: 5,
+        marginRight: 8,
     },
 });

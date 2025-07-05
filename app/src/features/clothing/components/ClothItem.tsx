@@ -214,7 +214,7 @@ const styleClothing = StyleSheet.create({
         minWidth: 90,
         width: 90,
         height: 140,
-        marginBottom: spacing.medium,
+        marginBottom: spacing.small,
         position: 'relative',
         borderRadius: spacing.small,
         boxShadow: '0px 2px 8px rgba(0,0,0,0.2)',

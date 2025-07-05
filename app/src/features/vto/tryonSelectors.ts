@@ -72,7 +72,7 @@ export const selectReadyTryonsWithType = createSelector(
             .map((t) => {
                 const clothType = clothTypeById[t.clothing_id];
                 return {
-                    ...t,
+                ...t,
                     cloth_type: clothType,
                 };
             });

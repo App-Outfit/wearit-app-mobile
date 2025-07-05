@@ -161,10 +161,10 @@ export async function pickFromGallery(): Promise<string | null> {
 
 export const handleCamera = async (setImageUri: any) => {
     try {
-        const uri = await pickFromCamera();
-        if (uri) {
+    const uri = await pickFromCamera();
+    if (uri) {
             console.log('📸 Camera - Setting URI:', uri);
-            setImageUri(uri);
+        setImageUri(uri);
         }
     } catch (error) {
         console.error('📸 Camera - Error:', error);
@@ -175,9 +175,9 @@ export const handleCamera = async (setImageUri: any) => {
 export const handleGallery = async (setImageUri: any, options?: { aspect?: [number, number] }) => {
     try {
         const uri = await pickFromGallery();
-        if (uri) {
+    if (uri) {
             console.log('🖼️ Gallery - Setting URI:', uri);
-            setImageUri(uri);
+        setImageUri(uri);
         }
     } catch (error) {
         console.error('🖼️ Gallery - Error:', error);

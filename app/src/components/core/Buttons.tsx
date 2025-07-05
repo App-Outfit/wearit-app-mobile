@@ -132,7 +132,7 @@ export const AddButtonText = ({ onPress, text }) => {
             style={styleAddButtonText.addButton}
         >
             <View style={styleAddButtonText.addButtonCircle}>
-                <Feather name="plus" color={baseColors.white} size={23} />
+                <Feather name="plus" color={baseColors.white} size={30} />
             </View>
             <Text style={styleAddButtonText.addButtonText}>{text}</Text>
         </TouchableOpacity>
@@ -149,8 +149,8 @@ const styleAddButtonText = StyleSheet.create({
         alignItems: 'center',
     },
     addButtonCircle: {
-        width: 30,
-        height: 30,
+        width: 50,
+        height: 50,
         backgroundColor: baseColors.primary,
         borderRadius: '50%',
         justifyContent: 'center',
@@ -160,6 +160,6 @@ const styleAddButtonText = StyleSheet.create({
         fontSize: 11,
         textAlign: 'center',
         margin: 0,
-        marginTop: 5,
+        marginTop: -20,
     },
 });
