@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Image, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Image, Text, StyleSheet, ActivityIndicator, Animated } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import type { TryonData, ClothData } from '../slice/sampleTryons';
 import {
@@ -61,6 +61,7 @@ export default function VTODisplay({ onNavigate }) {
     const [dressMaskBase64, setDressMaskBase64] = React.useState<string>();
     const [tryon64, setTryon64] = React.useState<string>('');
     const current_body = useAppSelector(selectCurrentBody);
+    const selected = useAppSelector(selectSelectedTryon);
 
     React.useEffect(() => {
         // dispatch(loadTryonsSuccess(sampleTryons));
@@ -90,7 +91,6 @@ export default function VTODisplay({ onNavigate }) {
     }, [current_body, dispatch]);
 
     // const userCloth = useAppSelector(selectAllClothes);
-    const selected = useAppSelector(selectSelectedTryon);
     const userCloth = useAppSelector(selectAllClothes);
     // const selectedTryon:  UpperLowerTryon | TryonItem | null =
     // selected.upperLower || selected.dress || selected.upper || selected.lower || null;
@@ -208,19 +208,49 @@ export default function VTODisplay({ onNavigate }) {
         }
     }, [resultBase64]);
 
+    // Affichage superposé des images
     return (
         <View style={styles.boxImg}>
-            {current_body !== null ? (
-                <ImageDisplay uri={`data:image/png;base64,${resultBase64}`} />
+            {current_body ? (
+                <View style={styles.superposeContainer}>
+                    {/* Body */}
+                    {current_body.image_url && (
+                        <Image
+                            source={{ uri: current_body.image_url }}
+                            style={styles.image}
+                            resizeMode="cover"
+                        />
+                    )}
+                    {/* Dress (prend le dessus sur upper/lower) */}
+                    {selected.dress?.output_url ? (
+                        <Image
+                            source={{ uri: selected.dress.output_url }}
+                            style={styles.image}
+                            resizeMode="cover"
+                        />
+                    ) : (
+                        <>
+                            {/* Upper */}
+                            {selected.upper?.output_url && (
+                                <Image
+                                    source={{ uri: selected.upper.output_url }}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
+                            )}
+                            {/* Lower */}
+                            {selected.lower?.output_url && (
+                                <Image
+                                    source={{ uri: selected.lower.output_url }}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
+                            )}
+                        </>
+                    )}
+                </View>
             ) : (
                 <View style={styles.boxOri}>
-                    <Image
-                        style={styles.image}
-                        source={{
-                            uri: `data:image/png;base64,${resultBase64}`,
-                        }}
-                        resizeMode="contain"
-                    />
                     <View style={styles.addButtonBox}>
                         <AddButtonText
                             onPress={onNavigate}
@@ -240,10 +270,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    image: {
+    superposeContainer: {
         width: '100%',
         height: '100%',
-        borderRadius: spacing.small,
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    image: {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        top: 0,
+        left: 0,
     },
     boxOri: {
         position: 'relative',
