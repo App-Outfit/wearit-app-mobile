@@ -29,7 +29,11 @@ const initialState: BodyState = {
 const bodySlice = createSlice({
     name: 'body',
     initialState,
-    reducers: {},
+    reducers: {
+        setCurrentBody(state, action: PayloadAction<BodyItem>) {
+            state.currentBody = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         // fulfilled
         builder
@@ -98,3 +102,4 @@ const bodySlice = createSlice({
 });
 
 export default bodySlice.reducer;
+export const { setCurrentBody } = bodySlice.actions;
