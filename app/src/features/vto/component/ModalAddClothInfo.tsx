@@ -6,6 +6,8 @@ import {
     Text,
     StyleSheet,
     Keyboard,
+    Image,
+    ScrollView,
 } from 'react-native';
 import { Modal, Portal } from 'react-native-paper';
 import { spacing, typography } from '../../../styles/theme';
@@ -15,36 +17,48 @@ import MultiChoice, {
 import UniqueChoice from '../../../components/choice_component/UniqueChoice';
 import { InputField } from '../../../components/core/PlaceHolders';
 import { CButton } from '../../../components/core/Buttons';
+import { clothingIcons } from '../../../assets/icons/clothingIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export function ModalAddClothInfo({ open, onCancel, onSave }) {
-    const [clothType, setClothType] = React.useState<
-        'upper' | 'lower' | 'dress' | undefined
-    >();
+export function ModalAddClothInfo({ open, onCancel, onSave, imageUri }) {
+    const [clothType, setClothType] = React.useState<'upper' | 'lower' | 'dress' | undefined>();
     const [category, setCategory] = React.useState<string>();
-    const [clothId, setClothId] = React.useState<string>();
+
+    React.useEffect(() => {
+        // Sélectionner upper par défaut à l'ouverture
+        if (open && !clothType) setClothType('upper');
+    }, [open]);
+
+    // Catégories par type (avec clothingIcons)
+    const categoriesByType: Record<'upper' | 'lower' | 'dress', { key: string, label: string, icon: any }[]> = {
+        upper: [
+            { key: 'tshirt', label: 'T-shirt', icon: clothingIcons.upper },
+            { key: 'shirt', label: 'Chemise', icon: clothingIcons.upper },
+            { key: 'sweater', label: 'Pull', icon: clothingIcons.upper },
+            { key: 'jacket', label: 'Veste', icon: clothingIcons.upper },
+            { key: 'coat', label: 'Manteau', icon: clothingIcons.upper },
+            { key: 'hoodie', label: 'Hoodie', icon: clothingIcons.upper },
+        ],
+        lower: [
+            { key: 'pants', label: 'Pantalon', icon: clothingIcons.lower },
+            { key: 'shorts', label: 'Short', icon: clothingIcons.lower },
+            { key: 'skirt', label: 'Jupe', icon: clothingIcons.lower },
+        ],
+        dress: [
+            { key: 'dress', label: 'Robe', icon: clothingIcons.dress },
+            { key: 'costume', label: 'Costume', icon: clothingIcons.dress },
+        ],
+    };
 
     const saveNewCloth = () => {
-        console.log(
-            `Saving new cloth with type: ${clothType}, category: ${category}, id: ${clothId}`,
-        );
+        if (!clothType || !category) return;
         onSave({
             cloth_type: clothType,
             category,
-            cloth_id: clothId,
         });
         setClothType(undefined);
         setCategory(undefined);
-        setClothId(undefined);
     };
-
-    const clothTypeOption: Option[] = React.useMemo(
-        () => [
-            { key: 'upper', label: 'Haut du corps' },
-            { key: 'lower', label: 'Bas du corps' },
-            { key: 'dress', label: 'Corps entier' },
-        ],
-        [],
-    );
 
     return (
         <Portal>
@@ -56,42 +70,88 @@ export function ModalAddClothInfo({ open, onCancel, onSave }) {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.typeText}>Type :</Text>
-                        <View
-                            style={{ flex: 1, marginVertical: spacing.small }}
-                        >
-                            <UniqueChoice
-                                options={clothTypeOption}
-                                selected={clothType}
-                                onChange={(key) => {
-                                    if (
-                                        key === 'upper' ||
-                                        key === 'lower' ||
-                                        key === 'dress'
-                                    )
-                                        setClothType(key);
-                                }}
-                            />
+                        {/* Image de l'habit en haut si disponible */}
+                        {imageUri && (
+                            <View style={{ alignItems: 'center', marginBottom: 8 }}>
+                                <Image source={{ uri: imageUri }} style={{ width: 220, height: 220, borderRadius: 28, resizeMode: 'cover' }} />
+                            </View>
+                        )}
+                        {/* Sélection du type (upper/lower/dress) avec bulle et icône clothingIcons */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 8, marginTop: 0 }}>
+                            {([
+                                { type: 'upper', icon: clothingIcons.upper, label: 'Haut' },
+                                { type: 'lower', icon: clothingIcons.lower, label: 'Bas' },
+                                { type: 'dress', icon: clothingIcons.dress, label: 'Corps' },
+                            ] as const).map(({ type, icon, label }) => (
+                                <TouchableOpacity
+                                    key={type}
+                                    style={{
+                                        marginHorizontal: 12,
+                                        alignItems: 'center',
+                                    }}
+                                    onPress={() => {
+                                        setClothType(type);
+                                        setCategory(undefined);
+                                    }}
+                                >
+                                    <View style={{
+                                        width: 56,
+                                        height: 56,
+                                        borderRadius: 28,
+                                        backgroundColor: clothType === type ? '#f3e9ff' : '#fff',
+                                        borderWidth: clothType === type ? 3 : 1,
+                                        borderColor: clothType === type ? '#A259FF' : '#ccc',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}>
+                                        <Image source={icon} style={{ width: 36, height: 36, resizeMode: 'contain' }} />
+                                    </View>
+                                    <Text style={{ fontSize: 12, marginTop: 2, color: clothType === type ? '#A259FF' : '#222' }}>{label}</Text>
+                                </TouchableOpacity>
+                            ))}
                         </View>
-
-                        <InputField
-                            placeholder="Nom"
-                            value={clothId}
-                            onChangeText={setClothId}
-                            onSubmitEditing={() => Keyboard.dismiss()}
-                        />
-                        <InputField
-                            placeholder="Catégorie (ex. 'robe', 't-shirt')"
-                            value={category}
-                            onChangeText={setCategory}
-                            onSubmitEditing={() => Keyboard.dismiss()}
-                        />
+                        {/* Sélection de la catégorie selon le type sélectionné, fond grisé uniforme */}
+                        {clothType && (
+                            <View style={{
+                                backgroundColor: '#F3F4F8',
+                                borderRadius: 18,
+                                paddingVertical: 12,
+                                marginBottom: 8,
+                                marginTop: 4,
+                                minHeight: 90,
+                            }}>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        {categoriesByType[clothType].map((cat) => (
+                                            <TouchableOpacity
+                                                key={cat.key}
+                                                style={{ marginHorizontal: 8, alignItems: 'center' }}
+                                                onPress={() => setCategory(cat.key)}
+                                            >
+                                                <View style={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: 28,
+                                                    backgroundColor: category === cat.key ? '#f3e9ff' : '#fff',
+                                                    borderWidth: category === cat.key ? 3 : 1,
+                                                    borderColor: category === cat.key ? '#A259FF' : '#ccc',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}>
+                                                    <Image source={cat.icon} style={{ width: 36, height: 36, resizeMode: 'contain' }} />
+                                                </View>
+                                                <Text style={{ fontSize: 12, marginTop: 2, color: category === cat.key ? '#A259FF' : '#222' }}>{cat.label}</Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </ScrollView>
+                            </View>
+                        )}
                         <CButton
                             variant="primary"
                             size="xlarge"
                             disabled={
                                 clothType === undefined ||
-                                !clothId === undefined ||
                                 category === undefined
                             }
                             onPress={saveNewCloth}

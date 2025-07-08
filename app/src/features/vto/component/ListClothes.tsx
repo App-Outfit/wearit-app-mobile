@@ -232,6 +232,7 @@ export function MiniDressing({ setDrawerCloth, drawerCloth }) {
                 open={infoModalOpen}
                 onCancel={() => setInfoModalOpen(false)}
                 onSave={handleSaveNewCloth}
+                imageUri={newPictureUri}
                 // loading={uploading}
                 // error={uploadError}
             />
