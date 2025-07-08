@@ -1,17 +1,17 @@
-Welcome to WearIT Backend's documentation!
-===========================================
+Welcome to WearIT Application's documentation!
+==============================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    introduction
+   mobile-app/index
+   backend/index
 
-Generated Documentation
-=======================
+Indices and tables
+==================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: API and Services:
-
-   modules
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

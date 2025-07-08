@@ -1,19 +1,19 @@
-# 📚 WearIT Backend Documentation Guide
+# 📚 WearIT Application Documentation Guide
 
-This guide explains how to generate and view the documentation for the WearIT backend project locally. It also covers best practices for writing docstrings using the **Google Style** and explains their importance.
+Ce guide explique comment générer et consulter la documentation pour l'application WearIT (backend Python et application mobile React Native) localement. Il couvre également les bonnes pratiques pour écrire des docstrings en utilisant le **style Google** et explique leur importance.
 
 ---
 
-## 🛠️ Prerequisites
+## 🛠️ Prérequis
 
-Ensure you have the following installed:
+Assurez-vous d'avoir installé :
 
-- **Python** (version 3.8 or higher)
-- **Sphinx** and necessary extensions
+- **Python** (version 3.8 ou supérieure)
+- **Sphinx** et les extensions nécessaires
 
-### Install Dependencies
+### Installation des dépendances
 
-Install the required dependencies using `requirements.txt`:
+Installez les dépendances requises en utilisant `requirements.txt` :
 
 ```bash
 pip install -r requirements.txt
@@ -21,29 +21,29 @@ pip install -r requirements.txt
 
 ---
 
-## 🚀 Generating and Viewing the Documentation Locally
+## 🚀 Génération et consultation de la documentation localement
 
-### 1. Navigate to the Documentation Directory
+### 1. Naviguer vers le répertoire de documentation
 
 ```bash
 cd docs
 ```
 
-### 2. Clean Previous Builds
+### 2. Nettoyer les builds précédents
 
 ```bash
 make clean
 ```
 
-### 3. Generate the HTML Documentation
+### 3. Générer la documentation HTML
 
 ```bash
 make html
 ```
 
-### 4. View the Documentation
+### 4. Consulter la documentation
 
-Open the generated `index.html` in your browser:
+Ouvrez le fichier `index.html` généré dans votre navigateur :
 
 ```bash
 # Linux
@@ -61,31 +61,42 @@ start build\html\index.html
 
 ---
 
-## 📝 Adding New Files or Functions to the Documentation
+## 📝 Ajouter de nouveaux fichiers ou fonctions à la documentation
 
-When you add new files or functions to the project, you need to regenerate the `.rst` files so that they are included in the documentation.
+Lorsque vous ajoutez de nouveaux fichiers ou fonctions au projet, vous devez régénérer les fichiers `.rst` pour qu'ils soient inclus dans la documentation.
 
-#### Example `requirements.txt`
+#### Exemple `requirements.txt`
 
 ```txt
 sphinx>=4.0
 sphinx_rtd_theme
+sphinx_js
 ```
-### Generate `.rst` Files for New Modules or Functions
 
-Navigate to the `docs` directory and run the following command to regenerate the `.rst` files for your source code:
+### Générer les fichiers `.rst` pour de nouveaux modules ou fonctions
+
+Naviguez vers le répertoire `docs` et exécutez la commande suivante pour régénérer les fichiers `.rst` pour votre code source :
+
+#### Pour le backend Python
 
 ```bash
 sphinx-apidoc -f -o source ../backend/src
 ```
 
-- **`-f`**: Forces the overwriting of existing `.rst` files.
-- **`-o source`**: Specifies the output directory for the generated `.rst` files.
-- **`../../backend/src`**: Path to the source code directory.
+#### Pour l'application mobile React Native
 
-### Rebuild the Documentation
+```bash
+# Génération manuelle des fichiers .rst pour React Native
+# Les fichiers sont créés manuellement dans docs/source/mobile-app/
+```
 
-After generating the `.rst` files, clean and rebuild the documentation:
+- **`-f`** : Force l'écrasement des fichiers `.rst` existants.
+- **`-o source`** : Spécifie le répertoire de sortie pour les fichiers `.rst` générés.
+- **`../backend/src`** : Chemin vers le répertoire du code source.
+
+### Reconstruire la documentation
+
+Après avoir généré les fichiers `.rst`, nettoyez et reconstruisez la documentation :
 
 ```bash
 make clean
@@ -94,21 +105,21 @@ make html
 
 ---
 
-## 🖋️ Writing Docstrings
+## 🖋️ Écrire des Docstrings
 
-### Why Use Docstrings?
+### Pourquoi utiliser des Docstrings ?
 
-Docstrings are essential for:
+Les docstrings sont essentielles pour :
 
-- **Code Clarity**: They explain what a function, class, or module does.
-- **Automatic Documentation**: Tools like **Sphinx** generate documentation from docstrings.
-- **Maintainability**: They help developers understand and maintain the codebase.
+- **Clarté du code** : Elles expliquent ce que fait une fonction, classe ou module.
+- **Documentation automatique** : Des outils comme **Sphinx** génèrent la documentation à partir des docstrings.
+- **Maintenabilité** : Elles aident les développeurs à comprendre et maintenir le code.
 
-### Google Style Docstrings
+### Style Google pour les Docstrings
 
-The WearIT backend uses the **Google Style** for docstrings.
+Le projet WearIT utilise le **style Google** pour les docstrings.
 
-#### Example Docstring
+#### Exemple de Docstring Python
 
 ```python
 def create_user(name: str, email: str, password: str) -> str:
@@ -128,16 +139,41 @@ def create_user(name: str, email: str, password: str) -> str:
     return "token"
 ```
 
-### Docstring Sections
+#### Exemple de Docstring TypeScript/React
 
-1. **Summary**: A one-line description of the function.
-2. **Args**: Describes the parameters, including their types.
-3. **Raises**: Lists exceptions the function might raise.
-4. **Returns**: Describes the return value and its type.
+```typescript
+/**
+ * Hook personnalisé pour la gestion du Virtual Try-On
+ * 
+ * @param initialOutfit - L'outfit initial à afficher
+ * @returns Un objet contenant l'état actuel et les fonctions de contrôle
+ */
+export const useVirtualTryOn = (initialOutfit?: Outfit) => {
+  const [currentOutfit, setCurrentOutfit] = useState<Outfit | null>(initialOutfit || null);
+  
+  /**
+   * Génère un outfit aléatoire
+   * 
+   * @returns Promise<string> - L'URI de l'image générée
+   */
+  const generateRandomOutfit = async (): Promise<string> => {
+    // Logique de génération
+  };
+  
+  return { currentOutfit, generateRandomOutfit };
+};
+```
+
+### Sections des Docstrings
+
+1. **Résumé** : Une description en une ligne de la fonction.
+2. **Args/Params** : Décrit les paramètres, y compris leurs types.
+3. **Raises** : Liste les exceptions que la fonction peut lever.
+4. **Returns** : Décrit la valeur de retour et son type.
 
 ---
 
-## 📂 Directory Structure
+## 📂 Structure des répertoires
 
 ```
 wearit-app-mobile/
@@ -145,6 +181,16 @@ wearit-app-mobile/
 │   ├── source/
 │   │   ├── conf.py
 │   │   ├── index.rst
+│   │   ├── mobile-app/          # Documentation React Native
+│   │   │   ├── index.rst
+│   │   │   ├── overview.rst
+│   │   │   ├── architecture.rst
+│   │   │   ├── features/
+│   │   │   ├── components/
+│   │   │   └── ...
+│   │   ├── backend/             # Documentation Backend
+│   │   │   ├── index.rst
+│   │   │   └── ...
 │   │   └── _templates/
 │   ├── Makefile
 │   ├── make.bat
@@ -154,21 +200,21 @@ wearit-app-mobile/
 
 ---
 
-## 🔄 Useful Commands
+## 🔄 Commandes utiles
 
-- **Clean the Build**:
+- **Nettoyer le Build** :
 
   ```bash
   make clean
   ```
 
-- **Generate HTML Documentation**:
+- **Générer la Documentation HTML** :
 
   ```bash
   make html
   ```
 
-- **Generate PDF Documentation** (requires `latex`):
+- **Générer la Documentation PDF** (nécessite `latex`) :
 
   ```bash
   make latexpdf
@@ -176,10 +222,10 @@ wearit-app-mobile/
 
 ---
 
-## 🕵️‍♂️ Troubleshooting
+## 🕵️‍♂️ Dépannage
 
-- **Module Import Errors**:  
-  Ensure the path in `conf.py` is correct:
+- **Erreurs d'Import de Module** :  
+  Assurez-vous que le chemin dans `conf.py` est correct :
 
   ```python
   import os
@@ -187,15 +233,15 @@ wearit-app-mobile/
   sys.path.insert(0, os.path.abspath('../../backend/src'))
   ```
 
-- **Missing Dependencies**:  
-  Install the dependencies listed in `requirements.txt`:
+- **Dépendances Manquantes** :  
+  Installez les dépendances listées dans `requirements.txt` :
 
   ```bash
   pip install -r requirements.txt
   ```
 
-- **Permission Issues**:  
-  Ensure all necessary files and folders have the correct permissions:
+- **Problèmes de Permissions** :  
+  Assurez-vous que tous les fichiers et dossiers nécessaires ont les bonnes permissions :
 
   ```bash
   chmod -R 755 backend/src
@@ -203,10 +249,12 @@ wearit-app-mobile/
 
 ---
 
-## 📚 Additional Resources
+## 📚 Ressources supplémentaires
 
-- [Sphinx Documentation](https://www.sphinx-doc.org/en/master/)
-- [Google Style Guide for Docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)
-- [Read the Docs Guide](https://docs.readthedocs.io/en/stable/)
+- [Documentation Sphinx](https://www.sphinx-doc.org/en/master/)
+- [Guide de style Google pour les Docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)
+- [Guide Read the Docs](https://docs.readthedocs.io/en/stable/)
+- [Documentation React Native](https://reactnative.dev/docs/getting-started)
+- [Documentation TypeScript](https://www.typescriptlang.org/docs/)
 
 ---

@@ -1,94 +1,98 @@
 # WearIT
 
-## Documentation
+Application mobile de Virtual Try-On (VTO) permettant d'essayer virtuellement des vêtements grâce à l'IA.
 
-Link : https://wearit-app-mobile.readthedocs.io/en/latest/index.html
+## 🚀 Technologies
 
-The project is organized as follows:
-In the Main Folder **src** you will find : 
+- **Frontend** : React Native, Expo, TypeScript, Redux Toolkit
+- **Backend** : FastAPI, Python, MongoDB, AWS S3
+- **IA** : Replicate API pour le VTO
+- **Paiements** : Stripe
+- **Documentation** : Sphinx
 
----
+## 📋 Prérequis
 
-## Prerequisites
+- **Node.js 16+** & **npm**
+- **Python 3.10+**
+- **MongoDB**
+- **Comptes AWS S3, Replicate, Stripe**
 
-* **Python 3.10+**
-* **Node.js 16+** & **npm**
-* (Optional) **Expo CLI** (`npm install -g expo-cli`)
-
----
-
-## Setup
+## ⚡ Installation
 
 ```bash
-# 1. Clone repository
+# 1. Cloner le repository
 git clone https://github.com/App-Outfit/wearit-app-mobile.git
 cd wearit-app-mobile
 
-# 2. Copy and update env file
+# 2. Configuration des variables d'environnement
 cp .env.example .env
-# Edit .env to set your DATABASE_URL, SECRET_KEY, AI_API_KEY, API_URL, etc.
+# Éditer .env avec vos clés API
 ```
 
----
+## 🔧 Configuration
 
-## Backend
+### Backend
 
 ```bash
 cd backend
-# Create & activate virtual env
-python -m venv .venv && source .venv/bin/activate
-# Install dependencies
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# ou .venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-# Start server
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-* **API**: [http://localhost:8000/api/v1](http://localhost:8000/api/v1)
-* **Docs**: [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
+**API** : http://localhost:8000/api/v1  
+**Docs** : http://localhost:8000/api/v1/docs
 
----
-
-## Frontend
+### Frontend
 
 ```bash
-cd frontend
+cd app
 npm install
-npm start --reset-cache
+npm start
 ```
 
-* Launch Expo on simulator or mobile via Expo Go.
+## 🧪 Tests
 
----
+```bash
+# Backend
+cd backend && pytest tests/ -v
 
-## Tests
+# Frontend
+cd app && npm test
+```
 
-* **Backend**: `cd backend && pytest tests/ -v`
-* **Frontend**: `cd frontend && npm test`
+## 📱 Build & Déploiement
 
-
-## IOS Build Dev
+### Développement
 ```bash
 eas build --profile development --platform ios
-```
-```bash
 npx expo start --dev-client
 ```
 
-## IOS Build Production
-
+### Production
 ```bash
 eas build --platform ios --profile production
-```
-```bash
 eas submit -p ios --latest
 ```
 
----
+## 📚 Documentation
 
-## Contributing
+```bash
+cd docs
+./generate_docs.sh html      # Générer la documentation
+./generate_docs.sh serve     # Serveur de développement
+```
 
-1. Fork & branch off `develop` (feature/xyz)
-2. Follow Conventional Commits
-3. Open a PR; ensure CI passes
+**Documentation en ligne** : https://wearit-app-mobile.readthedocs.io
 
----
+## 🤝 Contribution
+
+1. Fork & branche depuis `develop` (feature/xyz)
+2. Suivre les [Conventional Commits](https://conventionalcommits.org)
+3. Ouvrir une PR avec CI validé
+
+## 📄 Licence
+
+0BSD
