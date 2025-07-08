@@ -266,16 +266,6 @@ export default function VTODisplay({ onNavigate, drawerCloth, onRandomize, rando
         }
     }, [resultBase64]);
 
-    React.useEffect(() => {
-        // Mini rebond quand le rail est caché
-        if (!drawerCloth) {
-            translateY.value = withSpring(-30, { damping: 8 });
-            setTimeout(() => {
-                translateY.value = withSpring(0, { damping: 8 });
-            }, 180);
-        }
-    }, [drawerCloth]);
-
     return (
         <PanGestureHandler onGestureEvent={onGestureEvent} enabled={!drawerCloth}>
             <Animated.View style={[styles.boxImg, animatedStyle]}>
