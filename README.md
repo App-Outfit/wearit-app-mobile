@@ -67,8 +67,8 @@ cd app && npm test
 
 ### Développement
 ```bash
-eas build --profile development --platform ios
-npx expo start --dev-client
+eas build --platform ios --profile development
+npx expo start -c
 ```
 
 ### Production
@@ -85,14 +85,8 @@ cd docs
 ./generate_docs.sh serve     # Serveur de développement
 ```
 
-**Documentation en ligne** : https://wearit-app-mobile.readthedocs.io
-
 ## 🤝 Contribution
 
 1. Fork & branche depuis `develop` (feature/xyz)
 2. Suivre les [Conventional Commits](https://conventionalcommits.org)
 3. Ouvrir une PR avec CI validé
-
-## 📄 Licence
-
-0BSD
