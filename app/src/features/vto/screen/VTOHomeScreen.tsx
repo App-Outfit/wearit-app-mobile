@@ -18,6 +18,7 @@ import {
     selectReadyTryonsLower,
     selectReadyTryonsUpper,
     selectReadyTryonsWithType,
+    selectTryonStatus,
 } from '../tryonSelectors';
 import { setDress, setUpper, setUpperLower } from '../tryonSlice';
 import MenuDrawer from 'react-native-side-drawer';
@@ -39,6 +40,7 @@ export function VTODressingScreen({ navigation }) {
     const credits = useAppSelector(selectUserCredits);
     const currentResult = useAppSelector(selectResultTryon);
     const dispatch = useAppDispatch();
+    const tryonStatus = useAppSelector(selectTryonStatus);
 
     // Mémoriser les sélecteurs pour éviter les recalculs
     const memoizedTryonsReady = React.useMemo(() => tryonsReady, [tryonsReady]);
@@ -50,50 +52,43 @@ export function VTODressingScreen({ navigation }) {
     const [isLoadingRandom, setIsLoadingRandom] = useState(false);
     const [currentRandomImage, setCurrentRandomImage] = useState<string | null>(null);
 
-    // Fonction de génération d'une image random (à adapter à ta logique)
-    async function generateRandomOutfitImage(): Promise<string> {
-      // ... génère une image base64 ou URI
-      // Par exemple, tu peux réutiliser generateRandomOutfit()
-      // et retourner le base64 de la nouvelle tenue/photo
-      // Ici, on suppose que generateRandomOutfit() existe déjà et retourne le base64
-      return await generateRandomOutfit();
-    }
-
-    // Initialisation de la queue au montage
     useEffect(() => {
-      let isMounted = true;
-      const initQueue = async () => {
-        setIsLoadingRandom(true);
-        const img1 = await generateRandomOutfitImage();
-        const img2 = await generateRandomOutfitImage();
-        if (isMounted) {
-          setRandomQueue([img1, img2]);
-          setCurrentRandomImage(img1);
-          setIsLoadingRandom(false);
-        }
-      };
-      initQueue();
-      return () => { isMounted = false; };
-    }, []);
+      if (
+        typeof tryonStatus === 'string' &&
+        tryonStatus === 'succeeded' &&
+        randomQueue.length === 0 &&
+        memoizedTryonsReady.length > 0
+      ) {
+        let isMounted = true;
+        const initQueue = () => {
+          setIsLoadingRandom(true);
+          const img1 = generateRandomOutfit();
+          const img2 = generateRandomOutfit();
+          if (isMounted) {
+            setRandomQueue([img1, img2]);
+            setCurrentRandomImage(img1);
+            setIsLoadingRandom(false);
+          }
+        };
+        initQueue();
+        return () => { isMounted = false; };
+      }
+    }, [tryonStatus, randomQueue.length, memoizedTryonsReady.length]);
 
-    // Gestion du swipe/randomize
-    const handleRandomize = useCallback(async () => {
+    const handleRandomize = useCallback(() => {
       if (randomQueue.length === 0) {
         setIsLoadingRandom(true);
-        const img = await generateRandomOutfitImage();
+        const img = generateRandomOutfit();
         setRandomQueue([img]);
         setCurrentRandomImage(img);
         setIsLoadingRandom(false);
         return;
       }
-      // Affiche la première image de la queue
       const [nextImage, ...rest] = randomQueue;
       setCurrentRandomImage(nextImage);
       setRandomQueue(rest);
-      // Génère la suivante en fond
-      generateRandomOutfitImage().then((img) => {
-        setRandomQueue((q) => [...q, img]);
-      });
+      const img = generateRandomOutfit();
+      setRandomQueue((q) => [...q, img]);
     }, [randomQueue]);
 
     const succesSaveOutfitToast = () => {
@@ -156,60 +151,62 @@ export function VTODressingScreen({ navigation }) {
         toCreateBody();
     };
 
-    const generateRandomOutfit = React.useCallback(() => {
-        // select a random outfit from the list of available outfits
-        if (memoizedTryonsReady.length === 0) {
-            Toast.show({
-                type: 'error',
-                text1: 'Aucun vêtement disponible',
-                position: 'bottom',
-            });
-            return;
+    const generateRandomOutfit = () => {
+      if (memoizedTryonsReady.length === 0) {
+        if (typeof tryonStatus === 'string' && tryonStatus !== 'loading') {
+          Toast.show({
+            type: 'error',
+            text1: 'Aucun vêtement disponible',
+            position: 'bottom',
+          });
         }
-
-        const randomIndex = Math.floor(Math.random() * memoizedTryonsReady.length);
-        const randomOutfit = memoizedTryonsReady[randomIndex];
-
-        switch (randomOutfit.cloth_type) {
-            case 'dress':
-                dispatch(setDress(randomOutfit));
-                break;
-            case 'upper':
-                const lowerOutfit =
-                    memoizedLowerTryons[Math.floor(Math.random() * memoizedLowerTryons.length)];
-                if (lowerOutfit) {
-                    dispatch(
-                        setUpperLower({
-                            upper: randomOutfit,
-                            lower: lowerOutfit,
-                        }),
-                    );
-                } else {
-                    dispatch(setUpper(randomOutfit));
-                }
-                break;
-            case 'lower':
-                const upperOutfit =
-                    memoizedUpperTryons[Math.floor(Math.random() * memoizedUpperTryons.length)];
-                if (upperOutfit) {
-                    dispatch(
-                        setUpperLower({
-                            upper: upperOutfit,
-                            lower: randomOutfit,
-                        }),
-                    );
-                } else {
-                    dispatch(setUpper(randomOutfit));
-                }
-                break;
-            default:
-                Toast.show({
-                    type: 'error',
-                    text1: 'Type de vêtement inconnu',
-                    position: 'bottom',
-                });
+        return '';
+      }
+      const randomIndex = Math.floor(Math.random() * memoizedTryonsReady.length);
+      const randomOutfit = memoizedTryonsReady[randomIndex];
+      switch (randomOutfit.cloth_type) {
+        case 'dress':
+          dispatch(setDress(randomOutfit));
+          break;
+        case 'upper': {
+          const lowerOutfit =
+            memoizedLowerTryons[Math.floor(Math.random() * memoizedLowerTryons.length)];
+          if (lowerOutfit) {
+            dispatch(
+              setUpperLower({
+                upper: randomOutfit,
+                lower: lowerOutfit,
+              })
+            );
+          } else {
+            dispatch(setUpper(randomOutfit));
+          }
+          break;
         }
-    }, [memoizedTryonsReady, memoizedUpperTryons, memoizedLowerTryons, dispatch]);
+        case 'lower': {
+          const upperOutfit =
+            memoizedUpperTryons[Math.floor(Math.random() * memoizedUpperTryons.length)];
+          if (upperOutfit) {
+            dispatch(
+              setUpperLower({
+                upper: upperOutfit,
+                lower: randomOutfit,
+              })
+            );
+          } else {
+            dispatch(setUpper(randomOutfit));
+          }
+          break;
+        }
+        default:
+          Toast.show({
+            type: 'error',
+            text1: 'Type de vêtement inconnu',
+            position: 'bottom',
+          });
+      }
+      return '';
+    };
 
     React.useEffect(() => {
         // Ne charger les crédits qu'une seule fois si ils ne sont pas déjà chargés
