@@ -67,6 +67,7 @@ export default function VTODisplay({ onNavigate, drawerCloth, onRandomize, rando
     const [isSwiping, setIsSwiping] = React.useState(false);
     const translateY = useSharedValue(0);
     const isSliding = React.useRef(false);
+    const prevDrawerCloth = React.useRef(drawerCloth);
 
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ translateY: translateY.value }],
@@ -265,6 +266,16 @@ export default function VTODisplay({ onNavigate, drawerCloth, onRandomize, rando
             setTryon64(resultBase64);
         }
     }, [resultBase64]);
+
+    React.useEffect(() => {
+        if (prevDrawerCloth.current && !drawerCloth) {
+            // Rail vient d'être caché : mini rebond
+            translateY.value = withTiming(-30, { duration: 120 }, () => {
+                translateY.value = withSpring(0, { damping: 8 });
+            });
+        }
+        prevDrawerCloth.current = drawerCloth;
+    }, [drawerCloth]);
 
     return (
         <PanGestureHandler onGestureEvent={onGestureEvent} enabled={!drawerCloth}>
