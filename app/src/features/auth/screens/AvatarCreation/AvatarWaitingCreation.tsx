@@ -54,13 +54,10 @@ export function AvatarWaitingCreationScreen({ navigation, route }) {
 
                     <View style={styles.textContainer}>
                         <Header variant="h3" style={styles.title}>
-                            Votre Mannequin est en cours de création
+                            Création de votre mannequin...
                         </Header>
                         <Text style={styles.text}>
-                            Cela prend généralement X minutes, mais cela peut
-                            prendre plus de temps. Pendant ce temps, vous êtes
-                            libre de faire ce que vous voulez. Une fois que tout
-                            est terminé, nous vous enverrons un message push !
+                            Cela prend quelques minutes. Vous recevrez une notification dès que c’est prêt !
                         </Text>
                     </View>
                 </>

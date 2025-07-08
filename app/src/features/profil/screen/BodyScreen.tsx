@@ -23,7 +23,7 @@ export function BodyScreen({ navigation }) {
         return (
             <View style={styles.bodyScreenCenter}>
                 <Text style={styles.text}>
-                    Vous n'avez pas pas de Mannequin
+                    Vous n'avez pas de Mannequin
                 </Text>
                 <CButton
                     size="large"
@@ -50,7 +50,7 @@ export function BodyScreen({ navigation }) {
                     }}
                     size="large"
                 >
-                    Supprimer le Body
+                    Supprimer
                 </CButton>
             </View>
 
