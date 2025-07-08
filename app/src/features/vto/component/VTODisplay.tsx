@@ -33,6 +33,9 @@ import { UpperLowerTryon, setCurrentResult } from '../tryonSlice';
 import { inpaintTryon } from '../tryonThunks';
 import { current } from '@reduxjs/toolkit';
 import Toast from 'react-native-toast-message';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS, useAnimatedGestureHandler } from 'react-native-reanimated';
+import { PanGestureHandler } from 'react-native-gesture-handler';
+import type { PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 
 const ImageDisplay = React.memo(
     ({ uri }: { uri: string }) => (
@@ -53,7 +56,7 @@ export function isUpperLowerTryon(x: any): x is UpperLowerTryon {
     return x && typeof x === 'object' && 'upper' in x && 'lower' in x;
 }
 
-export default function VTODisplay({ onNavigate }) {
+export default function VTODisplay({ onNavigate, drawerCloth, onRandomize, randomImage }) {
     const dispatch = useAppDispatch();
     const [resultBase64, setResultBase64] = React.useState<string>('');
     const [upperMaskBase64, setUpperMaskBase64] = React.useState<string>();
@@ -61,6 +64,61 @@ export default function VTODisplay({ onNavigate }) {
     const [dressMaskBase64, setDressMaskBase64] = React.useState<string>();
     const [tryon64, setTryon64] = React.useState<string>('');
     const current_body = useAppSelector(selectCurrentBody);
+    const [isSwiping, setIsSwiping] = React.useState(false);
+    const translateY = useSharedValue(0);
+    const isSliding = React.useRef(false);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: translateY.value }],
+    }));
+
+    const handleRandomize = React.useCallback(async () => {
+        // Slide la photo hors de l'écran vers le haut
+        translateY.value = withTiming(-800, { duration: 250 }, (finished) => {
+            if (finished) {
+                runOnJS(triggerRandomize)();
+            }
+        });
+    }, []);
+
+    // Fonction JS pour randomize et slide-in (depuis le bas)
+    const triggerRandomize = async () => {
+        if (onRandomize) {
+            await onRandomize();
+        }
+        // Slide-in la nouvelle photo depuis le bas
+        translateY.value = 800;
+        translateY.value = withSpring(0, { damping: 15 });
+    };
+
+    const onGestureEvent = useAnimatedGestureHandler<
+        PanGestureHandlerGestureEvent,
+        { startY: number }
+    >({
+        onStart: (_, ctx) => {
+            ctx.startY = translateY.value;
+        },
+        onActive: (event, ctx) => {
+            if (!drawerCloth) {
+                translateY.value = ctx.startY + event.translationY;
+            }
+        },
+        onEnd: (event) => {
+            if (!drawerCloth) {
+                if (event.translationY < -120) {
+                    // Swipe vers le haut : slide out et randomize
+                    translateY.value = withTiming(-800, { duration: 250 }, (finished) => {
+                        if (finished) {
+                            runOnJS(triggerRandomize)();
+                        }
+                    });
+                } else {
+                    // Retour à la position initiale
+                    translateY.value = withSpring(0, { damping: 15 });
+                }
+            }
+        },
+    });
 
     React.useEffect(() => {
         // dispatch(loadTryonsSuccess(sampleTryons));
@@ -208,28 +266,40 @@ export default function VTODisplay({ onNavigate }) {
         }
     }, [resultBase64]);
 
+    React.useEffect(() => {
+        // Mini rebond quand le rail est caché
+        if (!drawerCloth) {
+            translateY.value = withSpring(-30, { damping: 8 });
+            setTimeout(() => {
+                translateY.value = withSpring(0, { damping: 8 });
+            }, 180);
+        }
+    }, [drawerCloth]);
+
     return (
-        <View style={styles.boxImg}>
-            {current_body !== null ? (
-                <ImageDisplay uri={`data:image/png;base64,${resultBase64}`} />
-            ) : (
-                <View style={styles.boxOri}>
-                    <Image
-                        style={styles.image}
-                        source={{
-                            uri: `data:image/png;base64,${resultBase64}`,
-                        }}
-                        resizeMode="contain"
-                    />
-                    <View style={styles.addButtonBox}>
-                        <AddButtonText
-                            onPress={onNavigate}
-                            text={'Ajouter votre mannequin'}
+        <PanGestureHandler onGestureEvent={onGestureEvent} enabled={!drawerCloth}>
+            <Animated.View style={[styles.boxImg, animatedStyle]}>
+                {current_body !== null ? (
+                    <ImageDisplay uri={`data:image/png;base64,${randomImage || resultBase64}`} />
+                ) : (
+                    <View style={styles.boxOri}>
+                        <Image
+                            style={styles.image}
+                            source={{
+                                uri: `data:image/png;base64,${randomImage || resultBase64}`,
+                            }}
+                            resizeMode="contain"
                         />
+                        <View style={styles.addButtonBox}>
+                            <AddButtonText
+                                onPress={onNavigate}
+                                text={'Ajouter votre mannequin'}
+                            />
+                        </View>
                     </View>
-                </View>
-            )}
-        </View>
+                )}
+            </Animated.View>
+        </PanGestureHandler>
     );
 }
 

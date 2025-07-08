@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import VTODisplay from '../component/VTODisplay';
 
 import Feather from 'react-native-vector-icons/Feather';
@@ -27,6 +27,7 @@ import { fetchCredits } from '../../profil/thunks/userThunks';
 import { selectResultTryon } from '../tryonSelectors';
 import uuid from 'react-native-uuid';
 import { saveImageToGalleryAsync } from '../../../utils/download';
+import { useState, useEffect, useCallback } from 'react';
 
 export function VTODressingScreen({ navigation }) {
     const [currentIsSave, setCurrentSave] = React.useState<boolean>(false);
@@ -43,6 +44,57 @@ export function VTODressingScreen({ navigation }) {
     const memoizedTryonsReady = React.useMemo(() => tryonsReady, [tryonsReady]);
     const memoizedUpperTryons = React.useMemo(() => upperTryons, [upperTryons]);
     const memoizedLowerTryons = React.useMemo(() => lowerTryons, [lowerTryons]);
+
+    // --- Ajout du système de queue pour images random ---
+    const [randomQueue, setRandomQueue] = useState<string[]>([]);
+    const [isLoadingRandom, setIsLoadingRandom] = useState(false);
+    const [currentRandomImage, setCurrentRandomImage] = useState<string | null>(null);
+
+    // Fonction de génération d'une image random (à adapter à ta logique)
+    async function generateRandomOutfitImage(): Promise<string> {
+      // ... génère une image base64 ou URI
+      // Par exemple, tu peux réutiliser generateRandomOutfit()
+      // et retourner le base64 de la nouvelle tenue/photo
+      // Ici, on suppose que generateRandomOutfit() existe déjà et retourne le base64
+      return await generateRandomOutfit();
+    }
+
+    // Initialisation de la queue au montage
+    useEffect(() => {
+      let isMounted = true;
+      const initQueue = async () => {
+        setIsLoadingRandom(true);
+        const img1 = await generateRandomOutfitImage();
+        const img2 = await generateRandomOutfitImage();
+        if (isMounted) {
+          setRandomQueue([img1, img2]);
+          setCurrentRandomImage(img1);
+          setIsLoadingRandom(false);
+        }
+      };
+      initQueue();
+      return () => { isMounted = false; };
+    }, []);
+
+    // Gestion du swipe/randomize
+    const handleRandomize = useCallback(async () => {
+      if (randomQueue.length === 0) {
+        setIsLoadingRandom(true);
+        const img = await generateRandomOutfitImage();
+        setRandomQueue([img]);
+        setCurrentRandomImage(img);
+        setIsLoadingRandom(false);
+        return;
+      }
+      // Affiche la première image de la queue
+      const [nextImage, ...rest] = randomQueue;
+      setCurrentRandomImage(nextImage);
+      setRandomQueue(rest);
+      // Génère la suivante en fond
+      generateRandomOutfitImage().then((img) => {
+        setRandomQueue((q) => [...q, img]);
+      });
+    }, [randomQueue]);
 
     const succesSaveOutfitToast = () => {
         Toast.show({
@@ -100,9 +152,9 @@ export function VTODressingScreen({ navigation }) {
         navigation.push('AvatarCreation');
     };
 
-    const display = React.useMemo(() => {
-        return <VTODisplay onNavigate={toCreateBody} />;
-    }, []);
+    const onNavigate = () => {
+        toCreateBody();
+    };
 
     const generateRandomOutfit = React.useCallback(() => {
         // select a random outfit from the list of available outfits
@@ -184,7 +236,13 @@ export function VTODressingScreen({ navigation }) {
                             },
                         ]}
                     >
-                        {display}
+                        <VTODisplay
+                            drawerCloth={drawerCloth}
+                            onNavigate={onNavigate}
+                            onRandomize={handleRandomize}
+                            randomImage={currentRandomImage}
+                        />
+                        {isLoadingRandom && <ActivityIndicator style={{ position: 'absolute', top: '50%', left: '50%' }} />}
                     </View>
                     <View
                         style={[
@@ -195,15 +253,6 @@ export function VTODressingScreen({ navigation }) {
                             },
                         ]}
                     >
-                        {/* <MenuDrawer
-                            open={drawerCloth}
-                            position={'right'}
-                            drawerContent={<MiniDressing setDrawerCloth={setDrawerCloth} drawerCloth={drawerCloth}/>}
-                            drawerPercentage={25}
-                            animationTime={250}
-                            overlay={true}
-                            opacity={1}
-                        />   */}
                         <MiniDressing
                             setDrawerCloth={setDrawerCloth}
                             drawerCloth={drawerCloth}
@@ -220,13 +269,7 @@ export function VTODressingScreen({ navigation }) {
                         )}
                         <Text style={styles.textIcon}>Enregistrer</Text>
                     </TouchableOpacity> */}
-                    <TouchableOpacity
-                        style={styles.icon}
-                        onPress={generateRandomOutfit}
-                    >
-                        <MaterialIcons name="shuffle" size={24} color="#000" />
-                    </TouchableOpacity>
-
+                    {/* Bouton shuffle supprimé, remplacé par le swipe */}
                     <TouchableOpacity
                         style={styles.icon}
                         onPress={handleDownloadImage}
