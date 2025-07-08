@@ -94,6 +94,22 @@ const tryonSlice = createSlice({
                 state.tryons.push(action.payload as TryonItem);
             }
         },
+        addPendingTryon(
+            state,
+            action: PayloadAction<{ body_id: string; clothing_id: string }>,
+        ) {
+            const { body_id, clothing_id } = action.payload;
+            // N'ajoute que si pas déjà présent
+            if (!state.tryons.find(t => t.clothing_id === clothing_id)) {
+                state.tryons.push({
+                    id: 'pending-' + clothing_id,
+                    body_id,
+                    clothing_id,
+                    status: 'pending',
+                    // autres champs par défaut si besoin
+                } as TryonItem);
+            }
+        },
         // Nettoyer les tryons orphelins quand un vêtement est supprimé
         removeTryonsByClothingId(state, action: PayloadAction<string>) {
             const clothingId = action.payload;
@@ -211,4 +227,5 @@ export const {
     updateTryon,
     setCurrentResult,
     removeTryonsByClothingId,
+    addPendingTryon,
 } = tryonSlice.actions;

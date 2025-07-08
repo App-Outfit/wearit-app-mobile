@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { baseColors, spacing } from '../../../styles/theme';
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
 import { selectTryonByClothID } from '../../vto/tryonSelectors';
@@ -25,9 +25,6 @@ export const ClothItem = React.memo(function ClothItem({
     cloth,
     associatedTryon,
 }: any) {
-    const [status, setStatus] = React.useState<
-        'loading' | 'success' | 'undefined'
-    >('undefined');
     const [modal, setModal] = React.useState(false);
     const [isDeleteMode, setIsDeleteMode] = React.useState(false);
     const [isDeleting, setIsDeleting] = React.useState(false);
@@ -41,18 +38,18 @@ export const ClothItem = React.memo(function ClothItem({
 
     React.useEffect(() => {
         if (!associatedTryon) {
-            setStatus('undefined');
+            // setStatus('undefined'); // This line is removed
         } else if (associatedTryon.status === 'pending') {
-            setStatus('loading');
+            // setStatus('loading'); // This line is removed
         } else if (associatedTryon.status === 'ready') {
-            setStatus('success');
+            // setStatus('success'); // This line is removed
         }
     }, [associatedTryon?.status]);
 
     const onPress = (cloth: ClothingItem) => {
         if (isDeleteMode) return; // Ne pas déclencher l'action normale en mode suppression
         
-        if (status === 'success' && associatedTryon) {
+        if (associatedTryon && associatedTryon.status === 'ready') {
             if (cloth.cloth_type === 'dress') {
                 dispatch(setDress(associatedTryon));
             } else if (cloth.cloth_type === 'upper') {
@@ -60,7 +57,7 @@ export const ClothItem = React.memo(function ClothItem({
             } else {
                 dispatch(setLower(associatedTryon));
             }
-        } else if (status === 'undefined') {
+        } else if (!associatedTryon) {
             setModal(true);
         }
     };
@@ -109,9 +106,11 @@ export const ClothItem = React.memo(function ClothItem({
     };
 
     const getTryon = async () => {
-        if (status != 'undefined') return null;
+        if (associatedTryon && associatedTryon.status === 'pending') return null;
 
         try {
+            // Ajoute un tryon temporaire en pending pour affichage immédiat du spinner
+            dispatch(require('../../vto/tryonSlice').addPendingTryon({ body_id: body!.id, clothing_id: cloth.id }));
             await dispatch(
                 createTryon({ body_id: body!.id, clothing_id: cloth.id }),
             );
@@ -121,8 +120,6 @@ export const ClothItem = React.memo(function ClothItem({
                 text1: "Try on en cours d'excution",
                 position: 'bottom',
             });
-
-            setStatus('loading');
             dispatch(fetchCredits());
         } catch (errorMessage) {
             Toast.show({
@@ -130,13 +127,13 @@ export const ClothItem = React.memo(function ClothItem({
                 text1: 'Erreur lors de la création du try on',
                 position: 'bottom',
             });
-
-            setStatus('undefined');
         }
 
         setModal(false);
     };
 
+    // Log le statut du tryon associé à ce vêtement
+    console.log('🧵 ClothItem', cloth.id, cloth.category, 'status:', associatedTryon?.status);
     return (
         <>
             <TouchableOpacity
@@ -157,19 +154,23 @@ export const ClothItem = React.memo(function ClothItem({
                 />
 
                 {/* Indicateur de statut */}
-                <View
-                    style={[
-                        styleClothing.status,
-                        {
-                            backgroundColor:
-                                status === 'loading'
-                                    ? baseColors.yellow
-                                    : status === 'success'
-                                      ? baseColors.success
-                                      : baseColors.primary,
-                        },
-                    ]}
-                ></View>
+                {associatedTryon?.status === 'pending' ? (
+                    <View style={[styleClothing.status, { justifyContent: 'center', alignItems: 'center', backgroundColor: 'transparent' }]}> 
+                        <ActivityIndicator size={16} color={baseColors.primary} />
+                    </View>
+                ) : (
+                    <View
+                        style={[
+                            styleClothing.status,
+                            {
+                                backgroundColor:
+                                    associatedTryon?.status === 'ready'
+                                        ? baseColors.success
+                                        : baseColors.primary,
+                            },
+                        ]}
+                    />
+                )}
 
                 {/* Bouton de suppression */}
                 {isDeleteMode && (
