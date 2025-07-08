@@ -19,6 +19,7 @@ import { InputField } from '../../../components/core/PlaceHolders';
 import { CButton } from '../../../components/core/Buttons';
 import { clothingIcons } from '../../../assets/icons/clothingIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Feather from 'react-native-vector-icons/Feather';
 
 export function ModalAddClothInfo({ open, onCancel, onSave, imageUri }) {
     const [clothType, setClothType] = React.useState<'upper' | 'lower' | 'dress' | undefined>();
@@ -70,6 +71,14 @@ export function ModalAddClothInfo({ open, onCancel, onSave, imageUri }) {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
+                        {/* Croix de fermeture */}
+                        <TouchableOpacity
+                            style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}
+                            onPress={onCancel}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                            <Feather name="x" size={28} color="#888" />
+                        </TouchableOpacity>
                         {/* Image de l'habit en haut si disponible */}
                         {imageUri && (
                             <View style={{ alignItems: 'center', marginBottom: 8 }}>
