@@ -132,8 +132,6 @@ export const ClothItem = React.memo(function ClothItem({
         setModal(false);
     };
 
-    // Log le statut du tryon associé à ce vêtement
-    console.log('🧵 ClothItem', cloth.id, cloth.category, 'status:', associatedTryon?.status);
     return (
         <>
             <TouchableOpacity

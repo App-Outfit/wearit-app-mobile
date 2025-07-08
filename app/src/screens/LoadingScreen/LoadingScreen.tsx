@@ -16,12 +16,7 @@ import {
 
 import { logout } from '../../features/auth/slices/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-    fetchCredits,
-    fetchProfile,
-    fetchReferralCode,
-} from '../../features/profil/thunks/userThunks';
-import { fetchBodies, fetchCurrentBody } from '../../features/body/bodyThunks';
+import { useFetchUserDataOnAuth } from '../../features/auth/hooks/useFetchUserDataOnAuth';
 import { current } from '@reduxjs/toolkit';
 
 export function LoadingScreen({ navigation, route }: any) {
@@ -52,39 +47,23 @@ export function LoadingScreen({ navigation, route }: any) {
     const dispatch = useAppDispatch();
     const { status, token } = useAppSelector((state) => state.auth);
     const [ready, setReady] = React.useState(false);
+    const fontsReady = fontsLoaded && ready;
+
+    // Appel du hook pour fetch les données utilisateur si token présent
+    useFetchUserDataOnAuth();
 
     useEffect(() => {
-        const bootstrap = async () => {
-            await preloadEssentialImages();
-
-            dispatch(loadToken());
-
-            try {
-                await dispatch(fetchProfile()).unwrap();
-                await dispatch(fetchReferralCode()).unwrap();
-                await dispatch(fetchCurrentBody()).unwrap();
-                await dispatch(fetchCredits()).unwrap();
-
-                setReady(true);
-            } catch (err) {
-                console.error('Erreur lors des fetchs initiaux :', err);
-                setReady(true);
-            }
-        };
-
-        bootstrap();
-    }, [dispatch]);
+        preloadEssentialImages().then(() => setReady(true));
+    }, []);
 
     useEffect(() => {
-        if (!fontsLoaded || !ready) return;
-
+        if (!fontsReady) return;
         if (token && !isTokenExpired(token)) {
             navigation.replace('MainTabs');
         } else {
-            AsyncStorage.removeItem('token');
             navigation.replace('Auth');
         }
-    }, [fontsLoaded, ready, token, navigation]);
+    }, [fontsReady, token, navigation]);
 
     return (
         <View style={styles.loading_screen}>

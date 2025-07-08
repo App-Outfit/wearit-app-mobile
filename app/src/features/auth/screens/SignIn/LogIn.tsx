@@ -9,6 +9,7 @@ import { validateEmail } from '../../../../utils/validation';
 
 import { isTokenExpired, loginUser } from '../../slices/authSlice';
 import { useAppDispatch, useAppSelector } from '../../../../utils/hooks';
+import { useFetchUserDataOnAuth } from '../../hooks/useFetchUserDataOnAuth';
 
 export const LogIn: React.FC = ({ navigation }: any) => {
     const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +31,9 @@ export const LogIn: React.FC = ({ navigation }: any) => {
 
     const emailRef = React.useRef<TextInput>(null);
     const passwordRef = React.useRef<TextInput>(null);
+
+    // Appel du hook pour fetch les données utilisateur après login
+    useFetchUserDataOnAuth();
 
     const handleEmailChange = useCallback((text: string) => {
         setEmail(text);
