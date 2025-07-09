@@ -58,7 +58,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-**API Endpoint**: http://localhost:8000/api/v1  
+**API Endpoint**: http://localhost:8000/api/v1
 **API Documentation**: http://localhost:8000/api/v1/docs
 
 ### 4. Mobile App Setup
@@ -69,15 +69,6 @@ npm start
 ```
 
 ## Development
-
-### Running Tests
-```bash
-# Backend tests
-cd backend && pytest tests/ -v
-
-# Frontend tests
-cd app && npm test
-```
 
 ### Code Quality
 ```bash
@@ -123,7 +114,31 @@ The application follows a microservices architecture with clear separation of co
 
 ## Contributing
 
-1. Fork the repository and create a feature branch from `develop`
+### Creating a Feature Branch
+
+1. **Update your local repository:**
+   ```bash
+   git fetch
+   git checkout develop
+   git pull origin develop
+   ```
+
+2. **Create your feature branch:**
+   ```bash
+   git checkout -b feature/nom-de-la-feature
+   ```
+   Replace `feature/nom-de-la-feature` with your feature name.
+
+3. **Work on your branch and push:**
+   ```bash
+   git add .
+   git commit -m "feat: your commit message"
+   git push origin feature/nom-de-la-feature
+   ```
+
+### Development Guidelines
+
+1. Always create feature branches from `develop` (not from `main`)
 2. Follow [Conventional Commits](https://conventionalcommits.org) for commit messages
 3. Ensure all tests pass and code quality standards are met
 4. Submit a pull request with comprehensive description
