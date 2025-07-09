@@ -1,0 +1,70 @@
+# Cursor AI Configuration for WearIT Project
+# This file configures Cursor AI behavior for optimal development experience
+
+## Project Context
+You are working on WearIT, a React Native mobile app with Python FastAPI backend for AI-powered virtual try-on.
+The project uses TypeScript, React Native, Python FastAPI, MongoDB, and AWS S3.
+
+## Code Style & Standards
+- Use TypeScript for all frontend code
+- Follow React Native best practices
+- Use Python type hints and FastAPI patterns
+- Maintain consistent naming: camelCase for JS/TS, snake_case for Python
+- Use MaterialCommunityIcons for UI icons (not Feather icons)
+- Write comprehensive docstrings and comments
+
+## Architecture Guidelines
+- Frontend: React Native with Redux Toolkit
+- Backend: FastAPI with clean architecture
+- Database: MongoDB with proper indexing
+- Storage: AWS S3 for file management
+- Documentation: Sphinx for both backend and frontend
+
+## Development Workflow
+- Create feature branches for new development
+- Use meaningful commit messages
+- Write tests for critical functionality
+- Document API changes
+- Follow mobile-first responsive design
+
+## AI Assistant Behavior
+- Provide context-aware suggestions
+- Suggest performance optimizations
+- Help with debugging and error resolution
+- Generate comprehensive documentation
+- Assist with code reviews and refactoring
+- Suggest security best practices
+
+## File Organization
+- Keep components modular and reusable
+- Separate business logic from UI components
+- Use proper folder structure for features
+- Maintain clear separation between frontend and backend
+
+## Performance Considerations
+- Optimize React Native bundle size
+- Use proper caching strategies
+- Implement lazy loading where appropriate
+- Monitor API response times
+- Optimize image loading and storage
+
+## Security Guidelines
+- Validate all user inputs
+- Implement proper authentication
+- Use environment variables for secrets
+- Follow OWASP security guidelines
+- Regular security audits
+
+## Testing Strategy
+- Unit tests for business logic
+- Integration tests for API endpoints
+- E2E tests for critical user flows
+- Performance testing for mobile app
+- Security testing for authentication
+
+## Documentation Standards
+- Keep README files simple and elegant
+- Document API endpoints comprehensively
+- Maintain up-to-date architecture diagrams
+- Provide clear setup instructions
+- Include troubleshooting guides
