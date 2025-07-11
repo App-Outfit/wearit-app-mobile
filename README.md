@@ -142,7 +142,3 @@ The application follows a microservices architecture with clear separation of co
 2. Follow [Conventional Commits](https://conventionalcommits.org) for commit messages
 3. Ensure all tests pass and code quality standards are met
 4. Submit a pull request with comprehensive description
-
-## License
-
-0BSD License - see LICENSE file for details
