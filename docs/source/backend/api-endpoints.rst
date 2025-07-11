@@ -736,6 +736,120 @@ Création ou mise à jour des données corporelles.
      }
    }
 
+Marketplace
+-----------------------------
+
+Tous les endpoints du marketplace sont sous le préfixe : ``/api/v1/fashion-products``
+
+GET /fashion-products
+~~~~~~~~~~~~~~~~~~~~~
+
+Récupération des produits de mode du marketplace avec filtres.
+
+**URL** : ``GET /api/v1/fashion-products``
+
+**Paramètres de requête** :
+
+* ``page`` (integer, optionnel, défaut: 1) : Numéro de page pour la pagination
+* ``page_size`` (integer, optionnel, défaut: 20) : Nombre d'éléments par page
+* ``search`` (string, optionnel) : Recherche texte (titre, nom produit, marque, catégorie)
+* ``category`` (string, optionnel) : Filtrer par catégorie (ex: "tops", "pants", ...)
+* ``brand`` (string, optionnel) : Filtrer par marque (ex: "zara", "asos", ...)
+* ``color`` (string, optionnel) : Filtrer par couleur (ex: "noir", "bleu", ...)
+* ``gender`` (string, optionnel) : Filtrer par genre (ex: "woman", "man")
+
+**Réponse** :
+
+.. code-block:: json
+
+   {
+     "total": 120,
+     "page": 1,
+     "page_size": 20,
+     "products": [
+       {
+         "id": "6814f6224090d55e763c964e",
+         "product_url": "https://www.zara.com/fr/fr/top-bustier-p03152016.html",
+         "title": "TOP BUSTIER - Marron clair",
+         "description": "",
+         "gender": "woman",
+         "price": 25.95,
+         "store_id": "zara",
+         "image_urls": [
+           "https://static.zara.net/assets/public/ebd1/4c52/9c2b42a391b7/c3a953d30132/03152016730-p/03152016730-p.jpg"
+         ],
+         "color_name": "Marron clair",
+         "product_name": "top-bustier",
+         "color_hex": "#C19D86",
+         "category_name": "femme-ensembles"
+       }
+     ]
+   }
+
+GET /fashion-products/filters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Récupération des valeurs de filtres disponibles (marques, catégories, couleurs, genres).
+
+**URL** : ``GET /api/v1/fashion-products/filters``
+
+**Réponse** :
+
+.. code-block:: json
+
+   {
+     "brands": ["zara", "asos", "bershka"],
+     "categories": ["tops", "pants", "dresses"],
+     "colors": ["noir", "bleu", "rouge"],
+     "genders": ["woman", "man"]
+   }
+
+**Explication des filtres** :
+
+- ``brand`` : Filtre les produits par marque (store_id)
+- ``category`` : Filtre les produits par catégorie (category_name)
+- ``color`` : Filtre les produits par couleur (color_name)
+- ``gender`` : Filtre les produits par genre ("woman", "man", etc.)
+- ``search`` : Recherche texte sur le titre, le nom du produit, la marque ou la catégorie
+
+Les filtres peuvent être combinés pour affiner la recherche. La pagination est disponible via ``page`` et ``page_size``.
+
+GET /fashion-products/{product_id}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Récupération du détail d'un produit de mode par son identifiant unique.
+
+**URL** : ``GET /api/v1/fashion-products/{product_id}``
+
+**Paramètres** :
+
+* ``product_id`` (string, requis) : L'identifiant du produit (ObjectId MongoDB)
+
+**Réponse** :
+
+.. code-block:: json
+
+   {
+     "id": "6814f6224090d55e763c964e",
+     "product_url": "https://www.zara.com/fr/fr/top-bustier-p03152016.html",
+     "title": "TOP BUSTIER - Marron clair",
+     "description": "",
+     "gender": "woman",
+     "price": 25.95,
+     "store_id": "zara",
+     "image_urls": [
+       "https://static.zara.net/assets/public/ebd1/4c52/9c2b42a391b7/c3a953d30132/03152016730-p/03152016730-p.jpg"
+     ],
+     "color_name": "Marron clair",
+     "product_name": "top-bustier",
+     "color_hex": "#C19D86",
+     "category_name": "femme-ensembles"
+   }
+
+**Codes d'erreur** :
+
+* ``404`` : Produit non trouvé
+
 Codes d'erreur globaux
 ----------------------
 
@@ -758,4 +872,4 @@ Format d'erreur
      "error": "Description de l'erreur",
      "detail": "Détails supplémentaires (optionnel)",
      "status_code": 400
-   } 
+   }
