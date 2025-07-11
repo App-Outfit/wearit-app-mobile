@@ -9,6 +9,7 @@ from app.features.tryon import tryon_route
 from app.features.favorite import favorite_route
 from app.features.payment import payment_route
 from app.features.explorer import explorer_route
+from app.features.fashion_products import fashion_product_route
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -21,6 +22,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.core.config import settings
 from app.core.errors import AppError
 from app.infrastructure.database.mongodb import MongoDB
+from app.infrastructure.database.mongodb import MongoDBProducts
 from app.infrastructure.storage.s3_client import S3Client
 
 from app.core.exception_handler import global_exception_handler
@@ -30,6 +32,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await MongoDB.connect(db_url=settings.MONGODB_URI, db_name=settings.MONGODB_DB)
+    await MongoDBProducts.connect(db_url=settings.MONGODB_URI, db_name=settings.MONGODB_PRODUCTS_DB)
     await S3Client.connect(
         region=settings.AWS_REGION_NAME,
         bucket_name=settings.AWS_BUCKET_NAME,
@@ -38,6 +41,7 @@ async def lifespan(app: FastAPI):
     )
     yield
     await MongoDB.close()
+    await MongoDBProducts.close()
     await S3Client.close()
 
 app = FastAPI(
@@ -102,3 +106,4 @@ app.include_router(tryon_route.router, prefix=API_V1)
 app.include_router(favorite_route.router, prefix=API_V1)
 app.include_router(payment_route.router, prefix=API_V1)
 app.include_router(explorer_route.router, prefix=API_V1)
+app.include_router(fashion_product_route.router, prefix=API_V1)

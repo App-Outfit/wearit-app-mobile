@@ -9,6 +9,13 @@ from app.features.auth.auth_schema import (
     ResetPasswordRequest
 )
 from app.core.errors import ConflictError, NotFoundError, UnauthorizedError, ValidationError
+from app.core.config import settings
+
+
+@pytest.fixture(autouse=True)
+def set_jwt_algorithm():
+    settings.JWT_ALGORITHM = "HS256"
+    settings.JWT_SECRET_KEY = "testsecretkey"
 
 
 @pytest.fixture

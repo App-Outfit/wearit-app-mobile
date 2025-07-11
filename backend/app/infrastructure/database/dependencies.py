@@ -3,14 +3,16 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from app.core.config import settings
 from app.features.auth.auth_repo import AuthRepository
-from app.infrastructure.database.mongodb import MongoDB
-
+from app.infrastructure.database.mongodb import MongoDB, MongoDBProducts
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def get_db():
     """ Fonction de dépendance pour obtenir la session de base de données """
     return MongoDB.get_database()
+
+def get_products_db():
+    return MongoDBProducts.get_database()
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
