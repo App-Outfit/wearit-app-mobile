@@ -6,25 +6,39 @@ import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
 import { spacing, typography } from '../../../styles/theme';
 import { CButton } from '../../../components/core/Buttons';
 import { ModalWarning } from '../../../components/core/Modal';
-import { deleteBody } from '../../body/bodyThunks';
+import { deleteBody, fetchCurrentBody } from '../../body/bodyThunks';
 
 export function BodyScreen({ navigation }) {
     const body = useAppSelector((state) => state.body.currentBody);
+    const loading = useAppSelector((state) => state.body.loading);
     const [modal, setModal] = React.useState(false);
 
     const dispatch = useAppDispatch();
 
-    const removeBody = () => {
+    // Effet pour rafraîchir le body au montage
+    React.useEffect(() => {
+        dispatch(fetchCurrentBody());
+    }, [dispatch]);
+
+    // Debug pour vérifier l'état
+    React.useEffect(() => {
+        console.log('BodyScreen - body state:', body);
+    }, [body]);
+
+    const removeBody = async () => {
         if (!body) return;
-        dispatch(deleteBody(body.id));
+        try {
+            await dispatch(deleteBody(body.id)).unwrap();
+            setModal(false);
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+        }
     };
 
     if (!body) {
         return (
             <View style={styles.bodyScreenCenter}>
-                <Text style={styles.text}>
-                    Vous n'avez pas de Mannequin
-                </Text>
+                <Text style={styles.text}>Vous n'avez pas de Mannequin</Text>
                 <CButton
                     size="large"
                     onPress={() => {
@@ -49,8 +63,9 @@ export function BodyScreen({ navigation }) {
                         setModal(true);
                     }}
                     size="large"
+                    disabled={loading}
                 >
-                    Supprimer
+                    {loading ? 'Suppression...' : 'Supprimer'}
                 </CButton>
             </View>
 
