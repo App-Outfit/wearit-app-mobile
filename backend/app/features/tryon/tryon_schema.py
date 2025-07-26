@@ -22,6 +22,7 @@ class TryonItem(BaseModel):
     clothing_id: str
     output_url: Optional[str] = None
     status: str
+    error: Optional[str] = None
     created_at: datetime
     version: int
 

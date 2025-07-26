@@ -55,6 +55,21 @@ class TryonRepository:
         )
         if result.matched_count == 0:
             raise NotFoundError("Tryon to update not found")
+    
+    async def set_error(self, tryon_id: str, error_message: str):
+        """Met à jour le status d'un tryon en erreur"""
+        result = await self._col.update_one(
+            {"_id": ObjectId(tryon_id)},
+            {
+                "$set": {
+                    "status": "failed",
+                    "error": error_message,
+                    "updated_at": datetime.now()
+                }
+            }
+        )
+        if result.matched_count == 0:
+            raise NotFoundError("Tryon to update not found")
         
     async def get_all_by_user(self, user_id: str) -> List[TryonModel]:
         """

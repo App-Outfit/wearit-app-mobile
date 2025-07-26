@@ -2,8 +2,8 @@ from bson import ObjectId
 import asyncio
 from datetime import datetime
 from app.core.logging_config import logger
-import replicate
 from app.core.config import settings
+from app.infrastructure.runpod.runpod_client import create_runpod_client, RunPodError, RunPodTimeoutError
 from app.features.tryon.tryon_repo import TryonRepository
 from app.infrastructure.storage.storage_repo import StorageRepository
 from app.infrastructure.storage.storage_path_builder import StoragePathBuilder
@@ -95,61 +95,122 @@ class TryonService:
         }
         mask_attr = mask_field_map.get(clothing.cloth_type)
         if not mask_attr:
-            raise ValueError(f"No mask defined for cloth_type '{clothing.cloth_type}'")
+            error_msg = f"No mask defined for cloth_type '{clothing.cloth_type}'"
+            logger.error(f"🔴 [IA] {error_msg}")
+            await self.repo.set_error(tryon_id, error_msg)
+            await self._publish_error(user_id, tryon_id, error_msg)
+            raise ValueError(error_msg)
         
         mask_key = getattr(body, mask_attr, None)
         if not mask_key:
-            raise ValueError(f"Body has no attribute '{mask_attr}' or it's empty")
+            error_msg = f"Body has no attribute '{mask_attr}' or it's empty"
+            logger.error(f"🔴 [IA] {error_msg}")
+            await self.repo.set_error(tryon_id, error_msg)
+            await self._publish_error(user_id, tryon_id, error_msg)
+            raise ValueError(error_msg)
         
         mask_url = await self.storage.get_presigned_url(mask_key)
                 
         try:
-            raw_output = await asyncio.to_thread(
-                lambda: replicate.run(
-                    settings.REPLICATE_MODEL_REF,
-                    input={
-                        "person":        body_url,
-                        "cloth":         clothing_url,
-                        "mask":          mask_url,
-                        "steps":         50,
-                        "guidance_scale":2,
-                        "return_dict":   False,
+            # Créer le client RunPod et lancer l'inférence
+            async with create_runpod_client() as runpod_client:
+                output_url = await runpod_client.run_inference(
+                    input_data={
+                        "person": body_url,
+                        "cloth": clothing_url,
+                        "mask": mask_url,
+                        "steps": 50,
+                        "guidance_scale": 2.0,  # Float comme dans votre exemple
+                        "return_dict": True,    # Comme dans votre exemple
                     },
+                    upload_files=settings.RUNPOD_UPLOAD_FILES
                 )
-            )
+                
+        except RunPodTimeoutError as e:
+            msg = f"Timeout lors de la génération IA: {e}"
+            logger.error(f"🔴 [IA] {msg}")
+            await self.repo.set_error(tryon_id, msg)
+            await self._publish_error(user_id, tryon_id, msg)
+            raise InternalServerError(msg)
+            
+        except RunPodError as e:
+            msg = f"Erreur RunPod: {e}"
+            logger.error(f"🔴 [IA] {msg}")
+            await self.repo.set_error(tryon_id, msg)
+            await self._publish_error(user_id, tryon_id, msg)
+            raise InternalServerError(msg)
+            
         except Exception as e:
-            msg = "Échec de la génération IA"
-            logger.exception(msg)
+            msg = f"Échec de la génération IA: {e}"
+            logger.exception(f"🔴 [IA] {msg}")
             await self.repo.set_error(tryon_id, msg)
             await self._publish_error(user_id, tryon_id, msg)
             raise InternalServerError(msg)
         
-        output_url = raw_output[0] if isinstance(raw_output, list) else raw_output
         if not isinstance(output_url, str):
             output_url = str(output_url)
-        logger.info(f"✅ [IA] Replicate returned: {output_url}")
+        logger.info(f"✅ [IA] RunPod generation completed, processing result image")
         
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(output_url) as resp:
-                    resp.raise_for_status()
-                    img_bytes = await resp.read()
+            if output_url.startswith('data:image'):
+                # Cas 1: URL data:image (base64) - décoder directement
+                logger.info(f"📥 [IA] Processing data:image base64")
+                
+                # Extraire la partie base64 après 'data:image/png;base64,'
+                base64_data = output_url.split(',', 1)[1]
+                
+                import base64
+                img_bytes = base64.b64decode(base64_data)
+                logger.info(f"📥 [IA] Decoded base64 image: {len(img_bytes)} bytes")
+                
+            elif output_url.startswith('http'):
+                # Cas 2: URL HTTP classique - télécharger
+                logger.info(f"🌐 [IA] Downloading from HTTP URL")
+                
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(output_url) as resp:
+                        logger.info(f"🌐 [IA] Download response status: {resp.status}")
+                        resp.raise_for_status()
+                        img_bytes = await resp.read()
+                        logger.info(f"📥 [IA] Downloaded image: {len(img_bytes)} bytes")
+            else:
+                raise ValueError(f"Format d'URL non supporté: {output_url[:50]}...")
+                
         except Exception as e:
-            msg = "Échec du téléchargement de l’image IA"
+            msg = f"Échec du traitement de l'image IA: {e}"
             logger.exception(msg)
             await self.repo.set_error(tryon_id, msg)
             await self._publish_error(user_id, tryon_id, msg)
             raise InternalServerError(msg)
 
         s3_key = StoragePathBuilder.tryon(user_id, body.id, tryon_id)
-        await self.storage.upload_image(s3_key, img_bytes)
+        logger.info(f"☁️ [IA] Uploading to S3")
+        
+        try:
+            await self.storage.upload_image(s3_key, img_bytes)
+            logger.info(f"☁️ [IA] S3 upload successful")
+        except Exception as e:
+            msg = f"Échec de l'upload S3: {e}"
+            logger.exception(msg)
+            await self.repo.set_error(tryon_id, msg)
+            await self._publish_error(user_id, tryon_id, msg)
+            raise InternalServerError(msg)
 
-        await self.repo.set_tryon(tryon_id, s3_key)
-        logger.info(f"✅ [IA] Output stored at {s3_key}")
+        try:
+            await self.repo.set_tryon(tryon_id, s3_key)
+            logger.info(f"💾 [IA] Database updated successfully for tryon {tryon_id}")
+        except Exception as e:
+            msg = f"Échec de la sauvegarde en base: {e}"
+            logger.exception(msg)
+            await self.repo.set_error(tryon_id, msg)
+            await self._publish_error(user_id, tryon_id, msg)
+            raise InternalServerError(msg)
+        
+        logger.info(f"✅ [IA] Output stored successfully")
         
         public_url = await self.storage.get_presigned_url(s3_key)
 
-        logger.info(f"✅ [IA] Replicate OK")
+        logger.info(f"✅ [IA] RunPod generation completed successfully")
         
         await pubsub_manager.publish(
             user_id,
@@ -185,6 +246,7 @@ class TryonService:
                 body_id=str(doc.body_id),
                 clothing_id=str(doc.clothing_id),
                 status=doc.status,
+                error=getattr(doc, 'error', None),
                 created_at=doc.created_at,
                 version=doc.version
             ))
@@ -202,6 +264,7 @@ class TryonService:
             body_id=str(doc.body_id),
             clothing_id=str(doc.clothing_id),
             status=doc.status,
+            error=getattr(doc, 'error', None),
             version=doc.version,
             created_at=doc.created_at,
             updated_at=doc.updated_at
@@ -264,6 +327,7 @@ class TryonService:
                 body_id=str(doc.body_id),
                 clothing_id=str(doc.clothing_id),
                 status=doc.status,
+                error=getattr(doc, 'error', None),
                 created_at=doc.created_at,
                 version=doc.version
             ))

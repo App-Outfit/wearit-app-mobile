@@ -14,7 +14,8 @@ class TryonModel(BaseModel):
 
     output_url: Optional[str] = None
     version: int
-    status: Optional[Literal["pending", "ready"]] = None
+    status: Optional[Literal["pending", "ready", "failed"]] = None
+    error: Optional[str] = None
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)

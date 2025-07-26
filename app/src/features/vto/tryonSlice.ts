@@ -84,14 +84,28 @@ const tryonSlice = createSlice({
             state,
             action: PayloadAction<Partial<TryonItem> & { id: string }>,
         ) {
-            const idx = state.tryons.findIndex(
-                (t) => t.id === action.payload.id,
-            );
+            const payload = action.payload;
+
+            // Si c'est une mise à jour d'un tryon réel (avec clothing_id),
+            // chercher et supprimer d'abord un éventuel tryon pending pour le même vêtement
+            if (payload.clothing_id && payload.status === 'ready') {
+                const pendingIdx = state.tryons.findIndex(
+                    (t) =>
+                        t.clothing_id === payload.clothing_id &&
+                        t.id.startsWith('pending-'),
+                );
+                if (pendingIdx >= 0) {
+                    state.tryons.splice(pendingIdx, 1);
+                }
+            }
+
+            // Chercher s'il existe déjà un tryon avec cet ID exact
+            const idx = state.tryons.findIndex((t) => t.id === payload.id);
 
             if (idx >= 0) {
-                state.tryons[idx] = { ...state.tryons[idx], ...action.payload };
+                state.tryons[idx] = { ...state.tryons[idx], ...payload };
             } else {
-                state.tryons.push(action.payload as TryonItem);
+                state.tryons.push(payload as TryonItem);
             }
         },
         addPendingTryon(
@@ -100,7 +114,7 @@ const tryonSlice = createSlice({
         ) {
             const { body_id, clothing_id } = action.payload;
             // N'ajoute que si pas déjà présent
-            if (!state.tryons.find(t => t.clothing_id === clothing_id)) {
+            if (!state.tryons.find((t) => t.clothing_id === clothing_id)) {
                 state.tryons.push({
                     id: 'pending-' + clothing_id,
                     body_id,
@@ -113,10 +127,12 @@ const tryonSlice = createSlice({
         // Nettoyer les tryons orphelins quand un vêtement est supprimé
         removeTryonsByClothingId(state, action: PayloadAction<string>) {
             const clothingId = action.payload;
-            
+
             // Supprimer les tryons associés à ce vêtement
-            state.tryons = state.tryons.filter(t => t.clothing_id !== clothingId);
-            
+            state.tryons = state.tryons.filter(
+                (t) => t.clothing_id !== clothingId,
+            );
+
             // Nettoyer aussi les sélections si elles concernent ce vêtement
             if (state.selectedTryon.upper?.clothing_id === clothingId) {
                 state.selectedTryon.upper = null;
