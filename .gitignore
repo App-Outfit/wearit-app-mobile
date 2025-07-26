@@ -35,7 +35,11 @@ yarn-error.*
 env/
 env_*/
 backend/.env
-backend/.venv
+# Python virtual environments
+.venv/
+venv/
+backend/.venv/
+backend/venv/
 
 
 # Ignorer les fichiers de build de Sphinx

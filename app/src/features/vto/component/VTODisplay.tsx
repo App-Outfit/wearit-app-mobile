@@ -28,12 +28,19 @@ import {
     selectClothTypeByTryonID,
 } from '../../clothing/clothingSelectors';
 import FastImage from '@d11/react-native-fast-image';
-import { selectCurrentBody } from '../../body/bodySelectors';
+import { selectCurrentBody, selectBodyLoading } from '../../body/bodySelectors';
 import { UpperLowerTryon, setCurrentResult } from '../tryonSlice';
 import { inpaintTryon } from '../tryonThunks';
 import { current } from '@reduxjs/toolkit';
 import Toast from 'react-native-toast-message';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS, useAnimatedGestureHandler } from 'react-native-reanimated';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+    withTiming,
+    runOnJS,
+    useAnimatedGestureHandler,
+} from 'react-native-reanimated';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import type { PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 
@@ -56,7 +63,12 @@ export function isUpperLowerTryon(x: any): x is UpperLowerTryon {
     return x && typeof x === 'object' && 'upper' in x && 'lower' in x;
 }
 
-export default function VTODisplay({ onNavigate, drawerCloth, onRandomize, randomImage }) {
+export default function VTODisplay({
+    onNavigate,
+    drawerCloth,
+    onRandomize,
+    randomImage,
+}) {
     const dispatch = useAppDispatch();
     const [resultBase64, setResultBase64] = React.useState<string>('');
     const [upperMaskBase64, setUpperMaskBase64] = React.useState<string>();
@@ -64,6 +76,7 @@ export default function VTODisplay({ onNavigate, drawerCloth, onRandomize, rando
     const [dressMaskBase64, setDressMaskBase64] = React.useState<string>();
     const [tryon64, setTryon64] = React.useState<string>('');
     const current_body = useAppSelector(selectCurrentBody);
+    const bodyLoading = useAppSelector(selectBodyLoading);
     const [isSwiping, setIsSwiping] = React.useState(false);
     const translateY = useSharedValue(0);
     const isSliding = React.useRef(false);
@@ -108,11 +121,15 @@ export default function VTODisplay({ onNavigate, drawerCloth, onRandomize, rando
             if (!drawerCloth) {
                 if (event.translationY < -120) {
                     // Swipe vers le haut : slide out et randomize
-                    translateY.value = withTiming(-800, { duration: 250 }, (finished) => {
-                        if (finished) {
-                            runOnJS(triggerRandomize)();
-                        }
-                    });
+                    translateY.value = withTiming(
+                        -800,
+                        { duration: 250 },
+                        (finished) => {
+                            if (finished) {
+                                runOnJS(triggerRandomize)();
+                            }
+                        },
+                    );
                 } else {
                     // Retour à la position initiale
                     translateY.value = withSpring(0, { damping: 15 });
@@ -278,10 +295,25 @@ export default function VTODisplay({ onNavigate, drawerCloth, onRandomize, rando
     }, [drawerCloth]);
 
     return (
-        <PanGestureHandler onGestureEvent={onGestureEvent} enabled={!drawerCloth}>
+        <PanGestureHandler
+            onGestureEvent={onGestureEvent}
+            enabled={!drawerCloth}
+        >
             <Animated.View style={[styles.boxImg, animatedStyle]}>
-                {current_body !== null ? (
-                    <ImageDisplay uri={`data:image/png;base64,${randomImage || resultBase64}`} />
+                {bodyLoading ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator
+                            size="large"
+                            color={baseColors.primary}
+                        />
+                        <Text style={styles.loadingText}>
+                            Chargement du mannequin...
+                        </Text>
+                    </View>
+                ) : current_body !== null ? (
+                    <ImageDisplay
+                        uri={`data:image/png;base64,${randomImage || resultBase64}`}
+                    />
                 ) : (
                     <View style={styles.boxOri}>
                         <Image
@@ -329,5 +361,18 @@ const styles = StyleSheet.create({
         height: 80,
         borderTopLeftRadius: spacing.small,
         paddingVertical: spacing.xSmall,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: baseColors.background,
+        borderRadius: spacing.small,
+    },
+    loadingText: {
+        marginTop: spacing.medium,
+        fontSize: 16,
+        color: baseColors.textSecondary,
+        textAlign: 'center',
     },
 });
