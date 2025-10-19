@@ -93,3 +93,29 @@ class StorageRepository:
         """
         object_key = url.split(".amazonaws.com/")[-1]
         await self.delete_image(object_key)
+    
+    async def get_file(self, object_key: str) -> bytes:
+        """
+        Download a file from S3 and return its bytes content.
+        """
+        loop = asyncio.get_running_loop()
+        try:
+            # Download file to BytesIO buffer
+            buffer = BytesIO()
+            download_fn = partial(
+                self._client.download_fileobj,
+                self._bucket,
+                object_key,
+                buffer
+            )
+            await loop.run_in_executor(None, download_fn)
+            buffer.seek(0)
+            content = buffer.read()
+            logger.info("🟢 [S3] Downloaded: %s (%d bytes)", object_key, len(content))
+            return content
+        except (NoCredentialsError, BotoCoreError) as e:
+            logger.exception(f"🔴 [S3] Download error: {e}")
+            raise InternalServerError("Failed to download file from S3")
+        except Exception:
+            logger.exception("🔴 [S3] Unexpected error during download")
+            raise InternalServerError("Failed to download file from S3")

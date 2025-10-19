@@ -43,16 +43,19 @@ class Settings:
 
     PYTHON_API_BASE_URL: str = os.getenv("PYTHON_API_BASE_URL")
 
-    # Replicate (legacy - à supprimer après migration)
-    REPLICATE_API_TOKEN: str = os.getenv("REPLICATE_API_TOKEN")
-    REPLICATE_MODEL_REF: str = os.getenv("REPLICATE_MODEL_REF")
-    REPLICATE_BODY_REF: str = os.getenv("REPLICATE_BODY_REF")
-    
     # RunPod configuration
     RUNPOD_API_URL: str = os.getenv("RUNPOD_API_URL")
     RUNPOD_API_KEY: str = os.getenv("RUNPOD_API_KEY")
     RUNPOD_TIMEOUT: int = int(os.getenv("RUNPOD_TIMEOUT", 300))  # 5 minutes par défaut
     RUNPOD_UPLOAD_FILES: bool = os.getenv("RUNPOD_UPLOAD_FILES", "false").lower() == "true"  # Upload files to RunPod vs direct URLs
+    
+    # Gemini configuration
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY")
+    GEMINI_IMAGE_MODEL: str = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.0-flash-exp")
+    USE_GEMINI_ENHANCEMENT: bool = os.getenv("USE_GEMINI_ENHANCEMENT", "true").lower() == "true"
+    
+    # RunPod preprocessing endpoint (for body masks)
+    RUNPOD_PREPROCESSING_ENDPOINT: str = os.getenv("RUNPOD_PREPROCESSING_ENDPOINT")
 
     model_config = ConfigDict(
         env_file = ".env"

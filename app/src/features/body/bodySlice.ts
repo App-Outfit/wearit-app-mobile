@@ -43,6 +43,10 @@ const bodySlice = createSlice({
             .addCase(fetchCurrentBody.fulfilled, (state, { payload }) => {
                 state.currentBody = payload;
             })
+            .addCase(fetchCurrentBody.rejected, (state) => {
+                // Si fetchCurrentBody échoue (404 ou autre), mettre currentBody à null
+                state.currentBody = null;
+            })
             .addCase(fetchBodyMasks.fulfilled, (state, { meta, payload }) => {
                 state.masks[meta.arg] = payload;
             })

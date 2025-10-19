@@ -25,6 +25,9 @@ import { useNavigation } from '@react-navigation/native';
 import DropdownMenu from '../component/DropDownMenu';
 import { InputField } from '../../../components/core/PlaceHolders';
 import { CButton } from '../../../components/core/Buttons';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import { selectAllClothes } from '../../clothing/clothingSelectors';
+import { fetchClothes } from '../../clothing/clothingThunks';
 
 type TypeDataPersonalCategory = {
     id: string;
@@ -70,18 +73,48 @@ const data_personal_category: TypeDataPersonalCategory[] = [
 ];
 
 export function DressingHomeScreen({ navigation }: any) {
+    const dispatch = useAppDispatch();
+    const allClothes = useAppSelector(selectAllClothes);
     const [searchQuery, setSearchQuery] = React.useState('');
     const [visibleModal, setModalVisible] = React.useState(false);
+
+    // Fetch clothes on mount
+    React.useEffect(() => {
+        dispatch(fetchClothes());
+    }, [dispatch]);
+
+    // Grouper par catégorie (upper, lower, dress)
+    const categorizedClothes = React.useMemo(() => {
+        const categories = {
+            upper: { name: 'Hauts', clothes: [] as any[] },
+            lower: { name: 'Bas', clothes: [] as any[] },
+            dress: { name: 'Robes', clothes: [] as any[] },
+        };
+        
+        allClothes.forEach(cloth => {
+            if (categories[cloth.cloth_type]) {
+                categories[cloth.cloth_type].clothes.push(cloth);
+            }
+        });
+        
+        return Object.entries(categories).map(([type, data]) => ({
+            id: type,
+            name: data.name,
+            nb_clothes: data.clothes.length,
+            cloths: data.clothes.map(c => ({ uri: c.resized_url || c.image_url })),
+            cloth_type: type as 'upper' | 'lower' | 'dress',
+        }));
+    }, [allClothes]);
 
     const navigateToClothGalery = (
         title: string,
         subtitle: string,
-        clothes: ImageSourcePropType[],
+        cloth_type: 'upper' | 'lower' | 'dress',
     ) => {
         navigation.push('DressingClothGalery', {
             title: title,
             subtitle: subtitle,
-            clothes: clothes,
+            cloth_type: cloth_type,
         });
     };
 
@@ -141,45 +174,27 @@ export function DressingHomeScreen({ navigation }: any) {
 
                 {/* Categories Box */}
                 <FlatList
-                    data={data_personal_category}
+                    data={categorizedClothes}
                     keyExtractor={(itm) => itm.id}
                     numColumns={2}
                     contentContainerStyle={{ padding: 8, paddingBottom: 200 }}
                     columnWrapperStyle={{ justifyContent: 'space-between' }}
-                    renderItem={({ item, index }) => {
-                        if (index === 0) {
-                            return (
-                                <View style={styles.addCategoryButtonBox}>
-                                    <IconButton
-                                        style={styles.addCategoryButton}
-                                        icon="plus"
-                                        iconColor="white"
-                                        size={28}
-                                        onPress={() => setModalVisible(true)}
-                                    />
-                                    <Text style={styles.titleAddButton}>
-                                        Ajouter une nouvelle catégorie
-                                    </Text>
-                                </View>
-                            );
-                        }
-
-                        const realItem = data_personal_category[index - 1];
+                    renderItem={({ item }) => {
                         return (
                             <TouchableOpacity
                                 style={{ paddingTop: 5 }}
                                 onPress={() =>
                                     navigateToClothGalery(
-                                        realItem.name,
-                                        `${realItem.nb_clothes} vêtements`,
-                                        realItem.cloths,
+                                        item.name,
+                                        `${item.nb_clothes} vêtement${item.nb_clothes > 1 ? 's' : ''}`,
+                                        item.cloth_type,
                                     )
                                 }
                             >
                                 <DressingBoxCategory
-                                    name_category={realItem.name}
-                                    nb_clothes={realItem.nb_clothes}
-                                    imgs={realItem.cloths}
+                                    name_category={item.name}
+                                    nb_clothes={item.nb_clothes}
+                                    imgs={item.cloths}
                                 />
                             </TouchableOpacity>
                         );

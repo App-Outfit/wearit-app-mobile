@@ -26,11 +26,11 @@ type TabParamList = {
 };
 
 export type DressingNavigatorParamList = {
-    Dressing: undefined;
+    DressingHome: undefined;
     DressingClothGalery: {
         title: string;
         subtitle: string;
-        clothes: ImageSourcePropType[];
+        cloth_type?: 'upper' | 'lower' | 'dress';
     };
     DressingOutfitDetail: any;
 };
@@ -39,14 +39,14 @@ const DressingStack = createStackNavigator<DressingNavigatorParamList>();
 
 export const DressingNavigator = () => {
     return (
-        <DressingStack.Navigator initialRouteName="Dressing">
+        <DressingStack.Navigator initialRouteName="DressingHome">
             <DressingStack.Screen
-                name="Dressing"
+                name="DressingHome"
                 component={CategoryOutfitNavigator}
                 options={{
                     ...screenOptions,
                     headerShown: true,
-                    title: 'Dressing',
+                    title: 'Garde-robe',
                 }}
             />
             <DressingStack.Screen
@@ -55,7 +55,7 @@ export const DressingNavigator = () => {
                 options={{
                     ...screenOptions,
                     headerShown: true,
-                    title: 'Dressing',
+                    title: 'Vêtements',
                 }}
             />
             <DressingStack.Screen

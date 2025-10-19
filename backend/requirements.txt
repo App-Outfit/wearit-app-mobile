@@ -4,6 +4,7 @@ asyncpg
 boto3
 dotenv
 fastapi
+google-generativeai>=0.3.0
 httpx
 moto
 motor
@@ -17,7 +18,6 @@ pytest-cov
 pytest-mock
 python-jose
 python-multipart
-replicate
 requests
 sentence-transformers
 sqlalchemy

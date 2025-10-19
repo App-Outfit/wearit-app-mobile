@@ -3,7 +3,6 @@ import asyncio
 from datetime import datetime
 from app.core.logging_config import logger
 from app.core.config import settings
-from app.infrastructure.runpod.runpod_client import create_runpod_client, RunPodError, RunPodTimeoutError
 from app.features.tryon.tryon_repo import TryonRepository
 from app.infrastructure.storage.storage_repo import StorageRepository
 from app.infrastructure.storage.storage_path_builder import StoragePathBuilder
@@ -12,7 +11,8 @@ from app.features.tryon.tryon_schema import (
     TryonListResponse, TryonDetailResponse,
     TryonItem, TryonDeleteResponse
 )
-import aiohttp
+import httpx
+import base64
 from app.features.body.body_repo import BodyRepository
 from app.features.clothing.clothing_repo import ClothingRepository
 from app.core.errors import NotFoundError, UnauthorizedError, InternalServerError
@@ -84,148 +84,216 @@ class TryonService:
         )
 
     async def _call_ia(self, user_id: str, body, tryon_id: str, clothing):
+        """
+        Génère le try-on via RunPod VTO endpoint avec polling
+        """
         logger.info(f"🤖 [IA] Starting virtual try-on for body={body.id} × clothing={clothing.id}")
-        body_url = await self.storage.get_presigned_url(body.image_url)
-        clothing_url = await self.storage.get_presigned_url(clothing.image_url)
-
-        mask_field_map = {
-            "upper": "mask_upper",
-            "lower": "mask_lower",
-            "dress": "mask_dress",
-        }
-        mask_attr = mask_field_map.get(clothing.cloth_type)
-        if not mask_attr:
-            error_msg = f"No mask defined for cloth_type '{clothing.cloth_type}'"
-            logger.error(f"🔴 [IA] {error_msg}")
-            await self.repo.set_error(tryon_id, error_msg)
-            await self._publish_error(user_id, tryon_id, error_msg)
-            raise ValueError(error_msg)
         
-        mask_key = getattr(body, mask_attr, None)
-        if not mask_key:
-            error_msg = f"Body has no attribute '{mask_attr}' or it's empty"
-            logger.error(f"🔴 [IA] {error_msg}")
-            await self.repo.set_error(tryon_id, error_msg)
-            await self._publish_error(user_id, tryon_id, error_msg)
-            raise ValueError(error_msg)
-        
-        mask_url = await self.storage.get_presigned_url(mask_key)
-                
         try:
-            # Créer le client RunPod et lancer l'inférence
-            async with create_runpod_client() as runpod_client:
-                output_url = await runpod_client.run_inference(
-                    input_data={
-                        "person": body_url,
-                        "cloth": clothing_url,
-                        "mask": mask_url,
+            # 1. Récupérer les URLs des images
+            body_url = await self.storage.get_presigned_url(body.image_url)
+            clothing_url = await self.storage.get_presigned_url(clothing.image_url)
+            
+            # 2. Déterminer le masque selon le type de vêtement
+            mask_field_map = {
+                "upper": "mask_upper",
+                "lower": "mask_lower",
+                "dress": "mask_dress",
+            }
+            mask_attr = mask_field_map.get(clothing.cloth_type)
+            if not mask_attr:
+                error_msg = f"No mask defined for cloth_type '{clothing.cloth_type}'"
+                logger.error(f"🔴 [IA] {error_msg}")
+                await self.repo.set_error(tryon_id, error_msg)
+                await self._publish_error(user_id, tryon_id, error_msg)
+                raise ValueError(error_msg)
+            
+            mask_key = getattr(body, mask_attr, None)
+            if not mask_key:
+                error_msg = f"Body has no attribute '{mask_attr}' or it's empty"
+                logger.error(f"🔴 [IA] {error_msg}")
+                await self.repo.set_error(tryon_id, error_msg)
+                await self._publish_error(user_id, tryon_id, error_msg)
+                raise ValueError(error_msg)
+            
+            mask_url = await self.storage.get_presigned_url(mask_key)
+            
+            # 3. Télécharger les images et les convertir en base64
+            logger.info(f"📥 Téléchargement des images pour try-on...")
+            person_base64 = await self._url_to_base64(body_url)
+            cloth_base64 = await self._url_to_base64(clothing_url)
+            mask_base64 = await self._url_to_base64(mask_url)
+            
+            # 4. Créer le job RunPod VTO
+            logger.info(f"🚀 Création job RunPod VTO...")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Créer le job
+                payload = {
+                    "input": {
+                        "person": person_base64,
+                        "cloth": cloth_base64,
+                        "mask": mask_base64,
                         "steps": 50,
-                        "guidance_scale": 2.0,  # Float comme dans votre exemple
-                        "return_dict": True,    # Comme dans votre exemple
-                    },
-                    upload_files=settings.RUNPOD_UPLOAD_FILES
-                )
+                        "guidance_scale": 2.0,
+                        "return_dict": True
+                    }
+                }
                 
-        except RunPodTimeoutError as e:
-            msg = f"Timeout lors de la génération IA: {e}"
-            logger.error(f"🔴 [IA] {msg}")
-            await self.repo.set_error(tryon_id, msg)
-            await self._publish_error(user_id, tryon_id, msg)
-            raise InternalServerError(msg)
-            
-        except RunPodError as e:
-            msg = f"Erreur RunPod: {e}"
-            logger.error(f"🔴 [IA] {msg}")
-            await self.repo.set_error(tryon_id, msg)
-            await self._publish_error(user_id, tryon_id, msg)
-            raise InternalServerError(msg)
-            
+                headers = {
+                    "Authorization": f"Bearer {settings.RUNPOD_API_KEY}",
+                    "Content-Type": "application/json"
+                }
+                
+                # Utiliser RUNPOD_API_URL (endpoint VTO)
+                vto_endpoint = f"{settings.RUNPOD_API_URL}/run"
+                
+                logger.info(f"📡 POST {vto_endpoint}")
+                response = await client.post(vto_endpoint, json=payload, headers=headers)
+                
+                if response.status_code != 200:
+                    raise Exception(f"RunPod VTO error: {response.status_code} - {response.text}")
+                
+                job_data = response.json()
+                job_id = job_data.get('id')
+                
+                if not job_id:
+                    raise Exception(f"Pas de job_id dans réponse RunPod: {job_data}")
+                
+                logger.info(f"✅ Job RunPod créé: {job_id}")
+                
+                # 5. Polling du statut (comme dans test_new_backend)
+                max_attempts = 60  # 10 minutes max (60 * 10s)
+                attempt = 0
+                
+                while attempt < max_attempts:
+                    await asyncio.sleep(10)  # Attendre 10 secondes
+                    attempt += 1
+                    
+                    # Check status
+                    status_url = f"{settings.RUNPOD_API_URL}/status/{job_id}"
+                    status_response = await client.get(status_url, headers={"Authorization": f"Bearer {settings.RUNPOD_API_KEY}"})
+                    
+                    if status_response.status_code != 200:
+                        logger.warning(f"⚠️ Erreur status check: {status_response.status_code}")
+                        continue
+                    
+                    status_data = status_response.json()
+                    status = status_data.get('status', '').upper()
+                    
+                    logger.info(f"📊 Job {job_id} status: {status} (attempt {attempt}/{max_attempts})")
+                    
+                    # Publier la progression
+                    await pubsub_manager.publish(user_id, {
+                        "type": "tryon_update",
+                        "tryon_id": str(tryon_id),
+                        "status": "processing",
+                        "progress": min(50 + attempt * 0.8, 95)
+                    })
+                    
+                    if status == 'COMPLETED':
+                        # Extraire le résultat
+                        output = status_data.get('output', {})
+                        
+                        # Parser selon la structure de test_new_backend
+                        base64_image = None
+                        if 'output' in output and isinstance(output['output'], dict):
+                            base64_image = output['output'].get('output')
+                        elif 'output' in output and isinstance(output['output'], str):
+                            base64_image = output['output']
+                        else:
+                            base64_image = (
+                                output.get('image_url') or
+                                output.get('result_image') or
+                                output.get('image') or
+                                output.get('base64_image')
+                            )
+                        
+                        if not base64_image:
+                            raise Exception(f"Pas d'image dans output RunPod: {list(output.keys())}")
+                        
+                        logger.info(f"✅ [IA] RunPod generation completed successfully")
+                        
+                        # 6. Sauvegarder le résultat sur S3
+                        s3_key = await self._save_result_to_s3(base64_image, user_id, str(tryon_id))
+                        
+                        # 7. Mise à jour MongoDB
+                        await self.repo.set_tryon(tryon_id, s3_key)
+                        
+                        # 8. Publier succès via WebSocket
+                        public_url = await self.storage.get_presigned_url(s3_key)
+                        
+                        await pubsub_manager.publish(
+                            user_id,
+                            {
+                                "type": "tryon_update",
+                                "tryon_id": str(tryon_id),
+                                "body_id": str(body.id),
+                                "clothing_id": str(clothing.id),
+                                "status": "ready",
+                                "output_url": public_url,
+                                "created_at": datetime.now().isoformat(),
+                                "version": 1,
+                            }
+                        )
+                        
+                        logger.info(f"✅ Try-on {tryon_id} completed: {s3_key}")
+                        return
+                        
+                    elif status == 'FAILED':
+                        error = status_data.get('error', 'Unknown error')
+                        raise Exception(f"RunPod job failed: {error}")
+                    
+                    # Continue polling si IN_QUEUE ou IN_PROGRESS
+                
+                # Timeout
+                raise Exception(f"Job {job_id} timeout après {max_attempts * 10}s")
+                
         except Exception as e:
-            msg = f"Échec de la génération IA: {e}"
+            msg = f"Échec génération IA: {e}"
             logger.exception(f"🔴 [IA] {msg}")
             await self.repo.set_error(tryon_id, msg)
             await self._publish_error(user_id, tryon_id, msg)
             raise InternalServerError(msg)
-        
-        if not isinstance(output_url, str):
-            output_url = str(output_url)
-        logger.info(f"✅ [IA] RunPod generation completed, processing result image")
-        
+
+    async def _url_to_base64(self, url: str) -> str:
+        """Convertir une URL en base64 data URL"""
         try:
-            if output_url.startswith('data:image'):
-                # Cas 1: URL data:image (base64) - décoder directement
-                logger.info(f"📥 [IA] Processing data:image base64")
-                
-                # Extraire la partie base64 après 'data:image/png;base64,'
-                base64_data = output_url.split(',', 1)[1]
-                
-                import base64
-                img_bytes = base64.b64decode(base64_data)
-                logger.info(f"📥 [IA] Decoded base64 image: {len(img_bytes)} bytes")
-                
-            elif output_url.startswith('http'):
-                # Cas 2: URL HTTP classique - télécharger
-                logger.info(f"🌐 [IA] Downloading from HTTP URL")
-                
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(output_url) as resp:
-                        logger.info(f"🌐 [IA] Download response status: {resp.status}")
-                        resp.raise_for_status()
-                        img_bytes = await resp.read()
-                        logger.info(f"📥 [IA] Downloaded image: {len(img_bytes)} bytes")
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url)
+                response.raise_for_status()
+                image_data = response.content
+                base64_data = base64.b64encode(image_data).decode('utf-8')
+                # Déterminer le mime type
+                content_type = response.headers.get('content-type', 'image/jpeg')
+                return f"data:{content_type};base64,{base64_data}"
+        except Exception as e:
+            logger.error(f"❌ Erreur conversion URL to base64 {url}: {e}")
+            raise
+
+    async def _save_result_to_s3(self, base64_image: str, user_id: str, tryon_id: str) -> str:
+        """Sauvegarder le résultat base64 sur S3 et retourner la clé"""
+        try:
+            # Extraire les données base64
+            if base64_image.startswith('data:'):
+                _, base64_data = base64_image.split(',', 1)
             else:
-                raise ValueError(f"Format d'URL non supporté: {output_url[:50]}...")
-                
+                base64_data = base64_image
+            
+            image_bytes = base64.b64decode(base64_data)
+            
+            # Créer la clé S3
+            s3_key = StoragePathBuilder.tryon(user_id, tryon_id, tryon_id)
+            
+            # Upload sur S3
+            await self.storage.upload_image(s3_key, image_bytes)
+            
+            logger.info(f"💾 Résultat try-on sauvegardé: {s3_key}")
+            return s3_key
+            
         except Exception as e:
-            msg = f"Échec du traitement de l'image IA: {e}"
-            logger.exception(msg)
-            await self.repo.set_error(tryon_id, msg)
-            await self._publish_error(user_id, tryon_id, msg)
-            raise InternalServerError(msg)
-
-        s3_key = StoragePathBuilder.tryon(user_id, body.id, tryon_id)
-        logger.info(f"☁️ [IA] Uploading to S3")
-        
-        try:
-            await self.storage.upload_image(s3_key, img_bytes)
-            logger.info(f"☁️ [IA] S3 upload successful")
-        except Exception as e:
-            msg = f"Échec de l'upload S3: {e}"
-            logger.exception(msg)
-            await self.repo.set_error(tryon_id, msg)
-            await self._publish_error(user_id, tryon_id, msg)
-            raise InternalServerError(msg)
-
-        try:
-            await self.repo.set_tryon(tryon_id, s3_key)
-            logger.info(f"💾 [IA] Database updated successfully for tryon {tryon_id}")
-        except Exception as e:
-            msg = f"Échec de la sauvegarde en base: {e}"
-            logger.exception(msg)
-            await self.repo.set_error(tryon_id, msg)
-            await self._publish_error(user_id, tryon_id, msg)
-            raise InternalServerError(msg)
-        
-        logger.info(f"✅ [IA] Output stored successfully")
-        
-        public_url = await self.storage.get_presigned_url(s3_key)
-
-        logger.info(f"✅ [IA] RunPod generation completed successfully")
-        
-        await pubsub_manager.publish(
-            user_id,
-            {
-                "type":       "tryon_update",
-                "tryon_id":   str(tryon_id),
-                "body_id":    str(body.id),
-                "clothing_id": str(clothing.id),
-                "created_at": datetime.now().isoformat(),
-                "version":    1,  # TODO: gérer les versions
-                "output_url": public_url,
-                "status":     "ready",
-            }
-        )
-        logger.info(f"✅ [IA] SSE published for user {user_id} with tryon {tryon_id}")
+            logger.error(f"❌ Erreur sauvegarde résultat S3: {e}")
+            raise
 
     async def get_all_tryons(self, user_id: str) -> TryonListResponse:
         docs = await self.repo.get_all_by_user(user_id)

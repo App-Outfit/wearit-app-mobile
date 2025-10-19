@@ -21,6 +21,15 @@ import { Modal, PaperProvider, Portal } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { ClothItem } from '../component/ClothItem';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks';
+import { selectAllClothes } from '../../clothing/clothingSelectors';
+import { fetchClothes } from '../../clothing/clothingThunks';
+import { useUploadClothing } from '../../clothing/hooks/useUploadClothing';
+import { ImportChoice } from '../../../components/choice_component/ImportChoice';
+import { ModalAddClothInfo } from '../../vto/component/ModalAddClothInfo';
+import { fetchTryonsByBodyId } from '../../vto/tryonThunks';
+import { selectCurrentBody } from '../../body/bodySelectors';
+import { fetchCurrentBody } from '../../body/bodyThunks';
 
 export type DressingClothGaleryScreenProps = NativeStackScreenProps<
     DressingNavigatorParamList,
@@ -29,77 +38,79 @@ export type DressingClothGaleryScreenProps = NativeStackScreenProps<
 export function DressingClothGaleryScreen({
     route,
 }: DressingClothGaleryScreenProps) {
-    const { title, subtitle, clothes } = route.params;
-    const [newImageUri, setNewImageUri] = React.useState(null);
+    const dispatch = useAppDispatch();
+    const allClothes = useAppSelector(selectAllClothes);
+    const currentBody = useAppSelector(selectCurrentBody);
+    const { title, subtitle, cloth_type } = route.params;
+    const [newImageUri, setNewImageUri] = React.useState<string | null>(null);
 
-    const [visibleModal, setModalVisible] = React.useState(false);
+    const [importModalOpen, setImportModalOpen] = React.useState(false);
+    const [infoModalOpen, setInfoModalOpen] = React.useState(false);
+
+    const { saveClothing, loading, error } = useUploadClothing();
+
+    // Fetch clothes and body on mount
+    React.useEffect(() => {
+        dispatch(fetchClothes());
+        dispatch(fetchCurrentBody());
+    }, [dispatch]);
+
+    // Fetch tryons when body is available
+    React.useEffect(() => {
+        if (currentBody) {
+            dispatch(fetchTryonsByBodyId(currentBody.id));
+        }
+    }, [currentBody, dispatch]);
+
+    // Filtrer par type de vêtement
+    const clothes = React.useMemo(() => {
+        if (!cloth_type) return allClothes;
+        return allClothes.filter(c => c.cloth_type === cloth_type);
+    }, [allClothes, cloth_type]);
 
     const addCloths = () => {
-        setModalVisible(true);
+        setImportModalOpen(true);
     };
 
-    const openCamera = () => {
-        handleCamera(setNewImageUri);
+    const handleImagePicked = async (uri: string) => {
+        setImportModalOpen(false);
+        if (uri) {
+            setNewImageUri(uri);
+            setInfoModalOpen(true);
+        }
     };
 
-    const openGalery = () => {
-        handleGallery(setNewImageUri);
+    const handleSaveNewCloth = async ({ cloth_type, category }: any) => {
+        if (!newImageUri) return;
+        
+        console.log('📦 Saving cloth:', { cloth_type, category, uri: newImageUri });
+        
+        await saveClothing({
+            uri: newImageUri,
+            cloth_type: cloth_type,
+            category: category,
+            name: `${category}_${Date.now()}`, // Générer un nom automatique
+        });
+        
+        setInfoModalOpen(false);
+        setNewImageUri(null);
+        // Refresh la liste
+        dispatch(fetchClothes());
     };
 
     return (
         <>
-            <Portal>
-                <Modal
-                    visible={visibleModal}
-                    onDismiss={() => setModalVisible(false)}
-                    contentContainerStyle={styles.modalContentContainer}
-                    theme={{ colors: { backdrop: 'rgba(0, 0, 0, 0.5)' } }}
-                >
-                    <LinearGradient
-                        colors={['#bfa2db', '#fff']}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            padding: 20,
-                            borderRadius: 15,
-                            flexDirection: 'row',
-                            justifyContent: 'space-around',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <TouchableOpacity
-                            onPress={openCamera}
-                            style={{
-                                marginRight: 20,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <FontAwesome
-                                name="camera"
-                                size={40}
-                                style={{ marginBottom: 5 }}
-                            />
-                            <Text>Camera</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            onPress={openGalery}
-                            style={{
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <FontAwesome
-                                name="picture-o"
-                                size={40}
-                                style={{ marginBottom: 5 }}
-                            />
-                            <Text>Galerie</Text>
-                        </TouchableOpacity>
-                    </LinearGradient>
-                </Modal>
-            </Portal>
+            <ImportChoice
+                open={importModalOpen}
+                onClose={() => setImportModalOpen(false)}
+                onPicked={handleImagePicked}
+            />
+            <ModalAddClothInfo
+                open={infoModalOpen}
+                onCancel={() => setInfoModalOpen(false)}
+                onSave={handleSaveNewCloth}
+                imageUri={newImageUri}
+            />
             <View style={styles.dressingScreen}>
                 <View style={styles.titleBox}>
                     <View style={styles.titleTextBox}>
@@ -119,13 +130,10 @@ export function DressingClothGaleryScreen({
                 </View>
 
                 {/*Cloths Galery*/}
-                {clothes.length === 0 ? (
+                {!clothes || clothes.length === 0 ? (
                     <View style={styles.emptyBox}>
-                        <TouchableOpacity>
-                            <Text
-                                style={styles.emptyBoxText}
-                                onPress={addCloths}
-                            >
+                        <TouchableOpacity onPress={addCloths}>
+                            <Text style={styles.emptyBoxText}>
                                 Ajouter des Vêtements
                             </Text>
                         </TouchableOpacity>
@@ -133,15 +141,15 @@ export function DressingClothGaleryScreen({
                 ) : (
                     <FlatList
                         data={clothes}
-                        keyExtractor={(_, idx) => idx.toString()}
+                        keyExtractor={(item) => item.id}
                         numColumns={2}
                         contentContainerStyle={{
                             padding: 8,
                             paddingBottom: 180,
                         }}
                         columnWrapperStyle={{ justifyContent: 'space-between' }}
-                        renderItem={({ item, index }) => {
-                            return <ClothItem source={item} />;
+                        renderItem={({ item }) => {
+                            return <ClothItem source={{ uri: item.resized_url || item.image_url }} clothingItem={item} />;
                         }}
                         showsVerticalScrollIndicator={false}
                         overScrollMode="never"

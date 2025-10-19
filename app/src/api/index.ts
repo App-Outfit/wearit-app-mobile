@@ -7,7 +7,7 @@ import Constants from 'expo-constants';
 
 // 🔧 CONFIGURATION DE DÉVELOPPEMENT
 const FORCE_DEVICE_TYPE: 'auto' | 'emulator' | 'physical' = 'physical'; // Changez ici : 'emulator', 'physical', ou 'auto'
-const LOCAL_IP = '192.168.1.162'; // 🔧 CHANGEZ CETTE IP SELON VOTRE RÉSEAU WiFi
+const LOCAL_IP = '192.168.1.122'; // 🔧 CHANGEZ CETTE IP SELON VOTRE RÉSEAU WiFi
 
 /**
  * Detects if the app is running on an emulator/simulator or physical device

@@ -15,6 +15,7 @@ import { baseColors, lightTheme } from '../styles/theme';
 import { VTONavigator } from '../features/vto/navigation/VTOMainNavigation';
 import { ProfilNavigator } from '../features/profil/navigation/ProfilNavigator';
 import { ExplorerNavigator } from '../features/explorer/navigation/ExplorerNavigator';
+import { DressingNavigator } from '../features/dressing/navigation/DressingNavigator';
 
 
 export type MainTabParamList = {
@@ -113,6 +114,20 @@ const MainTabNavigator: React.FC = () => (
                     tabBarIcon: ({ color, size }) => (
                         <FontAwesome6
                             name="person-booth"
+                            color={color}
+                            size={size}
+                        />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Dressing"
+                component={DressingNavigator}
+                options={{
+                    tabBarLabel: 'Garde-robe',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialCommunityIcons
+                            name="wardrobe-outline"
                             color={color}
                             size={size}
                         />
